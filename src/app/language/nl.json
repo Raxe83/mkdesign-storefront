@@ -1,0 +1,145 @@
+{
+  "common": {
+    "shopNow": "Nu winkelen",
+    "viewCollections": "Collecties bekijken",
+    "showAll": "Alles tonen",
+    "addToCart": "In winkelwagen",
+    "subscribe": "Abonneren",
+    "collections": "Onze collecties",
+    "collection": "Collectie",
+    "products": "Onze producten",
+    "noImg": "Geen afbeelding",
+    "and": "en",
+    "tos": "Servicevoorwaarden",
+    "privacy": "Privacybeleid",
+    "adding": "Toevoegen",
+    "backToHome": "Terug naar home",
+    "workdays": "Werkdagen",
+    "amount": "Hoeveelheid",
+    "color": "Kleur",
+    "delete": "Verwijderen",
+    "close": "Sluiten",
+    "contact": "Contact",
+    "check": "Begrepen",
+    "enterMail": "Voer je e-mailadres in"
+  },
+  "footer": {
+    "johnnyCase": "Bescherm je essentials met stijlvolle, discrete en duurzame hoesjes. Handgemaakt voor de moderne kenner.",
+    "shop": "Winkel",
+    "allRights": "Alle rechten voorbehouden.",
+    "imprint": "Colofon",
+    "dataProtection": "Gegevensbeschermingsverklaring",
+    "tou": "Gebruiksvoorwaarden"
+  },
+  "cookies": {
+    "settingsHeader": "Cookie-instellingen",
+    "mainDesc": "Wij gebruiken cookies om je ervaring op onze website te optimaliseren. Details vind je in ons",
+    "acceptCurrent": "Selectie accepteren",
+    "acceptAll": "Alles accepteren",
+    "decline": "Weigeren",
+    "necessaryCookies": "Noodzakelijke cookies",
+    "necessaryDesc": "Deze cookies zijn noodzakelijk voor de basisfuncties van de website.",
+    "cookies": "cookies",
+    "cookiesFunction": "Deze cookies maken verbeterde functionaliteit mogelijk."
+  },
+  "color": {
+    "black": "Zwart",
+    "white": "Wit"
+  },
+  "age": {
+    "header": "Leeftijdsverificatie",
+    "desc": "Deze website bevat inhoud die alleen geschikt is voor personen van 18 jaar en ouder.",
+    "verify": "Bevestig alstublieft dat je minimaal 18 jaar oud bent om door te gaan.",
+    "over": "Ik ben ouder dan 18",
+    "under": "Ik ben jonger dan 18"
+  },
+  "cart": {
+    "header": "Winkelwagen",
+    "articles": "Je artikelen",
+    "buyMore": "Verder winkelen",
+    "checkout": "Afrekenen",
+    "total": "Totaal",
+    "subtotal": "Subtotaal",
+    "summary": "Samenvatting",
+    "shippingCost": "Verzendkosten worden berekend bij het afrekenen.",
+    "empty": "Je winkelwagen is leeg",
+    "addProducts": "Voeg producten toe om te beginnen met winkelen"
+  },
+  "404": {
+    "header": "Pagina niet gevonden",
+    "desc": "De pagina die je zoekt bestaat niet of is verplaatst."
+  },
+  "product": {
+    "notAvailable": "Momenteel niet beschikbaar",
+    "notAvailableShort": "Niet beschikbaar",
+    "swipe": "Vegen",
+    "allProducts": "Alle producten",
+    "noProducts": "Geen producten gevonden",
+    "noProduct": "Product niet gevonden",
+    "loadError": "Fout bij het laden van het product",
+    "backToProducts": "Terug naar producten",
+    "discoverProducts": "Producten ontdekken",
+    "shipment": {
+      "header": "Verzending",
+      "fastDelevery": "Snelle levering",
+      "cheapCosts": "Goedkope kosten",
+      "costsAre": "De verzendkosten zijn"
+    }
+  },
+  "joinUs": {
+    "header": "Word lid van onze community!",
+    "desc": "Abonneer je op onze nieuwsbrief voor exclusieve aanbiedingen, nieuwe productaankondigingen en meer.",
+    "agreement": "Door je te abonneren, ga je akkoord met onze"
+  },
+  "nav": {
+    "home": "Home",
+    "products": "Producten",
+    "aboutUs": "Over ons",
+    "cart": "Winkelwagen"
+  },
+  "herosection": {
+    "header": "Premium Joint Cases",
+    "desc": "Bescherm je essentials met onze stijlvolle, discrete en duurzame hoesjes. Handgemaakt voor de moderne kenner."
+  },
+  "infoCard": {
+    "header": "",
+    "safe": {
+      "header": "Bescherming & veiligheid onderweg",
+      "desc": "Bewaar je joints veilig zonder je zorgen te maken dat ze geplet of beschadigd raken. De Johnny Case beschermt je essentials betrouwbaar tegen druk, vocht en externe invloeden – of het nu in je tas zit of onderweg."
+    },
+    "stil": {
+      "header": "Discreet & stijlvol genieten",
+      "desc": "Onopvallend, compact en stijlvol – Johnny Cases passen in elke zak en zorgen voor discreet transport. Geen verfrommeld papier of geïmproviseerde opslag meer – alleen puur gemak!"
+    },
+    "place": {
+      "header": "Alles belangrijks op één plek",
+      "desc": "Nooit meer zoeken naar je aansteker! Met de Clipper Edition heb je niet alleen ruimte voor je joints, maar ook een veilige houder voor je Clipper – voor het perfecte moment, altijd en overal."
+    }
+  },
+  "adText": {
+    "header": "Je perfecte metgezel – Johnny Case!",
+    "desc": "Klein maar krachtig – de Johnny Case past in elke zak en beschermt je joints perfect. Discreet en stijlvol, altijd klaar voor gebruik. Pak je case en maak het verschil in je dagelijks leven!"
+  },
+  "shipping": {
+    "header": "Verzending & Levering",
+    "time": {
+      "header": "Levertijd",
+      "desc": "De levertijd is doorgaans **3-5 werkdagen** na ontvangst van de betaling."
+    },
+    "costs": {
+      "header": "Verzendkosten"
+    },
+    "provider": {
+      "header": "Verzendings",
+      "desc": "Wij verzenden met DHL en Deutsche Post om een ​​snelle en veilige levering te garanderen."
+    },
+    "tracking": {
+      "header": "Volgen",
+      "desc": "Na verzending ontvangt u een e-mail met een trackingnummer. Zo kunt u uw pakket op elk moment volgen."
+    },
+    "returns": {
+      "header": "Retouren",
+      "desc": "Bent u niet tevreden met uw bestelling, dan kunt u deze binnen **14 dagen** retourneren. Neem contact met ons op via e-mail:"
+    }
+  }
+}

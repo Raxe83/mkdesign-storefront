@@ -1,0 +1,145 @@
+{
+    "common": {
+      "shopNow": "Acheter maintenant",
+      "viewCollections": "Voir les collections",
+      "showAll": "Afficher tout",
+      "addToCart": "Ajouter au panier",
+      "subscribe": "S'abonner",
+      "collections": "Nos collections",
+      "collection": "Collection",
+      "products": "Nos produits",
+      "noImg": "Pas d'image",
+      "and": "et",
+      "tos": "Conditions d'utilisation",
+      "privacy": "Politique de confidentialité",
+      "adding": "Ajout",
+      "backToHome": "Retour à l'accueil",
+      "workdays": "Jours ouvrables",
+      "amount": "Quantité",
+      "color": "Couleur",
+      "delete": "Supprimer",
+      "close": "Fermer",
+      "contact": "Contact",
+      "check": "Compris",
+      "enterMail": "Saisissez votre e-mail"
+    },
+    "footer": {
+      "johnnyCase": "Protégez vos essentiels avec des étuis élégants, discrets et durables. Fabriqués à la main pour le connaisseur moderne.",
+      "shop": "Boutique",
+      "allRights": "Tous droits réservés.",
+      "imprint": "Mentions légales",
+      "dataProtection": "Déclaration de protection des données",
+      "tou": "Conditions d'utilisation"
+    },
+    "cookies": {
+      "settingsHeader": "Paramètres des cookies",
+      "mainDesc": "Nous utilisons des cookies pour optimiser votre expérience sur notre site web. Vous pouvez trouver les détails dans notre",
+      "acceptCurrent": "Accepter la sélection",
+      "acceptAll": "Tout accepter",
+      "decline": "Refuser",
+      "necessaryCookies": "Cookies nécessaires",
+      "necessaryDesc": "Ces cookies sont nécessaires pour les fonctions de base du site web.",
+      "cookies": "cookies",
+      "cookiesFunction": "Ces cookies permettent des fonctionnalités améliorées."
+    },
+    "color": {
+      "black": "Noir",
+      "white": "Blanc"
+    },
+    "age": {
+      "header": "Vérification de l'âge",
+      "desc": "Ce site contient du contenu qui ne convient qu'aux personnes âgées de 18 ans et plus.",
+      "verify": "Veuillez confirmer que vous avez au moins 18 ans pour continuer.",
+      "over": "J'ai plus de 18 ans",
+      "under": "J'ai moins de 18 ans"
+    },
+    "cart": {
+      "header": "Panier",
+      "articles": "Vos articles",
+      "buyMore": "Continuer les achats",
+      "checkout": "Passer à la caisse",
+      "total": "Total",
+      "subtotal": "Sous-total",
+      "summary": "Résumé",
+      "shippingCost": "Les frais d'expédition seront calculés lors du paiement.",
+      "empty": "Votre panier est vide",
+      "addProducts": "Ajoutez des produits pour commencer vos achats"
+    },
+    "404": {
+      "header": "Page non trouvée",
+      "desc": "La page que vous recherchez n'existe pas ou a été déplacée."
+    },
+    "product": {
+      "notAvailable": "Actuellement indisponible",
+      "notAvailableShort": "Indisponible",
+      "swipe": "Glisser",
+      "allProducts": "Tous les produits",
+      "noProducts": "Aucun produit trouvé",
+      "noProduct": "Produit non trouvé",
+      "loadError": "Erreur lors du chargement du produit",
+      "backToProducts": "Retour aux produits",
+      "discoverProducts": "Découvrir les produits",
+      "shipment": {
+        "header": "Expédition",
+        "fastDelevery": "Livraison rapide",
+        "cheapCosts": "Frais économiques",
+        "costsAre": "Les frais d'expédition sont"
+      }
+    },
+    "joinUs": {
+      "header": "Rejoignez notre communauté!",
+      "desc": "Abonnez-vous à notre newsletter pour des offres exclusives, des annonces de nouveaux produits et plus encore.",
+      "agreement": "En vous abonnant, vous acceptez nos"
+    },
+    "nav": {
+      "home": "Accueil",
+      "products": "Produits",
+      "aboutUs": "À propos de nous",
+      "cart": "Panier"
+    },
+    "herosection": {
+      "header": "Étuis à joints premium",
+      "desc": "Protégez vos essentiels avec nos étuis élégants, discrets et durables. Fabriqués à la main pour le connaisseur moderne."
+    },
+    "infoCard": {
+      "header": "",
+      "safe": {
+        "header": "Protection et sécurité en déplacement",
+        "desc": "Conservez vos joints en toute sécurité sans craindre qu'ils ne soient écrasés ou endommagés. Le Johnny Case protège efficacement vos essentiels contre la pression, l'humidité et les influences extérieures – que ce soit dans votre sac ou en déplacement."
+      },
+      "stil": {
+        "header": "Plaisir discret et élégant",
+        "desc": "Discret, compact et élégant – les Johnny Cases s'adaptent à toutes les poches et assurent un transport discret. Fini le papier froissé ou le rangement improvisé – juste un confort pur !"
+      },
+      "place": {
+        "header": "Tout ce qui est important en un seul endroit",
+        "desc": "Ne cherchez plus jamais votre briquet ! Avec l'édition Clipper, vous avez non seulement de la place pour vos joints, mais aussi un support sécurisé pour votre Clipper – pour le moment parfait, n'importe quand et n'importe où."
+      }
+    },
+    "adText": {
+      "header": "Votre compagnon parfait – Johnny Case!",
+      "desc": "Petit mais costaud – le Johnny Case tient dans n'importe quelle poche et protège parfaitement vos joints. Discret et élégant, toujours prêt à partir. Prenez votre étui et faites la différence dans votre quotidien !"
+    },
+    "shipping": {
+      "header": "Expédition & Livraison",
+      "time": {
+        "header": "Délai de livraison",
+        "desc": "Le délai de livraison est généralement de **3 à 5 jours ouvrables** après réception du paiement."
+      },
+      "costs": {
+        "header": "Frais d'expédition"
+      },
+      "provider": {
+        "header": "Prestataire d'expédition",
+        "desc": "Nous expédions avec DHL & Deutsche Post pour assurer une livraison rapide et sécurisée."
+      },
+      "tracking": {
+        "header": "Suivi",
+        "desc": "Après l'expédition, vous recevrez un e-mail avec votre numéro de suivi afin que vous puissiez suivre votre colis à tout moment."
+      },
+      "returns": {
+        "header": "Retours",
+        "desc": "Si vous n'êtes pas satisfait de votre commande, vous pouvez la retourner dans un délai de **14 jours**. Contactez-nous par e-mail :"
+      }
+    }
+  }

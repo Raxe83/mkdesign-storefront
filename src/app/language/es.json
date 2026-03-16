@@ -1,0 +1,145 @@
+{
+    "common": {
+      "shopNow": "Comprar ahora",
+      "viewCollections": "Ver colecciones",
+      "showAll": "Mostrar todo",
+      "addToCart": "Añadir al carrito",
+      "subscribe": "Suscribirse",
+      "collections": "Nuestras colecciones",
+      "collection": "Colección",
+      "products": "Nuestros productos",
+      "noImg": "Sin imagen",
+      "and": "y",
+      "tos": "Términos de servicio",
+      "privacy": "Política de privacidad",
+      "adding": "Añadiendo",
+      "backToHome": "Volver al inicio",
+      "workdays": "Días laborables",
+      "amount": "Cantidad",
+      "color": "Color",
+      "delete": "Eliminar",
+      "close": "Cerrar",
+      "contact": "Contacto",
+      "check": "Comprendido",
+      "enterMail": "Introduce tu correo electrónico"
+    },
+    "footer": {
+      "johnnyCase": "Protege tus esenciales con estuches elegantes, discretos y duraderos. Hechos a mano para el conocedor moderno.",
+      "shop": "Tienda",
+      "allRights": "Todos los derechos reservados.",
+      "imprint": "Aviso legal",
+      "dataProtection": "Declaración de protección de datos",
+      "tou": "Condiciones de uso"
+    },
+    "cookies": {
+      "settingsHeader": "Configuración de cookies",
+      "mainDesc": "Utilizamos cookies para optimizar tu experiencia en nuestro sitio web. Puedes encontrar detalles en nuestra",
+      "acceptCurrent": "Aceptar selección",
+      "acceptAll": "Aceptar todo",
+      "decline": "Rechazar",
+      "necessaryCookies": "Cookies necesarias",
+      "necessaryDesc": "Estas cookies son necesarias para las funciones básicas del sitio web.",
+      "cookies": "cookies",
+      "cookiesFunction": "Estas cookies permiten una funcionalidad mejorada."
+    },
+    "color": {
+      "black": "Negro",
+      "white": "Blanco"
+    },
+    "age": {
+      "header": "Verificación de edad",
+      "desc": "Este sitio web contiene contenido que solo es adecuado para personas mayores de 18 años.",
+      "verify": "Por favor, confirma que tienes al menos 18 años para continuar.",
+      "over": "Soy mayor de 18 años",
+      "under": "Soy menor de 18 años"
+    },
+    "cart": {
+      "header": "Carrito",
+      "articles": "Tus artículos",
+      "buyMore": "Continuar comprando",
+      "checkout": "Finalizar compra",
+      "total": "Total",
+      "subtotal": "Subtotal",
+      "summary": "Resumen",
+      "shippingCost": "Los gastos de envío se calcularán al finalizar la compra.",
+      "empty": "Tu carrito está vacío",
+      "addProducts": "Añade productos para empezar a comprar"
+    },
+    "404": {
+      "header": "Página no encontrada",
+      "desc": "La página que buscas no existe o ha sido movida."
+    },
+    "product": {
+      "notAvailable": "Actualmente no disponible",
+      "notAvailableShort": "No disponible",
+      "swipe": "Deslizar",
+      "allProducts": "Todos los productos",
+      "noProducts": "No se encontraron productos",
+      "noProduct": "Producto no encontrado",
+      "loadError": "Error al cargar el producto",
+      "backToProducts": "Volver a productos",
+      "discoverProducts": "Descubrir productos",
+      "shipment": {
+        "header": "Envío",
+        "fastDelevery": "Entrega rápida",
+        "cheapCosts": "Costos económicos",
+        "costsAre": "Los costos de envío son"
+      }
+    },
+    "joinUs": {
+      "header": "¡Únete a nuestra comunidad!",
+      "desc": "Suscríbete a nuestro boletín para ofertas exclusivas, anuncios de nuevos productos y más.",
+      "agreement": "Al suscribirte, aceptas nuestros"
+    },
+    "nav": {
+      "home": "Inicio",
+      "products": "Productos",
+      "aboutUs": "Sobre nosotros",
+      "cart": "Carrito"
+    },
+    "herosection": {
+      "header": "Estuches premium para porros",
+      "desc": "Protege tus esenciales con nuestros estuches elegantes, discretos y duraderos. Hechos a mano para el conocedor moderno."
+    },
+    "infoCard": {
+      "header": "",
+      "safe": {
+        "header": "Protección y seguridad en movimiento",
+        "desc": "Guarda tus porros de forma segura sin preocuparte de que se aplasten o dañen. El Johnny Case protege de manera fiable tus esenciales contra la presión, la humedad y las influencias externas, ya sea en tu bolso o en movimiento."
+      },
+      "stil": {
+        "header": "Disfrute discreto y con estilo",
+        "desc": "Discreto, compacto y elegante – los Johnny Cases caben en cualquier bolsillo y garantizan un transporte discreto. ¡Se acabaron los papeles arrugados o los almacenamientos improvisados – solo pura comodidad!"
+      },
+      "place": {
+        "header": "Todo lo importante en un solo lugar",
+        "desc": "¡Nunca más busques tu mechero! Con la Edición Clipper, no solo tienes espacio para tus porros, sino también un soporte seguro para tu Clipper – para el momento perfecto, en cualquier momento y en cualquier lugar."
+      }
+    },
+    "adText": {
+      "header": "Tu compañero perfecto – ¡Johnny Case!",
+      "desc": "Pequeño pero poderoso – el Johnny Case cabe en cualquier bolsillo y protege perfectamente tus porros. Discreto y con estilo, siempre listo para usar. ¡Consigue tu estuche y marca la diferencia en tu día a día!"
+    },
+    "shipping": {
+      "header": "Envío y entrega",
+      "time": {
+        "header": "Tiempo de entrega",
+        "desc": "El tiempo de entrega es normalmente de **3-5 días laborables** después de recibir el pago."
+      },
+      "costs": {
+        "header": "Costos de envío"
+      },
+      "provider": {
+        "header": "Proveedor de servicios de envío",
+        "desc": "Enviamos con DHL y Deutsche Post para garantizar una entrega rápida y segura."
+      },
+      "tracking": {
+        "header": "Seguimiento",
+        "desc": "Después del envío, recibirás un correo electrónico con tu número de seguimiento para que puedas rastrear tu paquete en cualquier momento."
+      },
+      "returns": {
+        "header": "Devoluciones",
+        "desc": "Si no estás satisfecho con tu pedido, puedes devolverlo dentro de los **14 días**. Contáctanos por correo electrónico:"
+      }
+    }
+  }

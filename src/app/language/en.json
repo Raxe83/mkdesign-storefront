@@ -1,0 +1,146 @@
+{
+  "common": {
+    "shopNow": "Shop now",
+    "viewCollections": "View Collections",
+    "showAll": "Show All",
+    "addToCart": "Add to cart",
+    "subscribe": "subscribe",
+    "collections": "Our Collections",
+    "collection": "collection",
+    "products": "Our Products",
+    "noImg": "No Image",
+    "and": "and",
+    "tos": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "adding": "adding",
+    "backToHome": "Back to Home",
+    "workdays": "Workdays",
+    "amount": "amount",
+    "color": "color",
+    "delete": "delete",
+    "close": "close",
+    "contact": "Contact",
+    "check": "Confirm",
+    "enterMail": "Enter your Email"
+  },
+  "footer": {
+    "johnnyCase": "Protect your essentials with stylish, discreet, and durable cases. Handcrafted for the modern connoisseur.",
+    "shop": "Shop",
+    "allRights": "All rights reserved.",
+    "imprint": "Imprint",
+    "dataProtection": "Data Protection Declaration",
+    "tou": "Terms of Use"
+  },
+  "cookies":{
+    "settingsHeader": "Cookie-Settings",
+    "mainDesc": "We use cookies to optimize your experience on our website. You can find details in our",
+    "acceptCurrent": "Accept selection",
+    "acceptAll": "Accept all",
+    "decline": "Decline",
+    "necessaryCookies": "Necessary Cookies",
+    "necessaryDesc": "These cookies are necessary for the basic functions of the website.",
+    "cookies": "cookies",
+    "cookiesFunction": "These cookies enable enhanced functionality."
+  },
+  "color": {
+    "black": "Black",
+    "white": "White"
+  },
+  "age": {
+    "header": "Age verification",
+    "desc": "This website contains content that is only suitable for persons aged 18 and over.",
+    "verify": "Please confirm that you are at least 18 years old to continue.",
+    "over": "I am over 18",
+    "under": "I am under 18"
+  },
+  "cart": {
+    "header": "Cart",
+    "articles": "You'r Articles",
+    "buyMore": "continue shopping",
+    "checkout": "checkout",
+    "total": "total",
+    "subtotal": "Subtotal",
+    "summary": "Summary",
+    "shippingCost": "Shipping costs will be calculated at checkout.",
+    "empty": "You'r Cart is empty",
+    "addProducts": "Add Products to start shopping"
+  },
+  "404": {
+    "header": "Seite nicht gefunden",
+    "desc": "Die von dir gesuchte Seite existiert nicht oder wurde verschoben."
+  },
+  "product": {
+    "notAvailable":"Currently not Available",
+    "notAvailableShort":"Not Available",
+    "swipe": "Swipe",
+    "allProducts": "All Products",
+    "noProducts": "No Products found",
+    "noProduct": "Product not found",
+    "loadError": "Error while loading the product",
+    "backToProducts": "Back to Products",
+    "discoverProducts": "Discover Products",
+    "quantity": "Quantity",
+    "shipment": {
+      "header": "Shipment",
+      "fastDelevery": "fast delevery",
+      "cheapCosts": "cheap costs",
+      "costsAre": "The shipment costs are"
+    }
+  },
+  "joinUs": {
+    "header": "Join our Community!",
+    "desc": "Subscribe to our newsletter for exclusive offers, new product announcements, and more.",
+    "agreement": "By subscribing, you agree to our"
+  },
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "aboutUs": "About Us",
+    "cart": "cart"
+  },
+  "herosection": {
+    "header": "Premium Joint Cases",
+    "desc": "Protect your essentials with our stylish, discreet, and durable cases. Handcrafted for the modern connoisseur."
+  },
+  "infoCard": {
+    "header": "",
+    "safe": {
+      "header": "Protection & Security on the Go",
+      "desc": "Store your joints safely without worrying about them getting crushed or damaged. The Johnny Case reliably protects your essentials from pressure, moisture, and external influences – whether in your bag or on the move."
+    },
+    "stil": {
+      "header": "Discreet & Stylish Enjoyment",
+      "desc": "Unobtrusive, compact, and stylish – Johnny Cases fit into any pocket and ensure discreet transport. No more crumpled paper or makeshift storage – just pure convenience!"
+    },
+    "place": {
+      "header": "Everything Important in One Place",
+      "desc": "Never search for your lighter again! With the Clipper Edition, you not only have space for your joints but also a secure holder for your Clipper – for the perfect moment, anytime and anywhere."
+    }
+  },
+  "adText": {
+    "header": "Your Perfect Companion – Johnny Case!",
+    "desc": "Small but mighty – the Johnny Case fits in any pocket and perfectly protects your joints. Discreet and stylish, always ready to go. Grab your case and make a difference in your everyday life!"
+  },
+  "shipping": {
+    "header": "Shipping & Delivery",
+    "time": {
+      "header": "Delivery time",
+      "desc": "Delivery time is typically **3-5 business days** after receipt of payment."
+    },
+    "costs": {
+      "header": "Shipping costs"
+    },
+    "provider": {
+      "header": "Shipping service provider",
+      "desc": "We ship with DHL & Deutsche Post to ensure fast & secure delivery."
+    },
+    "tracking": {
+      "header": "Tracking",
+      "desc": "After shipping, you will receive an email with your tracking number so you can track your package at any time."
+    },
+    "returns": {
+      "header": "Returns",
+      "desc": "If you are not satisfied with your order, you can return it within **14 days**. Contact us by email:"
+    }
+  }
+}

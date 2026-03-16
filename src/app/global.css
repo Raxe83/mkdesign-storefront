@@ -1,0 +1,46 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: #18181b; /* zinc-900 */
+    --color-accent: #ea580c; /* emerald-600 */
+    --color-muted: #71717a; /* zinc-500 */
+    --color-surface: #ffffff;
+    --color-border: rgba(214, 211, 209, 0.5); /* stone-200/50 */
+    --color-charcoal: #18181b; /* zinc-900 */
+    --sand: #c8b99a;
+    --cream: #f5f0e8;
+    --color-gold: #d3820a; /* emerald-400 */
+    --color-background: #f5f3e8;
+    --warm-white: #fafaf7;
+    --rust: #b5460f;
+    --rust-light: #f0e8e0;
+    --rust-mid: #d4652b;
+    --gold: #c89b3c;
+    --gold-light: #f5edd8;
+    --serif: "Playfair Display", Georgia, serif;
+    --sans: "DM Sans", system-ui, sans-serif;
+  }
+
+  .dark {
+    --color-primary: #f4f4f5; /* zinc-100 */
+    --color-accent: #d3820a; /* emerald-400 */
+    --color-muted: #a1a1aa; /* zinc-400 */
+    --color-surface: #09090b; /* zinc-950 */
+    --color-border: rgba(63, 63, 70, 0.5); /* zinc-700/50 */
+  }
+
+  body {
+    @apply font-body text-primary bg-white dark:bg-zinc-950;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display tracking-tight;
+  }
+}
