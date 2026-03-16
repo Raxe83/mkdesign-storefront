@@ -41,7 +41,8 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
       setIsLoading(false);
     }
   };
-
+ 
+  
   return (
     <button
       onClick={handleAddToCart}
