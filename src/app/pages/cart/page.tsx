@@ -7,7 +7,6 @@ import { formatPrice } from "../../utils/formatPrice";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { Loader } from "../../components/Loader";
-import { primaryColor } from "@/app/global";
 
 const CartPage = () => {
   const { cart, isLoading, removeItem, updateItemQuantityFunction } = useCart();
@@ -175,7 +174,7 @@ const CartPage = () => {
                   <a
                     href={cart.checkoutUrl}
                     rel="noopener noreferrer"
-                    className={`block w-full bg-${primaryColor} text-white text-center px-4 py-2 rounded text-sm font-medium hover:bg-green-700 transition-colors`}
+                    className={`block w-full bg-accent text-white text-center px-4 py-2 rounded text-sm font-medium hover:bg-green-700 transition-colors`}
                   >
                     {t("cart.checkout")}
                   </a>

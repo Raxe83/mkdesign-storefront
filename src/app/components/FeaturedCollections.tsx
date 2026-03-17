@@ -2,12 +2,12 @@
 
 import type React from "react"
 import { useEffect, useState } from "react"
-import type { Collection } from "../types/shopify"
 import { getCollections } from "../services/shopify"
 import Link from "next/link"
+import { ShopifyCollection } from "./CollectionsList"
 
 const FeaturedCollections: React.FC = () => {
-  const [collections, setCollections] = useState<Collection[]>([])
+  const [collections, setCollections] = useState<ShopifyCollection[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
   useEffect(() => {

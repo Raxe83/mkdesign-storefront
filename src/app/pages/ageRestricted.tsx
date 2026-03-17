@@ -13,8 +13,7 @@ export default function AgeRestrictedPage() {
         <Button
           color={"primary"}
           onClick={() => {}}
-          text={t("common.backToHome")}
-        />
+        >{t("common.backToHome")}</Button>
       </Link>
     </div>
   );

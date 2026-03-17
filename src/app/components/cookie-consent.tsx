@@ -88,21 +88,15 @@ export default function CookieConsent() {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 items-center justify-end">
-            <Button
-              color="outline_weed"
-              onClick={() => setIsVisible(false)}
-              text={t("cookies.decline")}
-            />
-            <Button
-              color="outline_weed"
-              onClick={handleAcceptSelected}
-              text={t("cookies.acceptCurrent")}
-            />
-            <Button
-              color="earthy"
-              onClick={handleAcceptAll}
-              text={t("cookies.acceptAll")}
-            />
+            <Button color="outline_weed" onClick={() => setIsVisible(false)}>
+              {t("cookies.decline")}
+            </Button>
+            <Button color="outline_weed" onClick={handleAcceptSelected}>
+              {t("cookies.acceptCurrent")}
+            </Button>
+            <Button color="earthy" onClick={handleAcceptAll}>
+              {t("cookies.acceptAll")}
+            </Button>
           </div>
         </div>
 

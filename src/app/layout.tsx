@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import "./global.css";
 import { CartProvider } from "./context/CartContext";
 import { ToastProvider } from "./context/ToastContext";
-import AgeVerification from "./components/age-verification";
 import ScrollToTop from "./utils/ScrollToTop";
 import ImportantMessage from "./components/ImportantMessages";
 import CookieConsent from "./components/cookie-consent";

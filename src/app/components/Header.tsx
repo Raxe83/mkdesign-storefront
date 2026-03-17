@@ -33,7 +33,7 @@ const Header = () => {
           {shopDetails.shopname.split(" ").map((word, index) => (
             <span key={index} className="text-black font-serif ">
               {word === "Design" ? (
-                <span className="text-accent italic font-bold">
+                <span className="text-accent relative italic font-bold">
                   {word.replace(" ", " ")}
                 </span>
               ) : (
