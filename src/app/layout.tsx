@@ -15,9 +15,9 @@ export const metadata: Metadata = {
   title: shopDetails.shopname,
   description: shopDetails.shopDescription,
   icons: {
-    icon: "/favicon.svg",
-    apple: "/apple-touch-icon.png",
-    other: [{ rel: "icon", url: "/favicon.svg" }],
+    icon: "/mkdesign-logo.png",
+    apple: "/mkdesign-logo.png",
+    other: [{ rel: "icon", url: "/mkdesign-logo.png" }],
   },
   openGraph: {
     title: shopDetails.shopname,

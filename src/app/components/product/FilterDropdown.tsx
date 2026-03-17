@@ -139,7 +139,7 @@ export default function FilterDropdown({
   const hasPriceFilter = priceMin !== "" || priceMax !== "";
 
   return (
-    <div className="mb-8 space-y-3">
+    <div className="mb-8 space-y-3 z-20">
       {/* Search */}
       <div className="relative flex-1 min-w-[180px]">
         <Search
