@@ -16,8 +16,10 @@ const ColorChooser = ({selectedColor, setSelectedColor}: ColorChooserType) => {
         <button
           key={color.value}
           onClick={() => setSelectedColor(color.name)}
-          className={`w-6 h-6 rounded-full border-2 ${
-            selectedColor === color.name ? "border-emerald-600 scale-125" : "border-gray-300"
+          className={`w-5 h-5 rounded-full border-2 transition-transform duration-150 ${
+            selectedColor === color.name
+              ? "border-accent scale-125"
+              : "border-zinc-300 dark:border-zinc-600 hover:scale-110"
           }`}
           style={{ backgroundColor: color.value }}
         />

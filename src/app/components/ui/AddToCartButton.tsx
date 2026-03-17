@@ -11,7 +11,7 @@ interface AddToCartButtonProps {
   variantId: string;
   available: boolean;
   title: string;
-  color: string;
+  color?: string;
   icon?: boolean;
   quantity?: number;
 }
@@ -20,7 +20,7 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
   variantId,
   available,
   title,
-  color,
+  color = "",
   icon,
   quantity = 1,
 }) => {
@@ -47,7 +47,7 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
     <button
       onClick={handleAddToCart}
       disabled={!available || isLoading}
-      className="w-3/4 flex flex-row items-center justify-center bg-accent text-white hover:opacity-90 font-medium py-2.5 px-4 rounded transition-opacity duration-200 disabled:opacity-50"
+      className="w-full flex flex-row items-center justify-center bg-accent text-white hover:opacity-90 font-medium py-2.5 px-4 rounded transition-opacity duration-200 disabled:opacity-50"
     >
       {icon && <ShoppingCart size={18} className="mr-2" />}
       {!available

@@ -15,7 +15,11 @@
     --color-sand: #c9bc9a; /* zinc-100 */
     --color-cream: #f5f0e8; /* zinc-50 */
     --color-gold: #c89b3c; /* emerald-400 */
-    --color-background: #f5f3e8;
+    --color-background: #f7f5ed;
+    --color-background-transparent: rgba(245, 243, 232, 0.863);
+    --color-rust: #b85c2a;       /* terracotta / warm rust */
+    --color-rust-light: #f8ede7; /* tinted rust background */
+    --color-stone: #78716c;      /* warm gray (stone-500) */
 
     --serif: "Playfair Display", Georgia, serif;
     --sans: "DM Sans", system-ui, sans-serif;
@@ -27,6 +31,9 @@
     --color-muted: #a1a1aa; /* zinc-400 */
     --color-surface: #09090b; /* zinc-950 */
     --color-border: rgba(63, 63, 70, 0.5); /* zinc-700/50 */
+    --color-rust: #d4724a;
+    --color-rust-light: #2a1a12;
+    --color-stone: #a8a29e;
   }
 
   body {

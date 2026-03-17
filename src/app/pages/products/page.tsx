@@ -1,22 +1,35 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 import type { Product } from "../../types/shopify";
 import { getProducts, getProductsByCollection } from "../../services/shopify";
+import { useProductFilter, PRODUCTS_PER_PAGE } from "../../hooks/useProductFilter";
 import ProductCard from "../../components/product/ProductCard";
-import i18n from "../../i18n";
-import { useTranslation } from "react-i18next";
+import FilterDropdown from "../../components/product/FilterDropdown";
+import ProductPagination from "../../components/product/ProductPagination";
+import Skeleton from "../../components/ui/Skeleton";
 import { Loader } from "../../components/Loader";
+import i18n from "../../i18n";
 
 const ProductsPageContent = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [collectionHandle, setCollectionHandle] = useState<string | null>(null);
+
   const searchParams = useSearchParams();
   const [t] = useTranslation();
+
+  // Pre-select productType from URL param (e.g. ?productType=Shirts)
+  const initialTypes = useMemo(() => {
+    const t = searchParams.get("productType");
+    return t ? new Set([t]) : undefined;
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const filter = useProductFilter(allProducts, initialTypes);
 
   useEffect(() => {
     setCollectionHandle(searchParams.get("collection"));
@@ -24,82 +37,122 @@ const ProductsPageContent = () => {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const shopifyLocale = i18n.language;
       try {
         setIsLoading(true);
         setError(null);
-
-        let fetchedProducts: Product[];
-
-        if (collectionHandle) {
-          fetchedProducts = await getProductsByCollection(collectionHandle);
-        } else {
-          fetchedProducts = await getProducts(20, shopifyLocale);
-        }
-
-        setProducts(fetchedProducts);
-      } catch (err) {
-        console.error("Error fetching products:", err);
+        const locale = i18n.language;
+        const fetched = collectionHandle
+          ? await getProductsByCollection(collectionHandle, 250)
+          : await getProducts(250, locale);
+        setAllProducts(fetched);
+      } catch {
         setError(t("product.loadError"));
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchProducts();
   }, [collectionHandle]);
 
-  if (isLoading) {
-    return <Loader />;
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-12 bg-red-50 rounded-lg">
-        <p className="text-red-600">{error}</p>
-        <Link
-          href="/"
-          className="mt-4 inline-block text-blue-600 hover:underline"
-        >
-          {t("common.backToHome")}
-        </Link>
-      </div>
-    );
-  }
-
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-8">
-        {collectionHandle
-          ? `${t("common.collection")}: ${collectionHandle}`
-          : t("product.allProducts")}
-      </h1>
+    <div className="pb-12">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="font-display text-3xl lg:text-4xl font-medium text-primary leading-tight">
+          {collectionHandle
+            ? `${t("common.collection")}: ${collectionHandle}`
+            : t("product.allProducts")}
+        </h1>
+        {!isLoading && (
+          <p className="mt-1.5 text-sm text-muted">
+            {filter.filtered.length}{" "}
+            {filter.filtered.length === 1 ? "Produkt" : "Produkte"}
+            {allProducts.length !== filter.filtered.length &&
+              ` von ${allProducts.length}`}
+          </p>
+        )}
+      </div>
 
-      {products.length === 0 ? (
-        <div className="text-center py-12 bg-gray-100 rounded-lg">
-          <p className="text-gray-500">{t("product.noProducts")}</p>
-          {collectionHandle && (
-            <Link
-              href="/pages/products"
-              className="mt-4 inline-block text-blue-600 hover:underline"
-            >
-              {t("product.allProducts")}
-            </Link>
-          )}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
+      {/* Filter bar */}
+      <FilterDropdown
+        search={filter.search}
+        sort={filter.sort}
+        onlyAvailable={filter.onlyAvailable}
+        selectedTypes={filter.selectedTypes}
+        priceMin={filter.priceMin}
+        priceMax={filter.priceMax}
+        allProductTypes={filter.allProductTypes}
+        hasActiveFilters={filter.hasActiveFilters}
+        activeFilterCount={filter.activeFilterCount}
+        setSearch={filter.setSearch}
+        setSort={filter.setSort}
+        setOnlyAvailable={filter.setOnlyAvailable}
+        setSelectedTypes={filter.setSelectedTypes}
+        setPriceMin={filter.setPriceMin}
+        setPriceMax={filter.setPriceMax}
+        clearFilters={filter.clearFilters}
+        toggleType={filter.toggleType}
+      />
+
+      {/* Loading */}
+      {isLoading && (
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+          {Array.from({ length: PRODUCTS_PER_PAGE }).map((_, i) => (
+            <Skeleton.Card key={i} />
           ))}
         </div>
+      )}
+
+      {/* Error */}
+      {!isLoading && error && (
+        <div className="text-center py-16">
+          <p className="text-muted mb-4">{error}</p>
+          <Link href="/" className="text-accent hover:underline text-sm font-medium">
+            {t("common.backToHome")}
+          </Link>
+        </div>
+      )}
+
+      {/* Empty */}
+      {!isLoading && !error && filter.filtered.length === 0 && (
+        <div className="text-center py-20">
+          <p className="font-display text-lg text-primary mb-1">
+            Keine Produkte gefunden
+          </p>
+          <p className="text-sm text-muted mb-5">{t("product.noProducts")}</p>
+          {filter.hasActiveFilters && (
+            <button
+              onClick={filter.clearFilters}
+              className="text-sm text-accent hover:underline"
+            >
+              Filter zurücksetzen
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Grid + Pagination */}
+      {!isLoading && !error && filter.paginated.length > 0 && (
+        <>
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+            {filter.paginated.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+
+          <ProductPagination
+            page={filter.page}
+            totalPages={filter.totalPages}
+            goToPage={filter.goToPage}
+          />
+        </>
       )}
     </div>
   );
 };
 
 const ProductsPage = () => (
-  <Suspense fallback={<div>Loading...</div>}>
+  <Suspense fallback={<Loader />}>
     <ProductsPageContent />
   </Suspense>
 );

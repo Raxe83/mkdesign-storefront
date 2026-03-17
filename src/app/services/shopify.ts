@@ -88,6 +88,8 @@ export async function getProducts(first = 20, locale?: string): Promise<Product[
             handle
             description
             descriptionHtml
+            tags
+            productType
             priceRange {
               minVariantPrice {
                 amount
@@ -311,6 +313,8 @@ export async function getProductsByCollection(
               handle
               description
               descriptionHtml
+              tags
+              productType
               priceRange {
                 minVariantPrice {
                   amount

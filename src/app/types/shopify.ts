@@ -21,6 +21,8 @@ export interface Product {
   handle: string
   description: string
   descriptionHtml: string
+  tags: string[]
+  productType: string
   priceRange: {
     minVariantPrice: Money
   }

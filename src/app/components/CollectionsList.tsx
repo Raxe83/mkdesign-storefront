@@ -209,7 +209,7 @@ export function CategoryGrid({
           className={cn(
             "font-display font-bold leading-[1.15] tracking-tight",
             "text-[clamp(1.75rem,3.5vw,2.6rem)] text-charcoal",
-            "[&_em]:italic [&_em]:text-gold",
+            "[&_em]:italic [&_em]:text-accent",
           )}
           dangerouslySetInnerHTML={{ __html: title }}
         />

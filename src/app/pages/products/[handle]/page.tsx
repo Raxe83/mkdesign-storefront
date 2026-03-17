@@ -1,23 +1,26 @@
 "use client";
 
 import type React from "react";
-
 import { useEffect, useState } from "react";
 import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
-  ZoomIn,
+  Minus,
+  Plus,
+  Truck,
+  RotateCcw,
 } from "lucide-react";
 import type { Product } from "../../../types/shopify";
 import { getProductByHandle } from "../../../services/shopify";
 import { formatPrice } from "../../../utils/formatPrice";
 import AddToCartButton from "../../../components/ui/AddToCartButton";
-import { availableColors, shipment } from "../../../types/products";
+import { shipment } from "../../../types/products";
 import ColorChooser from "../../../components/product/ColorChooser";
 import i18n from "../../../i18n";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
+import Image from "next/image";
 import { useParams } from "next/navigation";
 import { ProductReviews } from "@/app/components/product/product-reviews";
 import { Loader } from "@/app/components/Loader";
@@ -30,8 +33,8 @@ const ProductDetailPage = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState<string>("Schwarz");
-  const [isZoomed, setIsZoomed] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [mainImgLoaded, setMainImgLoaded] = useState(false);
 
   const [t] = useTranslation();
 
@@ -55,7 +58,7 @@ const ProductDetailPage = () => {
           productData.featuredImage?.url ||
           productData.images.edges[0]?.node.url;
         setSelectedImage(defaultImage);
-      } catch (err) {
+      } catch {
         setError(t("product.loadError"));
       } finally {
         setIsLoading(false);
@@ -66,51 +69,46 @@ const ProductDetailPage = () => {
   }, [handle]);
 
   const handleThumbnailClick = (url: string, index: number) => {
+    setMainImgLoaded(false);
     setSelectedImage(url);
     setCurrentIndex(index);
-    setIsZoomed(false);
   };
 
   const handlePrevious = () => {
     if (!product) return;
-    const images = product.images.edges.map((edge) => edge.node);
+    const images = product.images.edges.map((e) => e.node);
     const newIndex = (currentIndex - 1 + images.length) % images.length;
+    setMainImgLoaded(false);
     setCurrentIndex(newIndex);
     setSelectedImage(images[newIndex].url);
-    setIsZoomed(false);
   };
 
   const handleNext = () => {
     if (!product) return;
-    const images = product.images.edges.map((edge) => edge.node);
+    const images = product.images.edges.map((e) => e.node);
     const newIndex = (currentIndex + 1) % images.length;
+    setMainImgLoaded(false);
     setCurrentIndex(newIndex);
     setSelectedImage(images[newIndex].url);
-    setIsZoomed(false);
   };
-
-  const toggleZoom = () => setIsZoomed(!isZoomed);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowLeft") handlePrevious();
     else if (e.key === "ArrowRight") handleNext();
-    else if (e.key === "Escape" && isZoomed) setIsZoomed(false);
   };
 
-  if (isLoading) {
-    return <Loader />;
-  }
+  if (isLoading) return <Loader />;
 
   if (error || !product) {
     return (
-      <div className="text-center py-16 bg-zinc-50 dark:bg-zinc-900 rounded border border-zinc-200 dark:border-zinc-800">
-        <h1 className="text-2xl font-semibold mb-3 text-primary">
+      <div className="text-center py-20">
+        <h1 className="font-display text-2xl font-medium mb-3 text-primary">
           {error || "Produkt nicht gefunden"}
         </h1>
-        <p className="mb-6 text-muted">{t("product.noProduct")}</p>
+        <p className="mb-6 text-muted text-sm">{t("product.noProduct")}</p>
         <Link
           href="/pages/products"
-          className="text-accent hover:underline font-medium"
+          className="text-accent hover:underline text-sm font-medium"
         >
           {t("product.backToProducts")}
         </Link>
@@ -118,73 +116,72 @@ const ProductDetailPage = () => {
     );
   }
 
-  const images = product.images.edges.map((edge) => edge.node);
+  const images = product.images.edges.map((e) => e.node);
   const firstVariant = product.variants.edges[0]?.node;
   const price =
     firstVariant?.price.amount || product.priceRange.minVariantPrice.amount;
   const currencyCode =
     firstVariant?.price.currencyCode ||
     product.priceRange.minVariantPrice.currencyCode;
-  const isAvailable = firstVariant?.availableForSale || false;
+  const isAvailable = firstVariant?.availableForSale ?? false;
 
   return (
-    <div className="py-4">
+    <div className="py-8">
+      {/* Back */}
       <Link
         href="/pages/products"
-        className="inline-flex items-center gap-1.5 text-muted hover:text-primary transition-colors duration-200 mb-8 text-sm font-medium"
+        className="inline-flex items-center gap-1.5 text-muted hover:text-primary transition-colors duration-200 mb-10 text-sm"
       >
-        <ArrowLeft size={15} />
+        <ArrowLeft size={14} />
         {t("product.backToProducts")}
       </Link>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16">
-        {/* Image gallery */}
+      {/* Two-column layout */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-20 items-start">
+
+        {/* ── Image gallery ── */}
         <div
-          className="space-y-3"
+          className="flex flex-col gap-3 md:sticky md:top-8"
           tabIndex={0}
           onKeyDown={handleKeyDown}
           aria-label="Bilder-Galerie"
         >
-          <div className="relative aspect-square overflow-hidden rounded bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800">
-            <div
-              className={`h-full w-full transition-transform duration-300 ease-in-out ${
-                isZoomed ? "cursor-zoom-out scale-150" : "cursor-zoom-in"
-              }`}
-              onClick={toggleZoom}
-            >
-              <img
-                src={selectedImage || "/placeholder.svg"}
+          {/* Main image */}
+          <div className="relative aspect-[3/4] overflow-hidden rounded bg-zinc-100 dark:bg-zinc-800">
+            {selectedImage ? (
+              <Image
+                src={selectedImage}
                 alt={
                   images[currentIndex]?.altText ||
-                  `${product.title} - Bild ${currentIndex + 1}`
+                  `${product.title} – Bild ${currentIndex + 1}`
                 }
-                className="h-full w-full object-cover"
+                fill
+                priority
+                onLoad={() => setMainImgLoaded(true)}
+                className={`object-cover transition-all duration-500 ease-out ${
+                  mainImgLoaded ? "opacity-100 blur-0" : "opacity-0 blur-sm"
+                }`}
+                sizes="(max-width: 768px) 100vw, 50vw"
               />
-            </div>
-
-            {!isZoomed && (
-              <button
-                className="absolute bottom-3 right-3 rounded-full bg-white/90 dark:bg-zinc-800/90 p-1.5 text-zinc-600 dark:text-zinc-300 shadow-sm hover:bg-white dark:hover:bg-zinc-700 transition-colors duration-200"
-                onClick={toggleZoom}
-                aria-label="Bild vergrößern"
-              >
-                <ZoomIn size={16} />
-              </button>
+            ) : (
+              <div className="flex h-full items-center justify-center text-sm text-muted">
+                Kein Bild
+              </div>
             )}
 
             {images.length > 1 && (
               <>
                 <button
-                  className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 dark:bg-zinc-800/90 p-1.5 text-zinc-600 dark:text-zinc-300 shadow-sm hover:bg-white dark:hover:bg-zinc-700 transition-colors duration-200"
                   onClick={handlePrevious}
                   aria-label="Vorheriges Bild"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 dark:bg-zinc-800/90 p-2 shadow-sm text-zinc-600 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700 transition-colors duration-200"
                 >
                   <ChevronLeft size={18} />
                 </button>
                 <button
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 dark:bg-zinc-800/90 p-1.5 text-zinc-600 dark:text-zinc-300 shadow-sm hover:bg-white dark:hover:bg-zinc-700 transition-colors duration-200"
                   onClick={handleNext}
                   aria-label="Nächstes Bild"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 dark:bg-zinc-800/90 p-2 shadow-sm text-zinc-600 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700 transition-colors duration-200"
                 >
                   <ChevronRight size={18} />
                 </button>
@@ -192,27 +189,26 @@ const ProductDetailPage = () => {
             )}
           </div>
 
+          {/* Thumbnails */}
           {images.length > 1 && (
             <div className="grid grid-cols-5 gap-2">
               {images.map((image, index) => (
                 <button
                   key={index}
-                  className={`aspect-square overflow-hidden rounded border-2 transition-all duration-200 ${
+                  onClick={() => handleThumbnailClick(image.url, index)}
+                  aria-label={`${product.title} – Bild ${index + 1}`}
+                  className={`relative aspect-square overflow-hidden rounded border-2 transition-all duration-200 ${
                     selectedImage === image.url
-                      ? "border-accent ring-1 ring-accent/30"
+                      ? "border-accent"
                       : "border-transparent hover:border-zinc-300 dark:hover:border-zinc-600"
                   }`}
-                  onClick={() => handleThumbnailClick(image.url, index)}
-                  aria-label={`${product.title} - Bild ${index + 1} auswählen`}
-                  aria-current={selectedImage === image.url}
                 >
-                  <img
-                    src={image.url || "/placeholder.svg"}
-                    alt={
-                      image.altText ||
-                      `${product.title} - Thumbnail ${index + 1}`
-                    }
-                    className="h-full w-full object-cover"
+                  <Image
+                    src={image.url}
+                    alt={image.altText || `${product.title} – ${index + 1}`}
+                    fill
+                    className="object-cover"
+                    sizes="80px"
                   />
                 </button>
               ))}
@@ -220,50 +216,71 @@ const ProductDetailPage = () => {
           )}
         </div>
 
-        {/* Product info */}
-        <div className="space-y-6">
+        {/* ── Product info ── */}
+        <div className="flex flex-col gap-6">
+
+          {/* Vendor + title */}
           <div>
-            <h1 className="text-3xl font-display font-semibold text-primary leading-tight">
+            <h1 className="font-display text-3xl lg:text-4xl font-medium text-primary leading-tight">
               {product.title}
             </h1>
-            <p className="mt-3 text-2xl font-medium text-primary">
-              {formatPrice(price, currencyCode)}
-            </p>
           </div>
 
+          {/* Price */}
+          <p className="text-2xl font-medium text-primary">
+            {formatPrice(price, currencyCode)}
+          </p>
+
+          {/* Reviews summary */}
+          <ProductReviews productId={product.id} short />
+
+          <hr className="border-zinc-200/60 dark:border-zinc-800" />
+
+          {/* Description */}
           <div
             className="prose prose-sm prose-zinc dark:prose-invert max-w-none text-muted leading-relaxed"
             dangerouslySetInnerHTML={{
-              __html:
-                product.descriptionHtml || `<p>${product.description}</p>`,
+              __html: product.descriptionHtml || `<p>${product.description}</p>`,
             }}
           />
 
-          <div className="py-4 border-y border-zinc-200/60 dark:border-zinc-800">
-            <ProductReviews productId={product.id} short />
-          </div>
-
-          {/* Quantity */}
-          <div className="flex items-center gap-4">
-            <label htmlFor="quantity" className="text-sm font-medium text-primary">
-              {t("product.quantity")}
-            </label>
-            <input
-              id="quantity"
-              type="number"
-              min={1}
-              value={quantity}
-              onChange={(e) => setQuantity(parseInt(e.target.value))}
-              className="w-16 rounded border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-primary px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-accent"
-            />
-          </div>
-
-          {/* Color chooser */}
+          {/* Color */}
           <div>
+            <p className="text-xs uppercase tracking-widest text-muted mb-2">
+              {t("product.color")}
+              {selectedColor ? ` — ${selectedColor}` : ""}
+            </p>
             <ColorChooser
               setSelectedColor={setSelectedColor}
               selectedColor={selectedColor}
             />
+          </div>
+
+          {/* Quantity */}
+          <div>
+            <p className="text-xs uppercase tracking-widest text-muted mb-2">
+              {t("product.quantity")}
+            </p>
+            <div className="inline-flex items-center border border-zinc-200 dark:border-zinc-700 rounded">
+              <button
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                aria-label="Menge verringern"
+                className="p-2.5 text-muted hover:text-primary transition-colors duration-150 disabled:opacity-30"
+                disabled={quantity <= 1}
+              >
+                <Minus size={14} />
+              </button>
+              <span className="w-10 text-center text-sm font-medium text-primary select-none">
+                {quantity}
+              </span>
+              <button
+                onClick={() => setQuantity((q) => q + 1)}
+                aria-label="Menge erhöhen"
+                className="p-2.5 text-muted hover:text-primary transition-colors duration-150"
+              >
+                <Plus size={14} />
+              </button>
+            </div>
           </div>
 
           {/* Add to cart */}
@@ -272,18 +289,42 @@ const ProductDetailPage = () => {
               variantId={firstVariant.id}
               available={isAvailable}
               title={product.title}
-              color={selectedColor!}
+              color={selectedColor}
               quantity={quantity}
               icon
             />
           ) : (
-            <p className="text-red-500 text-sm font-medium">{t("product.notAvailable")}</p>
+            <p className="text-sm font-medium text-red-500">
+              {t("product.notAvailable")}
+            </p>
           )}
+
+          {/* Shipping info */}
+          <div className="space-y-2.5 pt-4 border-t border-zinc-200/60 dark:border-zinc-800">
+            <div className="flex items-center gap-2.5 text-sm text-muted">
+              <Truck size={15} className="shrink-0" />
+              <span>
+                Standardversand: {shipment.standard.days} Werktage —{" "}
+                {formatPrice(shipment.standard.price.toFixed(2), currencyCode)}
+              </span>
+            </div>
+            <div className="flex items-center gap-2.5 text-sm text-muted">
+              <Truck size={15} className="shrink-0 text-accent" />
+              <span>
+                Expressversand: {shipment.premium.days} Werktage —{" "}
+                {formatPrice(shipment.premium.price.toFixed(2), currencyCode)}
+              </span>
+            </div>
+            <div className="flex items-center gap-2.5 text-sm text-muted">
+              <RotateCcw size={15} className="shrink-0" />
+              <span>30 Tage kostenlose Rückgabe</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Reviews section */}
-      <div className="mt-16 pt-8 border-t border-zinc-200/60 dark:border-zinc-800">
+      {/* Full reviews section */}
+      <div className="mt-20 pt-10 border-t border-zinc-200/60 dark:border-zinc-800">
         <ProductReviews productId={product.id} />
       </div>
     </div>

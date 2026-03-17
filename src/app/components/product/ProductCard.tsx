@@ -6,10 +6,9 @@ import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import Image from "next/image";
 import Price from "@/app/components/ui/Price";
-import Badge from "@/app/components/ui/Badge";
 import Skeleton from "@/app/components/ui/Skeleton";
 import AddToCartButton from "@/app/components/ui/AddToCartButton";
-import ColorChooser from "./ColorChooser";
+import { ShoppingBag } from "lucide-react";
 
 export interface ProductCardProps {
   product: Product;
@@ -17,78 +16,95 @@ export interface ProductCardProps {
 }
 
 const ProductCard = ({ product, isLoading = false }: ProductCardProps) => {
-  const [selectedColor, setSelectedColor] = useState<string>("Schwarz");
+  const [imgLoaded, setImgLoaded] = useState(false);
   const [t] = useTranslation();
 
-  if (isLoading) {
-    return <Skeleton.Card />;
-  }
+  if (isLoading) return <Skeleton.Card />;
 
   const firstVariant = product.variants.edges[0]?.node;
   const available = firstVariant?.availableForSale ?? false;
   const price = product.priceRange.minVariantPrice.amount;
   const currencyCode = product.priceRange.minVariantPrice.currencyCode;
+  const variantCount = product.variants.edges.length;
+  const hasMultipleVariants = variantCount > 1;
 
   return (
-    <div className="group border border-zinc-200/60 dark:border-zinc-800 rounded overflow-hidden bg-white dark:bg-zinc-900 flex flex-col transition-shadow duration-200 hover:shadow-md">
-      <Link
-        href={`/pages/products/${product.handle}`}
-        prefetch={false}
-        className="block relative"
-      >
-        {/* Badge */}
-        {!available && (
-          <div className="absolute top-2 left-2 z-10">
-            <Badge variant="soldout">{t("product.notAvailable")}</Badge>
-          </div>
-        )}
-
-        {/* Image */}
-        <div className="aspect-[4/3] overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+    <div className="group flex flex-col">
+      {/* ── Image ── */}
+      <div className="relative overflow-hidden rounded aspect-[4/5] bg-zinc-100 dark:bg-zinc-800">
+        <Link
+          href={`/pages/products/${product.handle}`}
+          prefetch={false}
+          className="block w-full h-full"
+        >
           {product.featuredImage ? (
             <Image
               src={product.featuredImage.url}
               alt={product.featuredImage.altText || product.title}
-              width={600}
-              height={450}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              fill
+              onLoad={() => setImgLoaded(true)}
+              className={`object-cover transition-all duration-500 ease-out group-hover:scale-[1.04] ${
+                imgLoaded ? "opacity-100" : "opacity-0"
+              }`}
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
           ) : (
             <div className="flex h-full items-center justify-center">
-              <span className="text-sm text-muted">{t("common.noImg")}</span>
+              <ShoppingBag size={28} className="text-zinc-300 dark:text-zinc-600" />
             </div>
+          )}
+
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/8 transition-colors duration-300" />
+        </Link>
+
+        {/* Badges top-left */}
+        <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1 pointer-events-none">
+          {!available && (
+            <span className="px-2 py-0.5 text-[10px] uppercase tracking-widest font-medium bg-zinc-900/80 text-white dark:bg-zinc-100/90 dark:text-zinc-900 rounded-sm">
+              {t("product.notAvailableShort")}
+            </span>
+          )}
+          {product.productType && (
+            <span className="px-2 py-0.5 text-[10px] uppercase tracking-widest font-medium bg-white/85 dark:bg-zinc-800/85 text-muted rounded-sm backdrop-blur-sm">
+              {product.productType}
+            </span>
           )}
         </div>
 
-        {/* Text */}
-        <div className="p-4 pb-2">
-          <h3 className="font-display font-medium text-primary leading-snug line-clamp-2">
-            {product.title}
-          </h3>
-          <p className="mt-1 text-sm text-muted line-clamp-2 leading-relaxed">
-            {product.description}
-          </p>
-        </div>
-      </Link>
+        {/* Variant count badge top-right */}
+        {hasMultipleVariants && (
+          <div className="absolute top-2.5 right-2.5 z-10 pointer-events-none">
+            <span className="px-2 py-0.5 text-[10px] font-medium bg-white/85 dark:bg-zinc-800/85 text-muted rounded-sm backdrop-blur-sm">
+              {variantCount} Var.
+            </span>
+          </div>
+        )}
 
-      {/* Color chooser */}
-      <div className="px-0 pt-1">
-        <ColorChooser
-          selectedColor={selectedColor}
-          setSelectedColor={setSelectedColor}
-        />
+        {/* Add-to-cart — slides up on hover */}
+        <div className="absolute bottom-0 left-0 right-0 p-2.5 z-10 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out">
+          <AddToCartButton
+            variantId={firstVariant?.id ?? ""}
+            available={available}
+            title={product.title}
+          />
+        </div>
       </div>
 
-      {/* Footer */}
-      <div className="px-4 pb-4 pt-2 flex flex-row justify-between items-center gap-4 mt-auto">
-        <Price amount={price} currencyCode={currencyCode} className="text-lg" />
-        <AddToCartButton
-          variantId={firstVariant?.id ?? ""}
-          available={available}
-          color={selectedColor}
-          title={product.title}
-          icon
+      {/* ── Info ── */}
+      <div className="pt-2.5 px-0.5 flex items-baseline justify-between gap-2">
+        <Link
+          href={`/pages/products/${product.handle}`}
+          prefetch={false}
+          className="min-w-0"
+        >
+          <h3 className="font-display font-medium text-primary text-sm leading-snug line-clamp-1 hover:text-accent transition-colors duration-200">
+            {product.title}
+          </h3>
+        </Link>
+        <Price
+          amount={price}
+          currencyCode={currencyCode}
+          className="text-sm shrink-0 text-muted tabular-nums"
         />
       </div>
     </div>
