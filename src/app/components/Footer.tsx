@@ -8,7 +8,7 @@ import { shopDetails } from "../global";
 const Footer = () => {
   const [t] = useTranslation();
   return (
-    <footer className="bg-background border-t border-gray-300 px-16 text-gray-700 py-12 flex mx-auto items-center justify-center">
+    <footer className="bg-charcoal border-t border-gray-300 px-16 text-gray-700 py-12 flex mx-auto items-center justify-center">
       <div className="container mx-auhref px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Branding */}
