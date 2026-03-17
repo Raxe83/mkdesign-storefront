@@ -24,10 +24,12 @@ module.exports = {
         rust: "var(--color-rust)",
         "rust-light": "var(--color-rust-light)",
         stone: "var(--color-stone)",
+        rustLight: "var(--rust-light)",
+        rustMid: "var(--rust-mid)",
       },
       keyframes: {
         "gift-in": {
-          "0%":   { opacity: "0", transform: "translateY(12px)" },
+          "0%": { opacity: "0", transform: "translateY(12px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
       },

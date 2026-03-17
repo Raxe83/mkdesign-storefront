@@ -58,7 +58,7 @@ function HeroTitle({ html }: { html: string }) {
         "font-display font-bold leading-[1.08] tracking-tight",
         "text-[clamp(2.6rem,5vw,4.2rem)] text-white mb-6",
         // <em> innerhalb des Titels: gold + kursiv
-        "[&_em]:text-gold [&_em]:not-italic [&_em]:italic",
+        "[&_em]:text-gold [&_em]:italic",
       )}
       dangerouslySetInnerHTML={{ __html: titleFirstPart + " <em>" + titleLastWord + "</em>" }}
     />
@@ -157,8 +157,10 @@ export function Hero({
             className="object-cover saturate-[0.85]"
           />
 
-          {/* Stimmungs-Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-rust/10 to-transparent pointer-events-none" />
+          {/* Warmer Cream-Tint – gibt dem Bild den warmen Marken-Ton */}
+          <div className="absolute inset-0 bg-cream/20 pointer-events-none" />
+          {/* Stimmungs-Gradient – rust-Akzent oben links, leichtes Vignette unten */}
+          <div className="absolute inset-0 bg-gradient-to-br from-rust/20 via-transparent to-charcoal/25 pointer-events-none" />
 
           {/* Stat Strip */}
           {stats && stats.length > 0 && <HeroStatStrip stats={stats} />}

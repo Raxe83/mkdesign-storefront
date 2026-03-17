@@ -40,7 +40,7 @@ const CartPopup = () => {
   const total = subtotal;
 
   return (
-    <div className="absolute top-full right-4 mt-2 max-w-xl bg-white rounded-md shadow-lg z-50 p-4">
+    <div className="absolute top-16 right-8 mt-2 max-w-xl bg-white rounded-md shadow-lg z-50 p-4">
       <div className="p-3 border-b  border-gray-200 flex justify-between items-center">
         <h3 className="font-medium text-sm">{t("cart.header")}</h3>
         <button

@@ -57,7 +57,7 @@ export default function RootLayout({
             <Header />
             {/* Main Content */}
             {/* Center the content and make sure it looks modern and responsive */}
-            <div>{children}</div>
+            <div className="pt-16 min-h-screen">{children}</div>
             <Footer />
             {/* Cookie Consent */}
             <CookieConsent />

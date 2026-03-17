@@ -14,13 +14,14 @@ const JoinUs = () => {
       <div className="container px-4 sm:px-6">
         <div className="mx-auto max-w-[800px] text-center">
           <h2 className="font-display text-[clamp(1.75rem,4vw,2.5rem)] font-semibold tracking-tight">
-            {recolorText({
-              text: "Abonniere meinen Newsletter",
+            {/* {recolorText({
+              text: "Nichts verpassen",
               wordsToRecolor: 1,
               styleVariant: "firestorm",
-            })}
+            })} */}
+            Nichts verpassen
           </h2>
-          <p className="mt-2 text-muted-foreground">{t("joinUs.desc")}</p>
+          <p className="mt-2 text-muted-foreground">Neue Produkte, Rabattcodes & Angebote direkt in Euer Postfach.</p>
           <div className="max-w-lg mx-auto mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center ">
             <Input
               id="email"

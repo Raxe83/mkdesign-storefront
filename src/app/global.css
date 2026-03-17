@@ -16,10 +16,12 @@
     --color-cream: #f5f0e8; /* zinc-50 */
     --color-gold: #c89b3c; /* emerald-400 */
     --color-background: #f7f5ed;
-    --color-background-transparent: rgba(245, 243, 232, 0.863);
-    --color-rust: #b85c2a;       /* terracotta / warm rust */
+    --color-background-transparent: rgba(245, 243, 232, 0.904);
+    --color-rust: #b85c2a; /* terracotta / warm rust */
     --color-rust-light: #f8ede7; /* tinted rust background */
-    --color-stone: #78716c;      /* warm gray (stone-500) */
+    --color-stone: #78716c; /* warm gray (stone-500) */
+    --rust-light: #f0e8e0;
+    --rust-mid: #d4652b;
 
     --serif: "Playfair Display", Georgia, serif;
     --sans: "DM Sans", system-ui, sans-serif;
@@ -38,7 +40,7 @@
 
   body {
     @apply font-body text-primary bg-white dark:bg-zinc-950;
-     font-family: var(--sans);
+    font-family: var(--sans);
   }
 
   h1,

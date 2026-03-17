@@ -17,6 +17,9 @@ import { shopDetails } from "./global";
 import HeroHighlight from "./components/HeroHighlight";
 import GiftFinder from "./components/Giftfinder ";
 import Skeleton from "./components/ui/Skeleton";
+import Firehighlight from "./components/Firehighlight";
+import { Personalization } from "./components/Personalization";
+import { Reviews } from "./components/Reviews";
 
 const HomePage = () => {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
@@ -56,6 +59,24 @@ const HomePage = () => {
           src: require("./img/Ornate Fire Pits.png").default,
           alt: "",
         }}
+        ctas={[
+          {
+            label: "Produkte entdecken",
+            href: "/pages/products",
+            variant: "primary",
+          },
+          {
+            label: "Alle Kategorien",
+            href: "/pages/categories",
+            variant: "outline",
+          },
+        ]}
+        stats={[
+          { value: "874+", label: "Bewertungen" },
+          { value: "4.9★", label: "Bewertung" },
+          { value: "25+", label: "Kategorien" },
+          { value: "100%", label: "Handarbeit" },
+        ]}
       />
       <HeroHighlight />
 
@@ -71,7 +92,20 @@ const HomePage = () => {
         <ProductsList featuredProducts={featuredProducts} />
       )}
 
+      <Firehighlight
+        image={{
+          src: require("./img/stehtisch.jpg").default,
+          alt: "Feuertonne",
+        }}
+      />
       <GiftFinder />
+      <Personalization
+        image={{
+          src: require("./img/Ornate Fire Pits.png").default,
+          alt: "",
+        }}
+      />
+      <Reviews />
       <JoinUs />
     </div>
   );
