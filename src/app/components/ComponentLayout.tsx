@@ -9,7 +9,7 @@ function ComponentLayout({
   className?: string;
 }) {
   return (
-    <div className={cn("px-32 flex-1 w-full h-full", className)}>
+    <div className={cn("px-4 sm:px-6 lg:px-[5vw] flex-1 w-full h-full", className)}>
       {children}
     </div>
   );

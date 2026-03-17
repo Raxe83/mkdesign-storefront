@@ -183,7 +183,7 @@ const ProductsList = ({
 
       {/* ── Mobile: horizontal scroll ── */}
       <div className="md:hidden">
-        <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide -mx-4 px-4">
+        <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide -mx-4 sm:-mx-6 px-4 sm:px-6">
           {products.map((product, i) => (
             <motion.div
               key={product.id}

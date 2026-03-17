@@ -80,8 +80,8 @@ const ProductCard = ({ product, isLoading = false }: ProductCardProps) => {
           </div>
         )}
 
-        {/* Add-to-cart — slides up on hover */}
-        <div className="absolute bottom-0 left-0 right-0 p-2.5 z-10 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out">
+        {/* Add-to-cart — always visible on mobile, slides up on desktop hover */}
+        <div className="absolute bottom-0 left-0 right-0 p-2.5 z-10 md:translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out">
           <AddToCartButton
             variantId={firstVariant?.id ?? ""}
             available={available}

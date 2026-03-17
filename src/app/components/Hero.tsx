@@ -119,12 +119,12 @@ export function Hero({
     <ComponentLayout className="relative overflow-hidden  bg-charcoal">
       <section
         className={cn(
-          "grid grid-cols-1 lg:grid-cols-2 min-h-[85vh]",
+          "grid grid-cols-1 lg:grid-cols-2 lg:min-h-[85vh]",
           className,
         )}
       >
         {/* ── Left: Content ── */}
-        <div className="relative flex flex-col justify-end py-16 lg:px-[5vw]">
+        <div className="relative flex flex-col justify-end py-10 sm:py-14 lg:py-16 lg:px-[5vw]">
           {/* Staggered fade-up animations via Tailwind arbitrary animations */}
           <div className="animate-hero-in">
             {eyebrow && <HeroEyebrow>{eyebrow}</HeroEyebrow>}
@@ -147,7 +147,7 @@ export function Hero({
           </div>
         </div>
         {/* ── Right: Image ── */}
-        <div className="relative overflow-hidden bg-rust-light min-h-[50vw] lg:min-h-0">
+        <div className="relative overflow-hidden bg-rust-light min-h-[60vw] sm:min-h-[45vw] lg:min-h-0">
           <Image
             src={image.src}
             alt={image.alt}

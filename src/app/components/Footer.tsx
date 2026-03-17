@@ -9,7 +9,7 @@ const Footer = () => {
   const [t] = useTranslation();
   return (
     // bg-[#18181b] sorgt für den exakten Charcoal-Farbton
-    <footer className="bg-[#18181b] border-t border-gray-800 px-16 text-gray-400 py-12 flex mx-auto items-center justify-center">
+    <footer className="bg-[#18181b] border-t border-gray-800 text-gray-400 py-12 flex mx-auto items-center justify-center">
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           

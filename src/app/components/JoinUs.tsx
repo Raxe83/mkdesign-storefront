@@ -11,9 +11,9 @@ const JoinUs = () => {
   const [t] = useTranslation();
   return (
     <section className="bg-background py-12 md:py-16 lg:py-20">
-      <div className="container">
+      <div className="container px-4 sm:px-6">
         <div className="mx-auto max-w-[800px] text-center">
-          <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">
+          <h2 className="font-display text-[clamp(1.75rem,4vw,2.5rem)] font-semibold tracking-tight">
             {recolorText({
               text: "Abonniere meinen Newsletter",
               wordsToRecolor: 1,
