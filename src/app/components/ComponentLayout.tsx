@@ -11,7 +11,7 @@ function ComponentLayout({
   return (
     <div
       className={cn(
-        "px-6 md:px-10 lg:px-32 mx-auto flex-1",
+        "max-w-screen-xl mx-auto px-6 md:px-10 lg:px-16",
         className,
       )}
     >

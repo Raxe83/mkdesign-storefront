@@ -7,7 +7,6 @@ import ProductCard from "./ProductCard";
 import type { Product } from "@/app/types/shopify";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
-import ComponentLayout from "@/app/components/ComponentLayout";
 import { cn } from "@/app/utils/utils";
 
 // ─── Animation variants ────────────────────────────────────────────────────────
@@ -79,7 +78,8 @@ const ProductsList = ({
   const canNext = page < totalPages - 1;
 
   return (
-    <ComponentLayout className="py-8 sm:py-12 lg:py-16">
+    <div className="w-full">
+    <div className="max-w-screen-xl mx-auto px-6 md:px-10 lg:px-16 py-8 sm:py-12 lg:py-16">
       {/* ── Section header ── */}
       <div className="flex items-end justify-between mb-8 sm:mb-10">
         <div className="max-w-lg">
@@ -207,7 +207,8 @@ const ProductsList = ({
           <ArrowRight size={14} />
         </Link>
       </div>
-    </ComponentLayout>
+    </div>
+    </div>
   );
 };
 

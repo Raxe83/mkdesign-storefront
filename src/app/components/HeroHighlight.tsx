@@ -1,19 +1,14 @@
-import { CirclePlay, Mail, Play, Star, Truck } from "lucide-react";
-import { title } from "process";
-import React from "react";
-import ComponentLayout from "./ComponentLayout";
+import { CirclePlay, Mail, Star, Truck } from "lucide-react";
 
 const items = [
   {
     title: "Handarbeit",
-    description:
-      "Jedes Produkt wird von Markus persönlich in Handarbeit gefertigt",
+    description: "Jedes Produkt wird von Markus persönlich in Handarbeit gefertigt",
     icon: CirclePlay,
   },
   {
     title: "Wunschmotiv",
-    description:
-      "Euer eigenes Motiv oder Gravur auf fast allen Produkten möglich",
+    description: "Euer eigenes Motiv oder Gravur auf fast allen Produkten möglich",
     icon: Mail,
   },
   {
@@ -30,26 +25,26 @@ const items = [
 
 function HeroHighlight() {
   return (
-    <ComponentLayout className="relative overflow-hidden bg-charcoal">
-      <div className="container mx-auto py-8 md:py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
+    <div className="w-full bg-charcoal border-b border-white/[0.06]">
+      <div className="max-w-screen-xl mx-auto px-6 md:px-10 lg:px-16 py-10 md:py-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {items.map((item, index) => (
             <div
               key={index}
-              className="bg-gray-500/30 rounded-lg shadow p-5 md:p-6 flex sm:flex-col items-center sm:text-center gap-4 sm:gap-0"
+              className="flex items-start gap-4 px-5 py-5 rounded-sm border border-white/[0.08] bg-white/[0.03]"
             >
-              <item.icon className="shrink-0 sm:mx-auto sm:mb-4 text-accent w-8 h-8 md:w-10 md:h-10" />
+              <div className="w-9 h-9 rounded-sm bg-rust/15 flex items-center justify-center shrink-0">
+                <item.icon className="text-rust w-4 h-4" />
+              </div>
               <div>
-                <h3 className="text-base md:text-xl font-semibold mb-1 sm:mb-2 text-white">
-                  {item.title}
-                </h3>
-                <p className="text-sm md:text-base text-gray-500">{item.description}</p>
+                <h3 className="text-sm font-medium text-white mb-1">{item.title}</h3>
+                <p className="text-xs text-white/45 leading-relaxed">{item.description}</p>
               </div>
             </div>
           ))}
         </div>
       </div>
-    </ComponentLayout>
+    </div>
   );
 }
 

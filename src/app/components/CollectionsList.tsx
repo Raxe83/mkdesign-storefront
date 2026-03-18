@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "../utils/utils";
-import ComponentLayout from "./ComponentLayout";
 
 // ─── Shopify Types ─────────────────────────────────────────────────────────────
 // Spiegelt die Storefront API Collection-Felder wider.
@@ -199,7 +198,8 @@ export function CategoryGrid({
   if (orderedCards.length === 0) return null;
 
   return (
-    <ComponentLayout className={cn("py-8 sm:py-12 lg:py-16", className)}>
+    <div className={cn("w-full", className)}>
+    <div className="max-w-screen-xl mx-auto px-6 md:px-10 lg:px-16 py-8 sm:py-12 lg:py-16">
       {/* Section Header */}
       <div className="max-w-lg mb-10">
         <span className="block mb-2 text-xs font-medium tracking-[0.15em] uppercase text-rust">
@@ -237,7 +237,8 @@ export function CategoryGrid({
           />
         ))}
       </div>
-    </ComponentLayout>
+    </div>
+    </div>
   );
 }
 

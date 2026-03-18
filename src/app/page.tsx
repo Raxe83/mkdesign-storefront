@@ -56,7 +56,7 @@ const HomePage = () => {
           "Personalisierte Produkte in Handarbeit gefertigt – von Feuertonnen über Schmuck bis hin zu Schieferuhren. Direkt aus Bleckede an Euch."
         }
         image={{
-          src: require("./img/stehtisch_nice.jpeg").default,
+          src: require("./img/feuertonne_nice.jpeg").default,
           alt: "",
         }}
         ctas={[
@@ -94,7 +94,7 @@ const HomePage = () => {
 
       <Firehighlight
         image={{
-          src: require("./img/stehtisch.jpg").default,
+          src: require("./img/stehtisch_nice.jpeg").default,
           alt: "Feuertonne",
         }}
       />

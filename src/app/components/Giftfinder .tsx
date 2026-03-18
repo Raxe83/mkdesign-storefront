@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { cn } from "../utils/utils";
-import ComponentLayout from "./ComponentLayout";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -239,7 +238,8 @@ export function GiftFinder({
   className,
 }: GiftFinderProps) {
   return (
-    <ComponentLayout className={cn("py-16 lg:py-24", className)}>
+    <div className={cn("w-full", className)}>
+    <div className="max-w-screen-xl mx-auto px-6 md:px-10 lg:px-16 py-16 lg:py-24">
       {/* Header */}
       <div className="max-w-xl mb-10">
         <span className="block mb-2 text-xs font-medium tracking-[0.15em] uppercase text-rust">
@@ -262,7 +262,8 @@ export function GiftFinder({
           <GiftCardItem key={card.id} card={card} index={index} />
         ))}
       </div>
-    </ComponentLayout>
+    </div>
+    </div>
   );
 }
 
