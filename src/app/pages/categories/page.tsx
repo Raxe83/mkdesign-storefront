@@ -7,6 +7,7 @@ import { Search, X } from "lucide-react";
 import { getProducts } from "../../services/shopify";
 import type { Product } from "../../types/shopify";
 import PageHeader from "../../components/PageHeader";
+import Skeleton from "../../components/ui/Skeleton";
 
 interface CategoryItem {
   type: string;
@@ -145,8 +146,17 @@ const CategoriesPage = () => {
         </div>
       </PageHeader>
 
+      {/* Loading */}
+      {isLoading && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 lg:gap-6">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <Skeleton.CategoryCard key={i} />
+          ))}
+        </div>
+      )}
+
       {/* Empty */}
-      {filtered.length === 0 && (
+      {!isLoading && filtered.length === 0 && (
         <div className="text-center py-20">
           <p className="font-display text-lg text-primary mb-1">Keine Kategorien gefunden</p>
           <p className="text-sm text-muted mb-5">Versuche einen anderen Suchbegriff.</p>
@@ -160,7 +170,7 @@ const CategoriesPage = () => {
       )}
 
       {/* Grid */}
-      {filtered.length > 0 && (
+      {!isLoading && filtered.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 lg:gap-6">
           {filtered.map((item) => (
             <CategoryCard

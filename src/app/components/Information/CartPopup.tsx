@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { ShoppingBag, Trash2, Truck, X } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import { formatPrice } from "../../utils/formatPrice";
@@ -17,6 +18,13 @@ const CartPopup = () => {
     setShowCartPopup,
   } = useCart();
   const [t] = useTranslation();
+
+  useEffect(() => {
+    if (!showCartPopup) return;
+    const onScroll = () => setShowCartPopup(false);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [showCartPopup, setShowCartPopup]);
 
   if (!showCartPopup) return null;
 

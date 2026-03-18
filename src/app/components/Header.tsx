@@ -51,9 +51,18 @@ const useNavItems = () => {
 const Header = () => {
   const { itemCount } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const [t] = useTranslation();
   const pathname = usePathname();
   const navItems = useNavItems();
+
+  // Shrink header on scroll
+  useEffect(() => {
+    const handler = () => setScrolled(window.scrollY > 12);
+    handler();
+    window.addEventListener("scroll", handler, { passive: true });
+    return () => window.removeEventListener("scroll", handler);
+  }, []);
 
   // Close on resize to desktop
   useEffect(() => {
@@ -75,8 +84,11 @@ const Header = () => {
   return (
     <>
       {/* Header ist immer ganz oben — z-[9999] schlägt alle Dropdowns & Popups */}
-      <header className="fixed top-0 left-0 w-full z-[9999] bg-backgroundTransparent dark:bg-zinc-950/95 backdrop-blur-sm border-b border-zinc-200/60 dark:border-zinc-800">
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 h-16 flex items-center relative">
+      <header className="fixed top-0 left-0 w-full z-[9999] bg-backgroundTransparent dark:bg-zinc-950/95 backdrop-blur-sm border-b border-zinc-200/60 dark:border-zinc-800 transition-all duration-300">
+        <div className={cn(
+          "max-w-screen-xl mx-auto px-4 sm:px-6 flex items-center relative transition-all duration-300",
+          scrolled ? "h-14" : "h-20"
+        )}>
           {/* ── Links: Burger (mobile) / Nav (desktop) ── */}
           <div className="flex items-center gap-1">
             {/* Burger — mobile */}
@@ -110,6 +122,10 @@ const Header = () => {
               alt={shopDetails.shopname}
               width={160}
               height={160}
+              className={cn(
+                "transition-all duration-300",
+                scrolled ? "w-32" : "w-40"
+              )}
             />
           </Link>
 
@@ -157,7 +173,8 @@ const Header = () => {
       {/* Backdrop — unter dem Header (z-[9998] < z-[9999]) */}
       <div
         className={cn(
-          "fixed inset-x-0 bottom-0 top-16 z-[9998] bg-black/50 lg:hidden transition-opacity duration-300",
+          "fixed inset-x-0 bottom-0 z-[9998] bg-black/50 lg:hidden transition-all duration-300",
+          scrolled ? "top-14" : "top-20",
           isMenuOpen
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none",
@@ -172,10 +189,11 @@ const Header = () => {
         aria-modal="true"
         aria-label="Navigation"
         className={cn(
-          "fixed top-16 left-0 bottom-0 z-[9998] w-[80vw] max-w-[320px] lg:hidden",
+          "fixed left-0 bottom-0 z-[9998] w-[80vw] max-w-[320px] lg:hidden",
+          scrolled ? "top-14" : "top-20",
           "bg-cream dark:bg-zinc-900 shadow-2xl",
           "flex flex-col",
-          "transition-transform duration-300 ease-out",
+          "transition-all duration-300 ease-out",
         )}
         style={{ transform: isMenuOpen ? "translateX(0)" : "translateX(-100%)" }}
       >

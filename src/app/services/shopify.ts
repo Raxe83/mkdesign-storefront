@@ -323,16 +323,21 @@ export async function getCollections(first = 6, locale?: string): Promise<Shopif
   return response.collections.edges.map((edge) => edge.node)
 }
 
-// Get products by collection mit optionaler Sprachunterstützung
+// Get products by collection mit optionaler Sprachunterstützung und vollständiger Pagination
 export async function getProductsByCollection(
   collectionHandle: string,
-  first = 20,
+  first?: number,
   locale?: string,
 ): Promise<Product[]> {
+  const BATCH = 250
   const query = `
-    query getProductsByCollection($handle: String!, $first: Int!) {
+    query getProductsByCollection($handle: String!, $first: Int!, $after: String) {
       collection(handle: $handle) {
-        products(first: $first) {
+        products(first: $first, after: $after) {
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
           edges {
             node {
               id
@@ -380,19 +385,36 @@ export async function getProductsByCollection(
     }
   `
 
-  const response = await shopifyFetch<{
-    collection: { products: { edges: Array<{ node: Product }> } } | null
-  }>({
-    query,
-    variables: { handle: collectionHandle, first },
-    locale, // Übergebe locale nur, wenn es angegeben wurde
-  })
+  const all: Product[] = []
+  let cursor: string | null = null
+  let hasNextPage = true
 
-  if (!response.collection) {
-    return []
+  while (hasNextPage) {
+    const limit = first ? Math.min(BATCH, first - all.length) : BATCH
+
+    const response = await shopifyFetch<{
+      collection: {
+        products: {
+          pageInfo: { hasNextPage: boolean; endCursor: string }
+          edges: Array<{ node: Product }>
+        }
+      } | null
+    }>({
+      query,
+      variables: { handle: collectionHandle, first: limit, after: cursor ?? undefined },
+      locale,
+    })
+
+    if (!response.collection) return []
+
+    const { edges, pageInfo } = response.collection.products
+    all.push(...edges.map((e) => e.node))
+
+    hasNextPage = pageInfo.hasNextPage && (first === undefined || all.length < first)
+    cursor = pageInfo.endCursor
   }
 
-  return response.collection.products.edges.map((edge) => edge.node)
+  return all
 }
 
 // Empfohlene Produkte abrufen mit optionaler Sprachunterstützung

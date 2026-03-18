@@ -11,7 +11,6 @@ import ProductCard from "../../components/product/ProductCard";
 import FilterDropdown from "../../components/product/FilterDropdown";
 import ProductPagination from "../../components/product/ProductPagination";
 import Skeleton from "../../components/ui/Skeleton";
-import { Loader } from "../../components/Loader";
 import PageHeader from "../../components/PageHeader";
 import i18n from "../../i18n";
 
@@ -43,8 +42,8 @@ const ProductsPageContent = () => {
         setError(null);
         const locale = i18n.language;
         const fetched = collectionHandle
-          ? await getProductsByCollection(collectionHandle, 250)
-          : await getProducts(250, locale);
+          ? await getProductsByCollection(collectionHandle, undefined, locale)
+          : await getProducts(undefined, locale);
         setAllProducts(fetched);
       } catch {
         setError(t("product.loadError"));
@@ -146,7 +145,10 @@ const ProductsPageContent = () => {
           <ProductPagination
             page={filter.page}
             totalPages={filter.totalPages}
+            totalFiltered={filter.filtered.length}
+            pageSize={filter.pageSize}
             goToPage={filter.goToPage}
+            setPageSize={filter.setPageSize}
           />
         </>
       )}
@@ -154,8 +156,18 @@ const ProductsPageContent = () => {
   );
 };
 
+const ProductsPageFallback = () => (
+  <div className="pb-12">
+    <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+      {Array.from({ length: PRODUCTS_PER_PAGE }).map((_, i) => (
+        <Skeleton.Card key={i} />
+      ))}
+    </div>
+  </div>
+);
+
 const ProductsPage = () => (
-  <Suspense fallback={<Loader />}>
+  <Suspense fallback={<ProductsPageFallback />}>
     <ProductsPageContent />
   </Suspense>
 );

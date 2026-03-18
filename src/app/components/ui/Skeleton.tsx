@@ -84,7 +84,19 @@ const SkeletonProductsGrid = () => (
   </ComponentLayout>
 );
 
+// ─── Category card skeleton (matches CategoryCard aspect-[3/4]) ───────────────
+
+const SkeletonCategoryCard = () => (
+  <div className="aspect-[3/4] w-full rounded animate-pulse bg-zinc-200 dark:bg-zinc-800 relative overflow-hidden">
+    <div className="absolute bottom-0 left-0 right-0 p-4 space-y-1.5">
+      <Skeleton className="h-4 w-2/3" />
+      <Skeleton className="h-3 w-1/3" />
+    </div>
+  </div>
+);
+
 Skeleton.Card = SkeletonCard;
+Skeleton.CategoryCard = SkeletonCategoryCard;
 Skeleton.CollectionsGrid = SkeletonCollectionsGrid;
 Skeleton.ProductsGrid = SkeletonProductsGrid;
 

@@ -13,7 +13,9 @@ export const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: "title-asc", label: "Name A–Z" },
 ];
 
-export const PRODUCTS_PER_PAGE = 12;
+export const PRODUCTS_PER_PAGE = 30;
+export const PAGE_SIZE_OPTIONS = [15, 30, 40] as const;
+export type PageSizeOption = (typeof PAGE_SIZE_OPTIONS)[number];
 
 export interface ProductFilterResult {
   // state
@@ -24,6 +26,7 @@ export interface ProductFilterResult {
   priceMin: string;
   priceMax: string;
   page: number;
+  pageSize: PageSizeOption;
   // derived
   allProductTypes: string[];
   filtered: Product[];
@@ -38,6 +41,7 @@ export interface ProductFilterResult {
   setSelectedTypes: (v: Set<string> | ((p: Set<string>) => Set<string>)) => void;
   setPriceMin: (v: string) => void;
   setPriceMax: (v: string) => void;
+  setPageSize: (v: PageSizeOption) => void;
   clearFilters: () => void;
   toggleType: (type: string) => void;
   goToPage: (n: number) => void;
@@ -56,10 +60,11 @@ export function useProductFilter(
   const [priceMin, setPriceMin] = useState("");
   const [priceMax, setPriceMax] = useState("");
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<PageSizeOption>(PRODUCTS_PER_PAGE);
 
   useEffect(() => {
     setPage(1);
-  }, [search, sort, onlyAvailable, selectedTypes, priceMin, priceMax]);
+  }, [search, sort, onlyAvailable, selectedTypes, priceMin, priceMax, pageSize]);
 
   const allProductTypes = useMemo(() => {
     const set = new Set<string>();
@@ -132,10 +137,10 @@ export function useProductFilter(
     return list;
   }, [allProducts, search, sort, onlyAvailable, selectedTypes, priceMin, priceMax]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PRODUCTS_PER_PAGE));
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const paginated = filtered.slice(
-    (page - 1) * PRODUCTS_PER_PAGE,
-    page * PRODUCTS_PER_PAGE
+    (page - 1) * pageSize,
+    page * pageSize
   );
 
   const hasActiveFilters =
@@ -176,9 +181,9 @@ export function useProductFilter(
   };
 
   return {
-    search, sort, onlyAvailable, selectedTypes, priceMin, priceMax, page,
+    search, sort, onlyAvailable, selectedTypes, priceMin, priceMax, page, pageSize,
     allProductTypes, filtered, paginated, totalPages, hasActiveFilters, activeFilterCount,
-    setSearch, setSort, setOnlyAvailable, setSelectedTypes, setPriceMin, setPriceMax,
+    setSearch, setSort, setOnlyAvailable, setSelectedTypes, setPriceMin, setPriceMax, setPageSize,
     clearFilters, toggleType, goToPage,
   };
 }
