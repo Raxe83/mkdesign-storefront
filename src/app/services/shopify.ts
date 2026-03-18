@@ -1,8 +1,9 @@
-import { ShopifyCollection } from "../components/CollectionsList"
-import type { Cart, Product } from "../types/shopify"
+import { ShopifyCollection } from "../components/CollectionsList";
+import type { Cart, Product } from "../types/shopify";
 
-const SHOPIFY_DOMAIN = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN
-const SHOPIFY_STOREFRONT_TOKEN = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN
+const SHOPIFY_DOMAIN = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN;
+const SHOPIFY_STOREFRONT_TOKEN =
+  process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN;
 
 // Hilfsfunktion für GraphQL-Anfragen
 async function shopifyFetch<T>({
@@ -10,9 +11,9 @@ async function shopifyFetch<T>({
   variables = {},
   locale,
 }: {
-  query: string
-  variables?: any
-  locale?: string
+  query: string;
+  variables?: any;
+  locale?: string;
 }): Promise<T> {
   // Füge locale zu variables hinzu, wenn es angegeben wurde
   const variablesWithLocale = locale
@@ -20,60 +21,69 @@ async function shopifyFetch<T>({
         ...variables,
         locale,
       }
-    : variables
+    : variables;
 
   try {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
       "X-Shopify-Storefront-Access-Token": SHOPIFY_STOREFRONT_TOKEN as string,
-    }
+    };
 
     // Füge Accept-Language nur hinzu, wenn locale angegeben wurde
     if (locale) {
-      headers["Accept-Language"] = locale
+      headers["Accept-Language"] = locale;
     }
 
-    const response = await fetch(`https://${SHOPIFY_DOMAIN}/api/2023-10/graphql.json`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ query, variables: variablesWithLocale }),
-    })
+    const response = await fetch(
+      `https://${SHOPIFY_DOMAIN}/api/2023-10/graphql.json`,
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ query, variables: variablesWithLocale }),
+      },
+    );
 
     if (!response.ok) {
-      const errorText = await response.text()
-      console.error("Shopify API error response:", errorText)
-      throw new Error(`HTTP error! Status: ${response.status}, Details: ${errorText}`)
+      const errorText = await response.text();
+      console.error("Shopify API error response:", errorText);
+      throw new Error(
+        `HTTP error! Status: ${response.status}, Details: ${errorText}`,
+      );
     }
 
-    const result = await response.json()
+    const result = await response.json();
     if (result.errors) {
-      console.error("GraphQL errors:", result.errors)
-      throw new Error(result.errors.map((e: any) => e.message).join("\n"))
+      console.error("GraphQL errors:", result.errors);
+      throw new Error(result.errors.map((e: any) => e.message).join("\n"));
     }
 
-    return result.data as T
+    return result.data as T;
   } catch (error) {
-    console.error("Error fetching from Shopify:", error)
-    throw error
+    console.error("Error fetching from Shopify:", error);
+    throw error;
   }
 }
 
-export const updateItemQuantity = async (cartId: string, lineId: string, quantity: number) => {
+export const updateItemQuantity = async (
+  cartId: string,
+  lineId: string,
+  quantity: number,
+) => {
   const response = await fetch(`/api/carts/${cartId}/lines/${lineId}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ quantity }), // Menge, die aktualisiert werden soll
-  })
+  });
 
   if (!response.ok) {
-    throw new Error("Failed to update item quantity")
+    throw new Error("Failed to update item quantity");
   }
 
-  const updatedCart = await response.json() // Nimm den aktualisierten Warenkorb
-  return updatedCart // Gib den neuen Warenkorb zurück
-}
+  const updatedCart = await response.json(); // Nimm den aktualisierten Warenkorb
+  return updatedCart; // Gib den neuen Warenkorb zurück
+};
 
 // Produkte abrufen mit optionaler Sprachunterstützung
 const PRODUCTS_QUERY = `
@@ -127,42 +137,47 @@ const PRODUCTS_QUERY = `
       }
     }
   }
-`
+`;
 
 type ProductsResponse = {
   products: {
-    pageInfo: { hasNextPage: boolean; endCursor: string }
-    edges: Array<{ node: Product }>
-  }
-}
+    pageInfo: { hasNextPage: boolean; endCursor: string };
+    edges: Array<{ node: Product }>;
+  };
+};
 
 // Shopify Storefront API erlaubt maximal 250 Produkte pro Request.
 // Bei mehr als 250 Produkten wird cursor-basierte Pagination verwendet.
-export async function getProducts(first?: number, locale?: string): Promise<Product[]> {
-  const BATCH = 250
-  const all: Product[] = []
-  let cursor: string | null = null
-  let hasNextPage = true
+export async function getProducts(
+  first?: number,
+  locale?: string,
+): Promise<Product[]> {
+  const BATCH = 250;
+  const all: Product[] = [];
+  let cursor: string | null = null;
+  let hasNextPage = true;
 
   while (hasNextPage) {
-    const limit = first ? Math.min(BATCH, first - all.length) : BATCH
+    const limit = first ? Math.min(BATCH, first - all.length) : BATCH;
 
     const response: ProductsResponse = await shopifyFetch<ProductsResponse>({
       query: PRODUCTS_QUERY,
       variables: { first: limit, after: cursor ?? undefined },
       locale,
-    })
+    });
 
-    const edges: Array<{ node: Product }> = response.products.edges
-    const pageInfo: { hasNextPage: boolean; endCursor: string } = response.products.pageInfo
+    const edges: Array<{ node: Product }> = response.products.edges;
+    const pageInfo: { hasNextPage: boolean; endCursor: string } =
+      response.products.pageInfo;
 
-    all.push(...edges.map((e) => e.node))
+    all.push(...edges.map((e) => e.node));
 
-    hasNextPage = pageInfo.hasNextPage && (first === undefined || all.length < first)
-    cursor = pageInfo.endCursor
+    hasNextPage =
+      pageInfo.hasNextPage && (first === undefined || all.length < first);
+    cursor = pageInfo.endCursor;
   }
 
-  return all
+  return all;
 }
 
 export const fetchBlogPost = async (locale?: string) => {
@@ -181,7 +196,7 @@ export const fetchBlogPost = async (locale?: string) => {
         }
       }
     }
-  `
+  `;
 
   try {
     // Aufruf von shopifyFetch, um Blog-Daten abzurufen
@@ -190,31 +205,34 @@ export const fetchBlogPost = async (locale?: string) => {
         articles: {
           edges: {
             node: {
-              title: string
-              content: string
-              tags: string[]
-            }
-          }[]
-        }
-      }
+              title: string;
+              content: string;
+              tags: string[];
+            };
+          }[];
+        };
+      };
     }>({
       query,
       locale, // Übergebe locale nur, wenn es angegeben wurde
-    })
+    });
 
     // Erfolgreiche Antwort
     if (data.blog) {
-      return data.blog.articles.edges
+      return data.blog.articles.edges;
     } else {
-      console.log("Keine Blog-Daten gefunden")
+      console.log("Keine Blog-Daten gefunden");
     }
   } catch (error) {
-    console.error("Fehler beim Abrufen der Blog-Artikel:", error)
+    console.error("Fehler beim Abrufen der Blog-Artikel:", error);
   }
-}
+};
 
 // Produkt nach Handle abrufen mit optionaler Sprachunterstützung
-export async function getProductByHandle(handle: string, locale?: string): Promise<Product | null> {
+export async function getProductByHandle(
+  handle: string,
+  locale?: string,
+): Promise<Product | null> {
   const query = `
     query getProductByHandle($handle: String!) {
       productByHandle(handle: $handle) {
@@ -256,24 +274,27 @@ export async function getProductByHandle(handle: string, locale?: string): Promi
         }
       }
     }
-  `
+  `;
 
   try {
     const response = await shopifyFetch<{ productByHandle: Product | null }>({
       query,
       variables: { handle },
       locale, // Übergebe locale nur, wenn es angegeben wurde
-    })
+    });
 
-    return response.productByHandle
+    return response.productByHandle;
   } catch (error) {
-    console.error("Error in getProductByHandle:", error)
-    throw error
+    console.error("Error in getProductByHandle:", error);
+    throw error;
   }
 }
 
 // Kollektionen abrufen mit optionaler Sprachunterstützung
-export async function getCollections(first = 6, locale?: string): Promise<ShopifyCollection[]> {
+export async function getCollections(
+  first = 6,
+  locale?: string,
+): Promise<ShopifyCollection[]> {
   const query = `
     query getCollections($first: Int!) {
       collections(first: $first) {
@@ -310,17 +331,17 @@ export async function getCollections(first = 6, locale?: string): Promise<Shopif
         }
       }
     }
-  `
+  `;
 
   const response = await shopifyFetch<{
-    collections: { edges: Array<{ node: ShopifyCollection }> }
+    collections: { edges: Array<{ node: ShopifyCollection }> };
   }>({
     query,
     variables: { first },
     locale, // Übergebe locale nur, wenn es angegeben wurde
-  })
+  });
 
-  return response.collections.edges.map((edge) => edge.node)
+  return response.collections.edges.map((edge) => edge.node);
 }
 
 // Get products by collection mit optionaler Sprachunterstützung und vollständiger Pagination
@@ -329,7 +350,7 @@ export async function getProductsByCollection(
   first?: number,
   locale?: string,
 ): Promise<Product[]> {
-  const BATCH = 250
+  const BATCH = 250;
   const query = `
     query getProductsByCollection($handle: String!, $first: Int!, $after: String) {
       collection(handle: $handle) {
@@ -383,45 +404,56 @@ export async function getProductsByCollection(
         }
       }
     }
-  `
+  `;
 
-  const all: Product[] = []
-  let cursor: string | null = null
-  let hasNextPage = true
+  type CollectionResponse = {
+    collection: {
+      products: {
+        pageInfo: { hasNextPage: boolean; endCursor: string };
+        edges: Array<{ node: Product }>;
+      };
+    } | null;
+  };
+
+  const all: Product[] = [];
+  let cursor: string | null = null;
+  let hasNextPage = true;
 
   while (hasNextPage) {
-    const limit = first ? Math.min(BATCH, first - all.length) : BATCH
+    const limit = first ? Math.min(BATCH, first - all.length) : BATCH;
 
-    const response = await shopifyFetch<{
-      collection: {
-        products: {
-          pageInfo: { hasNextPage: boolean; endCursor: string }
-          edges: Array<{ node: Product }>
-        }
-      } | null
-    }>({
+    const response: CollectionResponse = await shopifyFetch<CollectionResponse>({
       query,
-      variables: { handle: collectionHandle, first: limit, after: cursor ?? undefined },
+      variables: {
+        handle: collectionHandle,
+        first: limit,
+        after: cursor ?? undefined,
+      },
       locale,
-    })
+    });
 
-    if (!response.collection) return []
+    if (!response.collection) return [];
 
-    const { edges, pageInfo } = response.collection.products
-    all.push(...edges.map((e) => e.node))
+    const edges: Array<{ node: Product }> = response.collection.products.edges;
+    const pageInfo: { hasNextPage: boolean; endCursor: string } = response.collection.products.pageInfo;
+    all.push(...edges.map((e: { node: Product }) => e.node));
 
-    hasNextPage = pageInfo.hasNextPage && (first === undefined || all.length < first)
-    cursor = pageInfo.endCursor
+    hasNextPage =
+      pageInfo.hasNextPage && (first === undefined || all.length < first);
+    cursor = pageInfo.endCursor;
   }
 
-  return all
+  return all;
 }
 
 // Empfohlene Produkte abrufen mit optionaler Sprachunterstützung
-export async function getFeaturedProducts(first = 4, locale?: string): Promise<Product[]> {
+export async function getFeaturedProducts(
+  first = 4,
+  locale?: string,
+): Promise<Product[]> {
   // In einer realen App würdest du eine spezielle Kollektion für empfohlene Produkte haben
   // Hier verwenden wir einfach die ersten paar Produkte
-  return getProducts(first, locale)
+  return getProducts(first, locale);
 }
 
 // Warenkorb erstellen
@@ -470,12 +502,12 @@ export async function createCart(): Promise<Cart> {
         }
       }
     }
-  `
+  `;
 
   const response = await shopifyFetch<{ cartCreate: { cart: Cart } }>({
     query,
-  })
-  return response.cartCreate.cart
+  });
+  return response.cartCreate.cart;
 }
 
 export const addToCart = async (
@@ -518,7 +550,7 @@ export const addToCart = async (
         }
       }
     }
-  `
+  `;
 
   const variables = {
     cartId,
@@ -529,19 +561,22 @@ export const addToCart = async (
         attributes: customAttributes || [],
       },
     ],
-  }
+  };
 
   const data = await shopifyFetch<{ cartLinesAdd: { cart: Cart } }>({
     query,
     variables,
     locale, // Übergebe locale nur, wenn es angegeben wurde
-  })
+  });
 
-  return data.cartLinesAdd.cart
-}
+  return data.cartLinesAdd.cart;
+};
 
 // Warenkorb abrufen mit optionaler Sprachunterstützung
-export async function getCart(cartId: string, locale?: string): Promise<Cart | null> {
+export async function getCart(
+  cartId: string,
+  locale?: string,
+): Promise<Cart | null> {
   const query = `
     query getCart($cartId: ID!) {
       cart(id: $cartId) {
@@ -588,19 +623,24 @@ export async function getCart(cartId: string, locale?: string): Promise<Cart | n
         }
       }
     }
-  `
+  `;
 
   const response = await shopifyFetch<{ cart: Cart | null }>({
     query,
     variables: { cartId },
     locale, // Übergebe locale nur, wenn es angegeben wurde
-  })
+  });
 
-  return response.cart
+  return response.cart;
 }
 
 // Update cart item
-export async function updateCartItem(cartId: string, lineId: string, quantity: number, locale?: string): Promise<Cart> {
+export async function updateCartItem(
+  cartId: string,
+  lineId: string,
+  quantity: number,
+  locale?: string,
+): Promise<Cart> {
   const query = `
     mutation cartLinesUpdate($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
       cartLinesUpdate(cartId: $cartId, lines: $lines) {
@@ -645,7 +685,7 @@ export async function updateCartItem(cartId: string, lineId: string, quantity: n
         }
       }
     }
-  `
+  `;
 
   const variables = {
     cartId,
@@ -655,19 +695,23 @@ export async function updateCartItem(cartId: string, lineId: string, quantity: n
         quantity,
       },
     ],
-  }
+  };
 
   const response = await shopifyFetch<{ cartLinesUpdate: { cart: Cart } }>({
     query,
     variables,
     locale, // Übergebe locale nur, wenn es angegeben wurde
-  })
+  });
 
-  return response.cartLinesUpdate.cart
+  return response.cartLinesUpdate.cart;
 }
 
 // Remove cart item
-export async function removeCartItem(cartId: string, lineId: string, locale?: string): Promise<Cart> {
+export async function removeCartItem(
+  cartId: string,
+  lineId: string,
+  locale?: string,
+): Promise<Cart> {
   const query = `
     mutation cartLinesRemove($cartId: ID!, $lineIds: [ID!]!) {
       cartLinesRemove(cartId: $cartId, lineIds: $lineIds) {
@@ -712,18 +756,18 @@ export async function removeCartItem(cartId: string, lineId: string, locale?: st
         }
       }
     }
-  `
+  `;
 
   const variables = {
     cartId,
     lineIds: [lineId],
-  }
+  };
 
   const response = await shopifyFetch<{ cartLinesRemove: { cart: Cart } }>({
     query,
     variables,
     locale, // Übergebe locale nur, wenn es angegeben wurde
-  })
+  });
 
-  return response.cartLinesRemove.cart
+  return response.cartLinesRemove.cart;
 }
