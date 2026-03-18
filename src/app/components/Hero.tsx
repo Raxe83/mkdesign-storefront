@@ -60,7 +60,9 @@ function HeroTitle({ html }: { html: string }) {
         // <em> innerhalb des Titels: gold + kursiv
         "[&_em]:text-gold [&_em]:italic",
       )}
-      dangerouslySetInnerHTML={{ __html: titleFirstPart + " <em>" + titleLastWord + "</em>" }}
+      dangerouslySetInnerHTML={{
+        __html: titleFirstPart + " <em>" + titleLastWord + "</em>",
+      }}
     />
   );
 }
@@ -89,8 +91,8 @@ function HeroStatStrip({ stats }: { stats: HeroStat[] }) {
   return (
     <div className="absolute bottom-0 inset-x-0 bg-charcoal/75 backdrop-blur-md px-6 py-4">
       <div className="flex items-center justify-center gap-8 flex-wrap">
-        {stats.map((stat) => (
-          <div key={stat.label} className="text-center">
+        {stats.map((stat, i) => (
+          <div key={stat.label} className={cn("text-center", i === 3 && "hidden md:block")}>
             <p className="font-display font-bold text-[1.35rem] leading-none text-white">
               {stat.value}
             </p>

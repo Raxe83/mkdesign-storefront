@@ -58,7 +58,7 @@ const Header = () => {
   // Close on resize to desktop
   useEffect(() => {
     const handler = () => {
-      if (window.innerWidth >= 768) setIsMenuOpen(false);
+      if (window.innerWidth >= 1024) setIsMenuOpen(false);
     };
     window.addEventListener("resize", handler);
     return () => window.removeEventListener("resize", handler);
@@ -82,7 +82,7 @@ const Header = () => {
             {/* Burger — mobile */}
             <button
               onClick={() => setIsMenuOpen((v) => !v)}
-              className="md:hidden p-2.5 text-muted hover:text-primary transition-colors duration-200"
+              className="lg:hidden p-2.5 text-muted hover:text-primary transition-colors duration-200"
               aria-label={isMenuOpen ? "Menü schließen" : "Menü öffnen"}
               aria-expanded={isMenuOpen}
             >
@@ -90,7 +90,7 @@ const Header = () => {
             </button>
 
             {/* Desktop nav */}
-            <nav className="hidden md:flex">
+            <nav className="hidden lg:flex">
               <ul className="flex items-center gap-8">
                 <NavLink url="/" title={t("nav.home")} />
                 <NavLink url="/pages/products" title={t("nav.products")} />
@@ -116,7 +116,7 @@ const Header = () => {
           {/* ── Rechts: Cart ── */}
           <div className="flex items-center gap-1 ml-auto">
             {/* Cart — desktop */}
-            <div className="hidden md:block">
+            <div className="hidden lg:block">
               <ul>
                 <NavLink
                   url="/pages/cart"
@@ -138,7 +138,7 @@ const Header = () => {
             {/* Cart — mobile */}
             <Link
               href="/pages/cart"
-              className="md:hidden relative p-2.5 text-muted hover:text-primary transition-colors duration-200"
+              className="lg:hidden relative p-2.5 text-muted hover:text-primary transition-colors duration-200"
               aria-label="Warenkorb"
             >
               <ShoppingCart size={22} />
@@ -157,7 +157,7 @@ const Header = () => {
       {/* Backdrop — unter dem Header (z-[9998] < z-[9999]) */}
       <div
         className={cn(
-          "fixed inset-x-0 bottom-0 top-16 z-[9998] bg-black/50 md:hidden transition-opacity duration-300",
+          "fixed inset-x-0 bottom-0 top-16 z-[9998] bg-black/50 lg:hidden transition-opacity duration-300",
           isMenuOpen
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none",
@@ -172,16 +172,16 @@ const Header = () => {
         aria-modal="true"
         aria-label="Navigation"
         className={cn(
-          "fixed top-16 right-0 bottom-0 z-[9998] w-[80vw] max-w-[320px] md:hidden",
-          "bg-white dark:bg-zinc-950 shadow-2xl",
+          "fixed top-16 left-0 bottom-0 z-[9998] w-[80vw] max-w-[320px] lg:hidden",
+          "bg-cream dark:bg-zinc-900 shadow-2xl",
           "flex flex-col",
           "transition-transform duration-300 ease-out",
         )}
-        style={{ transform: isMenuOpen ? "translateX(0)" : "translateX(100%)" }}
+        style={{ transform: isMenuOpen ? "translateX(0)" : "translateX(-100%)" }}
       >
         {/* Close button row */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 shrink-0">
-          <span className="text-xs font-medium text-muted uppercase tracking-[0.1em]">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-sand/40 dark:border-zinc-800 shrink-0">
+          <span className="text-xs font-medium text-stone dark:text-muted uppercase tracking-[0.12em]">
             Navigation
           </span>
           <button
@@ -208,7 +208,7 @@ const Header = () => {
                       "text-base font-medium transition-colors duration-150",
                       isActive
                         ? "bg-rust/[.08] text-rust dark:bg-rust/15"
-                        : "text-charcoal dark:text-primary hover:bg-zinc-100 dark:hover:bg-zinc-900",
+                        : "text-charcoal dark:text-primary hover:bg-sand/30 dark:hover:bg-zinc-800",
                     )}
                   >
                     <span
@@ -230,7 +230,7 @@ const Header = () => {
           </ul>
 
           {/* Divider */}
-          <div className="my-4 mx-4 h-px bg-zinc-100 dark:bg-zinc-800" />
+          <div className="my-4 mx-4 h-px bg-sand/40 dark:bg-zinc-800" />
 
           {/* Cart */}
           <ul>
@@ -238,7 +238,7 @@ const Header = () => {
               <Link
                 href="/pages/cart"
                 onClick={() => setIsMenuOpen(false)}
-                className="flex items-center gap-3.5 px-4 py-4 rounded-sm text-base font-medium text-charcoal dark:text-primary hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors duration-150"
+                className="flex items-center gap-3.5 px-4 py-4 rounded-sm text-base font-medium text-charcoal dark:text-primary hover:bg-sand/30 dark:hover:bg-zinc-800 transition-colors duration-150"
               >
                 <span className="relative shrink-0 text-muted">
                   <ShoppingCart size={20} />
@@ -260,7 +260,7 @@ const Header = () => {
         </nav>
 
         {/* Drawer footer — language switcher */}
-        <div className="shrink-0 px-5 py-5 border-t border-zinc-100 dark:border-zinc-800">
+        <div className="shrink-0 px-5 py-5 border-t border-sand/40 dark:border-zinc-800">
           <LanguageSwitcher />
         </div>
       </div>

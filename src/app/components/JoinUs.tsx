@@ -30,7 +30,7 @@ const JoinUs = () => {
             />
           </div>
           <span className="max-w-lg mx-auto mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center">
-            <Button onClick={() => console.log("Subscribe")}>Abonniere</Button>
+            <Button onClick={() => console.log("Subscribe")}>Anmelden</Button>
           </span>
           <p className="mt-2 text-xs text-muted-foreground">
             {t("joinUs.agreement")}{" "}

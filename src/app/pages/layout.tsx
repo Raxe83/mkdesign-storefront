@@ -6,7 +6,7 @@ export default function PagesLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="pt-16 min-h-screen">
+    <div className="pt-16 min-h-screen overflow-x-hidden">
       <div className="max-w-screen-xl mx-auto px-6 md:px-10 lg:px-16">
         {children}
       </div>

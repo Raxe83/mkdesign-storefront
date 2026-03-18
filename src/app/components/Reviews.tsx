@@ -144,7 +144,7 @@ function ReviewCard({ review, index }: { review: Review; index: number }) {
         </div>
         <div className="text-right flex-shrink-0">
           {review.product && (
-            <p className="text-rust-mid text-[0.65rem] font-medium tracking-wide uppercase leading-tight mb-0.5">
+            <p className="text-rustMid text-[0.65rem] font-medium tracking-wide uppercase leading-tight mb-0.5">
               {review.product}
             </p>
           )}
@@ -225,7 +225,7 @@ export function Reviews({
             Mehr Bewertungen laden
           </button>
         )}
-        <Link
+        {/* <Link
           href={reviewsPageHref}
           className={cn(
             "px-8 py-3 rounded-sm",
@@ -235,8 +235,8 @@ export function Reviews({
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust focus-visible:ring-offset-2 focus-visible:ring-offset-charcoal",
           )}
         >
-          Alle {totalCount} Bewertungen ansehen
-        </Link>
+          <span>Alle {totalCount} Bewertungen ansehen</span>
+        </Link> */}
       </div>
     </ComponentLayout>
   );

@@ -12,6 +12,7 @@ import FilterDropdown from "../../components/product/FilterDropdown";
 import ProductPagination from "../../components/product/ProductPagination";
 import Skeleton from "../../components/ui/Skeleton";
 import { Loader } from "../../components/Loader";
+import PageHeader from "../../components/PageHeader";
 import i18n from "../../i18n";
 
 const ProductsPageContent = () => {
@@ -56,43 +57,45 @@ const ProductsPageContent = () => {
 
   return (
     <div className="pb-12">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="font-display text-3xl lg:text-4xl font-medium text-primary leading-tight">
-          {collectionHandle
-            ? `${t("common.collection")}: ${collectionHandle}`
-            : t("product.allProducts")}
-        </h1>
-        {!isLoading && (
-          <p className="mt-1.5 text-sm text-muted">
-            {filter.filtered.length}{" "}
-            {filter.filtered.length === 1 ? "Produkt" : "Produkte"}
-            {allProducts.length !== filter.filtered.length &&
-              ` von ${allProducts.length}`}
-          </p>
-        )}
-      </div>
-
-      {/* Filter bar */}
-      <FilterDropdown
-        search={filter.search}
-        sort={filter.sort}
-        onlyAvailable={filter.onlyAvailable}
-        selectedTypes={filter.selectedTypes}
-        priceMin={filter.priceMin}
-        priceMax={filter.priceMax}
-        allProductTypes={filter.allProductTypes}
-        hasActiveFilters={filter.hasActiveFilters}
-        activeFilterCount={filter.activeFilterCount}
-        setSearch={filter.setSearch}
-        setSort={filter.setSort}
-        setOnlyAvailable={filter.setOnlyAvailable}
-        setSelectedTypes={filter.setSelectedTypes}
-        setPriceMin={filter.setPriceMin}
-        setPriceMax={filter.setPriceMax}
-        clearFilters={filter.clearFilters}
-        toggleType={filter.toggleType}
-      />
+      <PageHeader
+        title={collectionHandle ?? t("product.allProducts")}
+        eyebrow={collectionHandle ? "Kollektion" : "Sortiment"}
+        breadcrumbs={
+          collectionHandle
+            ? [
+                { label: "Start", href: "/" },
+                { label: "Produkte", href: "/pages/products" },
+                { label: collectionHandle },
+              ]
+            : [{ label: "Start", href: "/" }, { label: "Produkte" }]
+        }
+        count={filter.filtered.length}
+        totalCount={allProducts.length}
+        singularLabel="Produkt"
+        pluralLabel="Produkte"
+        isLoading={isLoading}
+      >
+        <FilterDropdown
+          search={filter.search}
+          sort={filter.sort}
+          onlyAvailable={filter.onlyAvailable}
+          selectedTypes={filter.selectedTypes}
+          priceMin={filter.priceMin}
+          priceMax={filter.priceMax}
+          allProductTypes={filter.allProductTypes}
+          hasActiveFilters={filter.hasActiveFilters}
+          activeFilterCount={filter.activeFilterCount}
+          setSearch={filter.setSearch}
+          setSort={filter.setSort}
+          setOnlyAvailable={filter.setOnlyAvailable}
+          setSelectedTypes={filter.setSelectedTypes}
+          setPriceMin={filter.setPriceMin}
+          setPriceMax={filter.setPriceMax}
+          clearFilters={filter.clearFilters}
+          toggleType={filter.toggleType}
+          dark
+        />
+      </PageHeader>
 
       {/* Loading */}
       {isLoading && (

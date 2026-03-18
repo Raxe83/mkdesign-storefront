@@ -3,9 +3,10 @@
 import { useState, useMemo, useEffect } from "react";
 import type { Product } from "../types/shopify";
 
-export type SortOption = "newest" | "price-asc" | "price-desc" | "title-asc";
+export type SortOption = "best_selling" | "newest" | "price-asc" | "price-desc" | "title-asc";
 
 export const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: "best_selling", label: "Top Produkte" },
   { value: "newest", label: "Neueste zuerst" },
   { value: "price-asc", label: "Preis aufsteigend" },
   { value: "price-desc", label: "Preis absteigend" },
@@ -47,7 +48,7 @@ export function useProductFilter(
   initialTypes?: Set<string>
 ): ProductFilterResult {
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<SortOption>("newest");
+  const [sort, setSort] = useState<SortOption>("best_selling");
   const [onlyAvailable, setOnlyAvailable] = useState(false);
   const [selectedTypes, setSelectedTypes] = useState<Set<string>>(
     initialTypes ?? new Set()
@@ -102,6 +103,13 @@ export function useProductFilter(
     }
 
     switch (sort) {
+      case "best_selling":
+        // API liefert bereits BEST_SELLING-Reihenfolge — keine client-seitige Umsortierung
+        break;
+      case "newest":
+        // Reihenfolge umkehren (API-Default ist BEST_SELLING, newest = letzte hinzugefügte)
+        list.reverse();
+        break;
       case "price-asc":
         list.sort(
           (a, b) =>
@@ -133,7 +141,7 @@ export function useProductFilter(
   const hasActiveFilters =
     search.trim() !== "" ||
     onlyAvailable ||
-    sort !== "newest" ||
+    sort !== "best_selling" ||
     selectedTypes.size > 0 ||
     priceMin !== "" ||
     priceMax !== "";
@@ -141,12 +149,12 @@ export function useProductFilter(
   const activeFilterCount =
     (onlyAvailable ? 1 : 0) +
     selectedTypes.size +
-    (sort !== "newest" ? 1 : 0) +
+    (sort !== "best_selling" ? 1 : 0) +
     (priceMin !== "" || priceMax !== "" ? 1 : 0);
 
   const clearFilters = () => {
     setSearch("");
-    setSort("newest");
+    setSort("best_selling");
     setOnlyAvailable(false);
     setSelectedTypes(new Set());
     setPriceMin("");

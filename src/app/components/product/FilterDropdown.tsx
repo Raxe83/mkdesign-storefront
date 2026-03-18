@@ -17,27 +17,28 @@ interface FilterButtonProps {
   open: boolean;
   onClick: () => void;
   children: React.ReactNode;
+  dark?: boolean;
 }
 
-function FilterButton({
-  label,
-  active,
-  open,
-  onClick,
-  children,
-}: FilterButtonProps) {
+function FilterButton({ label, active, open, onClick, children, dark }: FilterButtonProps) {
   return (
     <div className="relative">
       <button
         onClick={onClick}
-        className={`flex items-center gap-1.5 px-3 py-2 text-sm rounded border transition-colors duration-200 whitespace-nowrap ${
+        className={`flex items-center gap-1.5 px-3 py-2 text-sm rounded-sm border transition-colors duration-200 whitespace-nowrap ${
           active || open
-            ? "border-accent text-accent bg-accent/5 dark:bg-accent/10"
-            : "border-zinc-200 dark:border-zinc-700 text-muted hover:text-primary hover:border-zinc-400 dark:hover:border-zinc-500"
+            ? dark
+              ? "border-rust text-rust bg-rust/15"
+              : "border-accent text-accent bg-accent/5 dark:bg-accent/10"
+            : dark
+              ? "border-white/20 text-white/55 hover:border-white/40 hover:text-white/90"
+              : "border-zinc-200 dark:border-zinc-700 text-muted hover:text-primary hover:border-zinc-400 dark:hover:border-zinc-500"
         }`}
       >
         {label}
-        {active && <span className="w-1.5 h-1.5 rounded-full bg-accent" />}
+        {active && (
+          <span className={`w-1.5 h-1.5 rounded-full ${dark ? "bg-rust" : "bg-accent"}`} />
+        )}
         <ChevronDown
           size={12}
           className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}
@@ -51,7 +52,7 @@ function FilterButton({
 // ── Panel wrapper ─────────────────────────────────────────────────────────────
 function Panel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="absolute left-0 top-full mt-1.5 min-w-[200px] rounded border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-md z-50">
+    <div className="absolute left-0 top-full mt-1.5 min-w-[200px] rounded-sm border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-md z-[9990]">
       {children}
     </div>
   );
@@ -70,7 +71,7 @@ function RowItem({
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center justify-between px-3 py-2 text-sm rounded hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors duration-150"
+      className="w-full flex items-center justify-between px-3 py-2 text-sm rounded-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors duration-150"
     >
       <span className={active ? "text-primary font-medium" : "text-muted"}>
         {label}
@@ -100,7 +101,7 @@ export type FilterDropdownProps = Pick<
   | "setPriceMax"
   | "clearFilters"
   | "toggleType"
->;
+> & { dark?: boolean };
 
 export default function FilterDropdown({
   search,
@@ -119,6 +120,7 @@ export default function FilterDropdown({
   setPriceMax,
   clearFilters,
   toggleType,
+  dark = false,
 }: FilterDropdownProps) {
   const [open, setOpen] = useState<OpenPanel>(null);
   const barRef = useRef<HTMLDivElement>(null);
@@ -138,31 +140,41 @@ export default function FilterDropdown({
 
   const hasPriceFilter = priceMin !== "" || priceMax !== "";
 
+  const inputCls = dark
+    ? "bg-white/10 border-white/20 text-white placeholder:text-white/35 focus:ring-rust focus:border-rust/40"
+    : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 text-primary placeholder:text-muted focus:ring-accent";
+
+  const sortLabel =
+    sort === "best_selling"
+      ? "Sortieren nach"
+      : (SORT_OPTIONS.find((o) => o.value === sort)?.label ?? "Sortieren nach");
+
   return (
-    <div className="mb-8 space-y-3 z-20">
+    <div className="space-y-3">
       {/* Search */}
-      <div className="relative flex-1 min-w-[180px]">
+      <div className="relative">
         <Search
           size={14}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
+          className={`absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${dark ? "text-white/35" : "text-muted"}`}
         />
         <input
           type="text"
           placeholder="Suchen…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-9 pr-8 py-2 text-sm rounded border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-primary placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-accent transition-colors duration-200"
+          className={`w-full pl-9 pr-8 py-2 text-sm rounded-sm border focus:outline-none focus:ring-1 transition-colors duration-200 ${inputCls}`}
         />
         {search && (
           <button
             onClick={() => setSearch("")}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-primary transition-colors"
+            className={`absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors ${dark ? "text-white/35 hover:text-white/70" : "text-muted hover:text-primary"}`}
           >
             <X size={13} />
           </button>
         )}
       </div>
-      {/* Row */}
+
+      {/* Filter row */}
       <div ref={barRef} className="flex flex-wrap gap-2 items-center">
         {/* ── Verfügbarkeit ── */}
         <FilterButton
@@ -170,25 +182,12 @@ export default function FilterDropdown({
           active={onlyAvailable}
           open={open === "availability"}
           onClick={() => toggle("availability")}
+          dark={dark}
         >
           <Panel>
             <div className="p-1">
-              <RowItem
-                label="Alle Produkte"
-                active={!onlyAvailable}
-                onClick={() => {
-                  setOnlyAvailable(false);
-                  setOpen(null);
-                }}
-              />
-              <RowItem
-                label="Nur verfügbare"
-                active={onlyAvailable}
-                onClick={() => {
-                  setOnlyAvailable(true);
-                  setOpen(null);
-                }}
-              />
+              <RowItem label="Alle Produkte" active={!onlyAvailable} onClick={() => { setOnlyAvailable(false); setOpen(null); }} />
+              <RowItem label="Nur verfügbare" active={onlyAvailable} onClick={() => { setOnlyAvailable(true); setOpen(null); }} />
             </div>
           </Panel>
         </FilterButton>
@@ -199,43 +198,32 @@ export default function FilterDropdown({
           active={hasPriceFilter}
           open={open === "price"}
           onClick={() => toggle("price")}
+          dark={dark}
         >
           <Panel>
             <div className="p-3 space-y-2 w-52">
-              <p className="text-[11px] uppercase tracking-widest text-muted mb-1">
-                Preisbereich
-              </p>
+              <p className="text-[11px] uppercase tracking-widest text-muted mb-1">Preisbereich</p>
               <div className="flex items-center gap-2">
-                <div className="relative flex-1">
-                  <input
-                    type="number"
-                    min={0}
-                    placeholder="Von"
-                    value={priceMin}
-                    onChange={(e) => setPriceMin(e.target.value)}
-                    className="w-full px-2 py-1.5 text-sm rounded border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-primary placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-accent"
-                  />
-                </div>
-                <span className="text-muted text-sm">–</span>
-                <div className="relative flex-1">
-                  <input
-                    type="number"
-                    min={0}
-                    placeholder="Bis"
-                    value={priceMax}
-                    onChange={(e) => setPriceMax(e.target.value)}
-                    className="w-full px-2 py-1.5 text-sm rounded border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-primary placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-accent"
-                  />
-                </div>
+                <input
+                  type="number"
+                  min={0}
+                  placeholder="Von"
+                  value={priceMin}
+                  onChange={(e) => setPriceMin(e.target.value)}
+                  className="w-full px-2 py-1.5 text-sm rounded-sm border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-primary placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-accent"
+                />
+                <span className="text-muted text-sm shrink-0">–</span>
+                <input
+                  type="number"
+                  min={0}
+                  placeholder="Bis"
+                  value={priceMax}
+                  onChange={(e) => setPriceMax(e.target.value)}
+                  className="w-full px-2 py-1.5 text-sm rounded-sm border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-primary placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-accent"
+                />
               </div>
               {hasPriceFilter && (
-                <button
-                  onClick={() => {
-                    setPriceMin("");
-                    setPriceMax("");
-                  }}
-                  className="text-xs text-muted hover:text-accent transition-colors"
-                >
+                <button onClick={() => { setPriceMin(""); setPriceMax(""); }} className="text-xs text-muted hover:text-accent transition-colors">
                   Zurücksetzen
                 </button>
               )}
@@ -250,28 +238,18 @@ export default function FilterDropdown({
             active={selectedTypes.size > 0}
             open={open === "type"}
             onClick={() => toggle("type")}
+            dark={dark}
           >
             <Panel>
               <div className="p-1">
                 <div className="max-h-60 overflow-y-auto">
                   {allProductTypes.map((type) => (
-                    <RowItem
-                      key={type}
-                      label={type}
-                      active={selectedTypes.has(type)}
-                      onClick={() => toggleType(type)}
-                    />
+                    <RowItem key={type} label={type} active={selectedTypes.has(type)} onClick={() => toggleType(type)} />
                   ))}
                 </div>
                 {selectedTypes.size > 0 && (
                   <div className="px-3 pt-2 pb-1 border-t border-zinc-100 dark:border-zinc-800">
-                    <button
-                      onClick={() => {
-                        setSelectedTypes(new Set());
-                        setOpen(null);
-                      }}
-                      className="text-xs text-muted hover:text-accent transition-colors"
-                    >
+                    <button onClick={() => { setSelectedTypes(new Set()); setOpen(null); }} className="text-xs text-muted hover:text-accent transition-colors">
                       Alle entfernen
                     </button>
                   </div>
@@ -281,30 +259,18 @@ export default function FilterDropdown({
           </FilterButton>
         )}
 
-        {/* ── Sortieren nach ── */}
+        {/* ── Sortieren ── */}
         <FilterButton
-          label={
-            sort === "newest"
-              ? "Sortieren nach"
-              : (SORT_OPTIONS.find((o) => o.value === sort)?.label ??
-                "Sortieren nach")
-          }
-          active={sort !== "newest"}
+          label={sortLabel}
+          active={sort !== "best_selling"}
           open={open === "sort"}
           onClick={() => toggle("sort")}
+          dark={dark}
         >
           <Panel>
             <div className="p-1">
               {SORT_OPTIONS.map((o) => (
-                <RowItem
-                  key={o.value}
-                  label={o.label}
-                  active={sort === o.value}
-                  onClick={() => {
-                    setSort(o.value);
-                    setOpen(null);
-                  }}
-                />
+                <RowItem key={o.value} label={o.label} active={sort === o.value} onClick={() => { setSort(o.value); setOpen(null); }} />
               ))}
             </div>
           </Panel>
@@ -314,7 +280,7 @@ export default function FilterDropdown({
         {hasActiveFilters && (
           <button
             onClick={clearFilters}
-            className="flex items-center gap-1 text-xs text-muted hover:text-primary transition-colors duration-200 ml-1"
+            className={`flex items-center gap-1 text-xs transition-colors duration-200 ml-1 ${dark ? "text-white/40 hover:text-white/70" : "text-muted hover:text-primary"}`}
           >
             <X size={13} />
             Zurücksetzen

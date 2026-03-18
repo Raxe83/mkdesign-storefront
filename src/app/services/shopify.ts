@@ -76,66 +76,93 @@ export const updateItemQuantity = async (cartId: string, lineId: string, quantit
 }
 
 // Produkte abrufen mit optionaler Sprachunterstützung
-export async function getProducts(first = 20, locale?: string): Promise<Product[]> {
-  // Verwende die ursprüngliche Query ohne locale-Parameter
-  const query = `
-    query getProducts($first: Int!) {
-      products(first: $first, sortKey: CREATED_AT, reverse: true) {
-        edges {
-          node {
-            id
-            title
-            handle
-            description
-            descriptionHtml
-            tags
-            productType
-            priceRange {
-              minVariantPrice {
-                amount
-                currencyCode
+const PRODUCTS_QUERY = `
+  query getProducts($first: Int!, $after: String) {
+    products(first: $first, after: $after, sortKey: BEST_SELLING) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      edges {
+        node {
+          id
+          title
+          handle
+          description
+          descriptionHtml
+          tags
+          productType
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          featuredImage {
+            url
+            altText
+          }
+          images(first: 5) {
+            edges {
+              node {
+                url
+                altText
               }
             }
-            featuredImage {
-              url
-              altText
-            }
-            images(first: 5) {
-              edges {
-                node {
-                  url
-                  altText
+          }
+          variants(first: 1) {
+            edges {
+              node {
+                id
+                title
+                price {
+                  amount
+                  currencyCode
                 }
-              }
-            }
-            variants(first: 1) {
-              edges {
-                node {
-                  id
-                  title
-                  price {
-                    amount
-                    currencyCode
-                  }
-                  availableForSale
-                }
+                availableForSale
               }
             }
           }
         }
       }
     }
-  `
+  }
+`
 
-  const response = await shopifyFetch<{
-    products: { edges: Array<{ node: Product }> }
-  }>({
-    query,
-    variables: { first },
-    locale, // Übergebe locale nur, wenn es angegeben wurde
-  })
+type ProductsResponse = {
+  products: {
+    pageInfo: { hasNextPage: boolean; endCursor: string }
+    edges: Array<{ node: Product }>
+  }
+}
 
-  return response.products.edges.map((edge) => edge.node)
+// Shopify Storefront API erlaubt maximal 250 Produkte pro Request.
+// Bei mehr als 250 Produkten wird cursor-basierte Pagination verwendet.
+export async function getProducts(first?: number, locale?: string): Promise<Product[]> {
+  const BATCH = 250
+  const all: Product[] = []
+  let cursor: string | null = null
+  let hasNextPage = true
+
+  while (hasNextPage) {
+    const limit = first ? Math.min(BATCH, first - all.length) : BATCH
+
+    const response: ProductsResponse = await shopifyFetch<ProductsResponse>({
+      query: PRODUCTS_QUERY,
+      variables: { first: limit, after: cursor ?? undefined },
+      locale,
+    })
+
+    const edges: Array<{ node: Product }> = response.products.edges
+    const pageInfo: { hasNextPage: boolean; endCursor: string } = response.products.pageInfo
+
+    all.push(...edges.map((e) => e.node))
+
+    hasNextPage = pageInfo.hasNextPage && (first === undefined || all.length < first)
+    cursor = pageInfo.endCursor
+  }
+
+  return all
 }
 
 export const fetchBlogPost = async (locale?: string) => {

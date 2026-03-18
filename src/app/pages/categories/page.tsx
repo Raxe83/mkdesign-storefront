@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Search, X } from "lucide-react";
 import { getProducts } from "../../services/shopify";
 import type { Product } from "../../types/shopify";
-import { Loader } from "../../components/Loader";
+import PageHeader from "../../components/PageHeader";
 
 interface CategoryItem {
   type: string;
@@ -79,7 +79,7 @@ const CategoriesPage = () => {
   const router = useRouter();
 
   useEffect(() => {
-    getProducts(250)
+    getProducts()
       .then(setAllProducts)
       .finally(() => setIsLoading(false));
   }, []);
@@ -110,42 +110,40 @@ const CategoriesPage = () => {
     return categories.filter((c) => c.type.toLowerCase().includes(q));
   }, [categories, search]);
 
-  if (isLoading) return <Loader />;
-
   return (
     <div className="pb-12">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="font-display text-3xl lg:text-4xl font-medium text-primary leading-tight tracking-tight">
-          Kategorien
-        </h1>
-        {!isLoading && (
-          <p className="mt-1.5 text-sm text-muted">
-            {filtered.length} {filtered.length === 1 ? "Kategorie" : "Kategorien"}
-            {filtered.length !== categories.length && ` von ${categories.length}`}
-          </p>
-        )}
-      </div>
-
-      {/* Search */}
-      <div className="relative mb-8 max-w-sm">
-        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Kategorie suchen…"
-          className="w-full pl-9 pr-9 py-2.5 text-sm bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded text-primary placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/40 transition-shadow"
-        />
-        {search && (
-          <button
-            onClick={() => setSearch("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-primary transition-colors"
-          >
-            <X size={14} />
-          </button>
-        )}
-      </div>
+      <PageHeader
+        title="Kategorien"
+        eyebrow="Sortiment"
+        breadcrumbs={[{ label: "Start", href: "/" }, { label: "Kategorien" }]}
+        count={filtered.length}
+        totalCount={categories.length}
+        singularLabel="Kategorie"
+        pluralLabel="Kategorien"
+        isLoading={isLoading}
+      >
+        <div className="relative max-w-sm">
+          <Search
+            size={14}
+            className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/35"
+          />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Kategorie suchen…"
+            className="w-full pl-9 pr-8 py-2 text-sm rounded-sm border focus:outline-none focus:ring-1 transition-colors duration-200 bg-white/10 border-white/20 text-white placeholder:text-white/35 focus:ring-rust focus:border-rust/40"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors text-white/35 hover:text-white/70"
+            >
+              <X size={13} />
+            </button>
+          )}
+        </div>
+      </PageHeader>
 
       {/* Empty */}
       {filtered.length === 0 && (

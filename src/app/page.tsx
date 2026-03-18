@@ -72,10 +72,10 @@ const HomePage = () => {
           },
         ]}
         stats={[
-          { value: "874+", label: "Bewertungen" },
           { value: "4.9★", label: "Bewertung" },
           { value: "25+", label: "Kategorien" },
           { value: "100%", label: "Handarbeit" },
+          { value: "874+", label: "Bewertungen" },
         ]}
       />
       <HeroHighlight />

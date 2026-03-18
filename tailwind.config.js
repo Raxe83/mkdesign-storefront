@@ -22,10 +22,9 @@ module.exports = {
         background: "var(--color-background)",
         backgroundTransparent: "var(--color-background-transparent)",
         rust: "var(--color-rust)",
-        "rust-light": "var(--color-rust-light)",
         stone: "var(--color-stone)",
-        rustLight: "var(--rust-light)",
-        rustMid: "var(--rust-mid)",
+        rustLight: "var(--color-rust-light)",
+        rustMid: "var(--color-rust-mid)",
       },
       keyframes: {
         "gift-in": {
