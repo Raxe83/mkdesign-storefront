@@ -2,41 +2,91 @@
 
 import type { Product } from "@/app/types/shopify";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import Image from "next/image";
+import { ShoppingBag, ShoppingCart, Check } from "lucide-react";
+import { useCart } from "@/app/context/CartContext";
+import { useToast } from "@/app/context/ToastContext";
 import Price from "@/app/components/ui/Price";
 import Skeleton from "@/app/components/ui/Skeleton";
-import AddToCartButton from "@/app/components/ui/AddToCartButton";
-import { ShoppingBag } from "lucide-react";
 
 export interface ProductCardProps {
   product: Product;
   isLoading?: boolean;
 }
 
+// ─── Inline cart button (icon-only, compact) ──────────────────────────────────
+
+function CartIconButton({
+  variantId,
+  available,
+  title,
+}: {
+  variantId: string;
+  available: boolean;
+  title: string;
+}) {
+  const { addItem } = useCart();
+  const { addToast } = useToast();
+  const [state, setState] = useState<"idle" | "loading" | "done">("idle");
+
+  const handle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!variantId || !available || state !== "idle") return;
+    setState("loading");
+    try {
+      await addItem(variantId, 1, []);
+      setState("done");
+      setTimeout(() => setState("idle"), 1800);
+    } catch {
+      addToast("Fehler beim Hinzufügen", "error");
+      setState("idle");
+    }
+  };
+
+  if (!available) return null;
+
+  return (
+    <button
+      onClick={handle}
+      aria-label={`${title} in den Warenkorb`}
+      disabled={state === "loading"}
+      className="h-10 w-10 flex items-center justify-center rounded-sm border border-zinc-200 dark:border-zinc-700 text-muted hover:border-rust hover:text-rust transition-colors duration-200 disabled:opacity-40 flex-shrink-0"
+    >
+      {state === "done" ? (
+        <Check size={14} className="text-emerald-500" />
+      ) : (
+        <ShoppingCart size={14} />
+      )}
+    </button>
+  );
+}
+
+// ─── Card ─────────────────────────────────────────────────────────────────────
+
 const ProductCard = ({ product, isLoading = false }: ProductCardProps) => {
   const [imgLoaded, setImgLoaded] = useState(false);
-  const [t] = useTranslation();
 
   if (isLoading) return <Skeleton.Card />;
 
   const firstVariant = product.variants.edges[0]?.node;
-  const available = firstVariant?.availableForSale ?? false;
-  const price = product.priceRange.minVariantPrice.amount;
-  const currencyCode = product.priceRange.minVariantPrice.currencyCode;
-  const variantCount = product.variants.edges.length;
-  const hasMultipleVariants = variantCount > 1;
+  const available    = firstVariant?.availableForSale ?? false;
+  const price        = product.priceRange.minVariantPrice.amount;
+  const currency     = product.priceRange.minVariantPrice.currencyCode;
+  const hasMultipleVariants = product.variants.edges.length > 1;
+
+  // Pick a tag badge: first meaningful tag or productType
+  const badgeTag = product.tags?.find(
+    (t) => !t.toLowerCase().includes("hidden") && t.length < 20,
+  );
+  const badge = badgeTag ?? product.productType ?? null;
 
   return (
-    <div className="group flex flex-col">
-      {/* ── Image ── */}
-      <div className="relative overflow-hidden rounded aspect-[4/5] bg-zinc-100 dark:bg-zinc-800">
-        <Link
-          href={`/pages/products/${product.handle}`}
-          prefetch={false}
-          className="block w-full h-full"
-        >
+    <div className="group flex flex-col rounded border border-zinc-200 dark:border-zinc-800 bg-background overflow-hidden dark:hover:border-zinc-700 transition-all duration-200">
+
+      {/* ── Image ──────────────────────────────────────────────── */}
+      <div className="relative aspect-[4/3] bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+        <Link href={`/pages/products/${product.handle}`} prefetch={false} className="block w-full h-full">
           {product.featuredImage ? (
             <Image
               src={product.featuredImage.url}
@@ -53,59 +103,82 @@ const ProductCard = ({ product, isLoading = false }: ProductCardProps) => {
               <ShoppingBag size={28} className="text-zinc-300 dark:text-zinc-600" />
             </div>
           )}
-
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/8 transition-colors duration-300" />
         </Link>
 
-        {/* Badges top-left */}
-        <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1 pointer-events-none">
-          {!available && (
-            <span className="px-2 py-0.5 text-[10px] uppercase tracking-widest font-medium bg-zinc-900/80 text-white dark:bg-zinc-100/90 dark:text-zinc-900 rounded-sm">
-              {t("product.notAvailableShort")}
-            </span>
-          )}
-          {product.productType && (
-            <span className="px-2 py-0.5 text-[10px] uppercase tracking-widest font-medium bg-white/85 dark:bg-zinc-800/85 text-muted rounded-sm backdrop-blur-sm">
-              {product.productType}
-            </span>
-          )}
-        </div>
-
-        {/* Variant count badge top-right */}
-        {hasMultipleVariants && (
-          <div className="absolute top-2.5 right-2.5 z-10 pointer-events-none">
-            <span className="px-2 py-0.5 text-[10px] font-medium bg-white/85 dark:bg-zinc-800/85 text-muted rounded-sm backdrop-blur-sm">
-              {variantCount} Var.
-            </span>
-          </div>
+        {/* Badge top-left */}
+        {badge && (
+          <span className="absolute top-2.5 left-2.5 z-10 px-2 py-0.5 text-[10px] uppercase tracking-widest font-medium bg-white/85 dark:bg-zinc-800/85 text-muted rounded-sm backdrop-blur-sm pointer-events-none">
+            {badge}
+          </span>
         )}
 
-        {/* Add-to-cart — always visible on mobile, slides up on desktop hover */}
-        <div className="absolute bottom-0 left-0 right-0 p-2.5 z-10 md:translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out">
-          <AddToCartButton
-            variantId={firstVariant?.id ?? ""}
-            available={available}
-            title={product.title}
-          />
-        </div>
+        {/* Unavailable top-right */}
+        {!available && (
+          <span className="absolute top-2.5 right-2.5 z-10 px-2 py-0.5 text-[10px] uppercase tracking-widest font-medium bg-zinc-900/80 text-white dark:bg-zinc-100/90 dark:text-zinc-900 rounded-sm pointer-events-none">
+            Vergriffen
+          </span>
+        )}
+
+        {/* Multiple variants top-right (when available) */}
+        {available && hasMultipleVariants && (
+          <span className="absolute top-2.5 right-2.5 z-10 px-2 py-0.5 text-[10px] font-medium bg-white/85 dark:bg-zinc-800/85 text-muted rounded-sm backdrop-blur-sm pointer-events-none">
+            {product.variants.edges.length} Var.
+          </span>
+        )}
       </div>
 
-      {/* ── Info ── */}
-      <div className="pt-2.5 px-0.5 flex items-baseline justify-between gap-2">
-        <Link
-          href={`/pages/products/${product.handle}`}
-          prefetch={false}
-          className="min-w-0"
-        >
-          <h3 className="font-display font-medium text-primary text-sm leading-snug line-clamp-1 hover:text-accent transition-colors duration-200">
+      {/* ── Content ────────────────────────────────────────────── */}
+      <div className="flex flex-col gap-2 p-4 flex-1">
+
+        {/* Category label */}
+        {product.productType && (
+          <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-accent">
+            {product.productType}
+          </p>
+        )}
+
+        {/* Title */}
+        <Link href={`/pages/products/${product.handle}`} prefetch={false}>
+          <h3 className="font-display font-medium text-primary text-base leading-snug line-clamp-2 hover:text-accent transition-colors duration-200">
             {product.title}
           </h3>
         </Link>
-        <Price
-          amount={price}
-          currencyCode={currencyCode}
-          className="text-sm shrink-0 text-muted tabular-nums"
-        />
+
+        {/* Description */}
+        {product.description && (
+          <p className="text-xs text-muted leading-relaxed line-clamp-2 flex-1">
+            {product.description}
+          </p>
+        )}
+
+        {/* Price + actions */}
+        <div className="flex items-center justify-between gap-2 pt-3 mt-auto border-t border-zinc-100 dark:border-zinc-800">
+          <div className="flex items-baseline gap-1 min-w-0">
+            {hasMultipleVariants && (
+              <span className="text-[10px] text-muted shrink-0">ab</span>
+            )}
+            <Price
+              amount={price}
+              currencyCode={currency}
+              className="text-sm font-medium text-primary tabular-nums"
+            />
+          </div>
+
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <CartIconButton
+              variantId={firstVariant?.id ?? ""}
+              available={available}
+              title={product.title}
+            />
+            <Link
+              href={`/pages/products/${product.handle}`}
+              prefetch={false}
+              className="h-10 px-4 flex items-center text-[10px] font-semibold uppercase tracking-widest border border-zinc-300 dark:border-zinc-600 text-primary rounded-sm hover:border-accent hover:text-accent transition-colors duration-200"
+            >
+              Ansehen
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );
