@@ -79,7 +79,7 @@ export default function PageHeader({
           </div>
 
           {!isLoading && totalCount !== undefined && (
-            <div className="hidden sm:block shrink-0 text-right select-none">
+            <div className="block shrink-0 text-right select-none">
               <p className="font-display font-bold text-[3.5rem] lg:text-[4.5rem] leading-none text-white/10 tabular-nums">
                 {totalCount}
               </p>

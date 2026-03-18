@@ -12,7 +12,7 @@ const NotFoundPage = () => {
       <p className="text-gray-600 mb-8 max-w-md mx-auto">{t("404.desc")}</p>
       <Link
         href="/"
-        className="bg-accent text-white px-6 py-3 rounded-md font-medium hover:bg-blue-700 transition-colors"
+        className="bg-accent text-white px-6 py-3 rounded-md font-medium  transition-colors"
       >
         {t("common.backToHome")}
       </Link>

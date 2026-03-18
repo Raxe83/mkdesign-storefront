@@ -25,6 +25,7 @@ const HomePage = () => {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [collections, setCollections] = useState<ShopifyCollection[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [reviewStats, setReviewStats] = useState<{ total: number; average: number } | null>(null);
   const [t] = useTranslation();
 
   useEffect(() => {
@@ -33,10 +34,11 @@ const HomePage = () => {
       try {
         setIsLoading(true);
 
-        const products = await getFeaturedProducts(8, shopifyLocale);
+        const [products, fetchedCollections] = await Promise.all([
+          getFeaturedProducts(8, shopifyLocale),
+          getCollections(6, shopifyLocale),
+        ]);
         setFeaturedProducts(products);
-
-        const fetchedCollections = await getCollections(6, shopifyLocale);
         setCollections(fetchedCollections);
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -45,7 +47,17 @@ const HomePage = () => {
       }
     };
 
+    const fetchStats = async () => {
+      try {
+        const res = await fetch("/api/judgeme/stats");
+        if (res.ok) setReviewStats(await res.json());
+      } catch {
+        // silently keep null → fallback values shown
+      }
+    };
+
     fetchData();
+    fetchStats();
   }, []);
 
   return (
@@ -72,10 +84,10 @@ const HomePage = () => {
           },
         ]}
         stats={[
-          { value: "4.9★", label: "Bewertung" },
+          { value: reviewStats ? `${reviewStats.average}★` : "4.9★", label: "Bewertung" },
           { value: "25+", label: "Kategorien" },
           { value: "100%", label: "Handarbeit" },
-          { value: "874+", label: "Bewertungen" },
+          { value: reviewStats ? `${reviewStats.total}+` : "874+", label: "Bewertungen" },
         ]}
       />
       <HeroHighlight />
@@ -105,7 +117,7 @@ const HomePage = () => {
           alt: "",
         }}
       />
-      <Reviews />
+      <Reviews reviewStats={reviewStats} />
       <JoinUs />
     </div>
   );
