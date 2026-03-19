@@ -12,7 +12,7 @@ import {
 import { useCart } from "../context/CartContext";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import ClickOutsideHandler from "../utils/ClickOutsideHandler";
+
 import NavLink from "./NavLink";
 import CartPopup from "./Information/CartPopup";
 import LanguageSwitcher from "../language/LanguageSwitcher";
@@ -49,7 +49,7 @@ const useNavItems = () => {
 // ─── Header ───────────────────────────────────────────────────────────────────
 
 const Header = () => {
-  const { itemCount } = useCart();
+  const { itemCount, showCartPopup, setShowCartPopup } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [t] = useTranslation();
@@ -85,10 +85,12 @@ const Header = () => {
     <>
       {/* Header ist immer ganz oben — z-[9999] schlägt alle Dropdowns & Popups */}
       <header className="fixed top-0 left-0 w-full z-[9999] bg-backgroundTransparent dark:bg-zinc-950/95 backdrop-blur-sm border-b border-zinc-200/60 dark:border-zinc-800 transition-all duration-300">
-        <div className={cn(
-          "max-w-screen-xl mx-auto px-4 sm:px-6 flex items-center relative transition-all duration-300",
-          scrolled ? "h-14" : "h-20"
-        )}>
+        <div
+          className={cn(
+            "max-w-screen-xl mx-auto px-4 sm:px-6 flex items-center relative transition-all duration-300",
+            scrolled ? "h-14" : "h-20",
+          )}
+        >
           {/* ── Links: Burger (mobile) / Nav (desktop) ── */}
           <div className="flex items-center gap-1">
             {/* Burger — mobile */}
@@ -124,34 +126,14 @@ const Header = () => {
               height={160}
               className={cn(
                 "transition-all duration-300",
-                scrolled ? "w-32" : "w-40"
+                scrolled ? "w-32" : "w-40",
               )}
             />
           </Link>
 
           {/* ── Rechts: Cart ── */}
           <div className="flex items-center gap-1 ml-auto">
-            {/* Cart — desktop */}
-            <div className="hidden lg:block">
-              <ul>
-                <NavLink
-                  url="/pages/cart"
-                  title=""
-                  icon={
-                    <div className="relative">
-                      <ShoppingCart size={20} />
-                      {itemCount > 0 && (
-                        <span className="absolute -top-2 -right-2 bg-accent text-white text-[10px] font-medium rounded-full h-4 w-4 flex items-center justify-center leading-none">
-                          {itemCount}
-                        </span>
-                      )}
-                    </div>
-                  }
-                />
-              </ul>
-            </div>
-
-            {/* Cart — mobile */}
+            {/* Cart — mobile: direct link to cart page */}
             <Link
               href="/pages/cart"
               className="lg:hidden relative p-2.5 text-muted hover:text-primary transition-colors duration-200"
@@ -164,6 +146,21 @@ const Header = () => {
                 </span>
               )}
             </Link>
+
+            {/* Cart — desktop: opens popup */}
+            <button
+              onClick={() => setShowCartPopup((v) => !v)}
+              aria-label="Warenkorb"
+              aria-expanded={showCartPopup}
+              className="hidden lg:flex relative p-2.5 text-muted hover:text-primary transition-colors duration-200"
+            >
+              <ShoppingCart size={20} />
+              {itemCount > 0 && (
+                <span className="absolute top-1 right-1 bg-accent text-white text-[10px] font-medium rounded-full h-4 w-4 flex items-center justify-center leading-none">
+                  {itemCount}
+                </span>
+              )}
+            </button>
           </div>
         </div>
       </header>
@@ -195,7 +192,9 @@ const Header = () => {
           "flex flex-col",
           "transition-all duration-300 ease-out",
         )}
-        style={{ transform: isMenuOpen ? "translateX(0)" : "translateX(-100%)" }}
+        style={{
+          transform: isMenuOpen ? "translateX(0)" : "translateX(-100%)",
+        }}
       >
         {/* Close button row */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-sand/40 dark:border-zinc-800 shrink-0">
@@ -283,9 +282,7 @@ const Header = () => {
         </div>
       </div>
 
-      <ClickOutsideHandler onClickOutside={() => {}}>
-        <CartPopup />
-      </ClickOutsideHandler>
+      <CartPopup />
     </>
   );
 };

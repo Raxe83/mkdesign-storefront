@@ -13,7 +13,6 @@ import {
   createCart,
   addToCart,
   updateCartItem,
-  updateItemQuantity,
   removeCartItem,
   getCart,
 } from "../services/shopify";
@@ -163,21 +162,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       setIsLoading(true);
       if (!cart) return;
 
-      // Führe die API-Anfrage aus
-      const updatedCart = await updateItemQuantity(cart.id, lineId, quantity);
-
-      // Wenn das Update erfolgreich ist, aktualisiere die Menge lokal
-      setCart((prevCart) => {
-        if (!prevCart) return prevCart;
-
-        const updatedLines = prevCart.lines.edges.map((line) =>
-          line.node.id === lineId
-            ? { ...line, node: { ...line.node, quantity } } // Update die Menge direkt
-            : line
-        );
-
-        return { ...prevCart, lines: { edges: updatedLines } };
-      });
+      const updatedCart = await updateCartItem(cart.id, lineId, quantity, shopifyLocale);
+      setCart(updatedCart);
     } catch (error) {
       console.error("Failed to update item quantity:", error);
     } finally {

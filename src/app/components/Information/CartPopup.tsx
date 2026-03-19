@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { ShoppingBag, Trash2, Truck, X } from "lucide-react";
+import Link from "next/link";
 import { useCart } from "../../context/CartContext";
 import { formatPrice } from "../../utils/formatPrice";
 import { useTranslation } from "react-i18next";
@@ -34,6 +35,7 @@ const CartPopup = () => {
 
   const isEmpty = !cart || cart.lines.edges.length === 0;
 
+
   const subtotal =
     !isEmpty && cart?.estimatedCost?.subtotalAmount?.amount
       ? Number.parseFloat(cart.estimatedCost.subtotalAmount.amount)
@@ -45,7 +47,15 @@ const CartPopup = () => {
       : "EUR";
 
   return (
-    <div className="absolute top-16 right-4 sm:right-8 mt-2 w-[calc(100vw-2rem)] max-w-sm bg-cream dark:bg-zinc-900 border border-sand/50 dark:border-zinc-800 rounded-sm shadow-md z-[9998]">
+    <>
+      {/* Backdrop — closes popup on outside click */}
+      <div
+        className="fixed inset-0 z-[9990]"
+        onClick={() => setShowCartPopup(false)}
+        aria-hidden="true"
+      />
+
+      <div className="fixed top-20 right-4 sm:right-8 w-[calc(100vw-2rem)] max-w-sm bg-cream dark:bg-zinc-900 border border-sand/50 dark:border-zinc-800 rounded-sm shadow-md z-[9998]">
 
       {/* Header */}
       <div className="px-4 py-3 border-b border-sand/40 dark:border-zinc-800 flex items-center justify-between">
@@ -156,17 +166,19 @@ const CartPopup = () => {
                   {t("cart.checkout")}
                 </a>
               )}
-              <button
-                className="block w-full text-center px-4 py-2 border border-sand/60 dark:border-zinc-700 rounded-sm text-sm font-medium text-stone dark:text-muted hover:border-rust hover:text-rust dark:hover:border-rust dark:hover:text-rust transition-colors duration-200"
+              <Link
+                href="/pages/cart"
                 onClick={() => setShowCartPopup(false)}
+                className="block w-full text-center px-4 py-2 border border-sand/60 dark:border-zinc-700 rounded-sm text-sm font-medium text-stone dark:text-muted hover:border-rust hover:text-rust dark:hover:border-rust dark:hover:text-rust transition-colors duration-200"
               >
-                {t("common.close")}
-              </button>
+                Zum Einkaufswagen
+              </Link>
             </div>
           </div>
         </>
       )}
     </div>
+    </>
   );
 };
 

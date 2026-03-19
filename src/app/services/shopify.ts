@@ -652,6 +652,10 @@ export async function updateCartItem(
               node {
                 id
                 quantity
+                attributes {
+                  key
+                  value
+                }
                 merchandise {
                   ... on ProductVariant {
                     id
@@ -662,6 +666,7 @@ export async function updateCartItem(
                     }
                     product {
                       title
+                      handle
                       featuredImage {
                         url
                         altText
@@ -723,6 +728,10 @@ export async function removeCartItem(
               node {
                 id
                 quantity
+                attributes {
+                  key
+                  value
+                }
                 merchandise {
                   ... on ProductVariant {
                     id
@@ -733,6 +742,7 @@ export async function removeCartItem(
                     }
                     product {
                       title
+                      handle
                       featuredImage {
                         url
                         altText

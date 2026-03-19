@@ -63,6 +63,7 @@ export interface CartItem {
     product: {
       title: string
       featuredImage: Image | null
+      handle: string
     }
   }
 }

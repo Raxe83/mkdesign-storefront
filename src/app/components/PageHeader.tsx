@@ -31,7 +31,7 @@ export default function PageHeader({
   isLoading = false,
   children,
 }: PageHeaderProps) {
-  const showCount = !isLoading && count !== undefined;
+  const showCount = count !== undefined || isLoading;
 
   return (
     <div className="w-screen ml-[calc(50%-50vw)] -mt-16 mb-10 bg-charcoal relative">
@@ -68,24 +68,39 @@ export default function PageHeader({
               {title}
             </h1>
             {showCount && (
-              <p className="mt-3 text-sm text-white/45">
-                <span className="text-white/70 font-medium">{count}</span>
-                {totalCount !== undefined && count !== totalCount && (
-                  <> von <span className="text-white/70 font-medium">{totalCount}</span></>
-                )}{" "}
-                {count === 1 ? singularLabel : pluralLabel}
+              <p className="mt-3 text-sm text-white/45 flex items-center gap-1.5">
+                {isLoading ? (
+                  <span className="inline-block h-3.5 w-16 rounded bg-white/15 animate-pulse" />
+                ) : (
+                  <>
+                    <span className="text-white/70 font-medium">{count}</span>
+                    {totalCount !== undefined && count !== totalCount && (
+                      <> von <span className="text-white/70 font-medium">{totalCount}</span></>
+                    )}{" "}
+                    {count === 1 ? singularLabel : pluralLabel}
+                  </>
+                )}
               </p>
             )}
           </div>
 
-          {!isLoading && totalCount !== undefined && (
+          {(isLoading || totalCount !== undefined) && (
             <div className="block shrink-0 text-right select-none">
-              <p className="font-display font-bold text-[3.5rem] lg:text-[4.5rem] leading-none text-white/10 tabular-nums">
-                {totalCount}
-              </p>
-              <p className="text-[10px] text-white/20 uppercase tracking-[0.14em] font-medium mt-1">
-                {pluralLabel} gesamt
-              </p>
+              {isLoading ? (
+                <>
+                  <div className="h-14 lg:h-[4.5rem] w-24 lg:w-32 rounded bg-white/10 animate-pulse" />
+                  <div className="h-2.5 w-20 rounded bg-white/10 animate-pulse mt-2 ml-auto" />
+                </>
+              ) : (
+                <>
+                  <p className="font-display font-bold text-[3.5rem] lg:text-[4.5rem] leading-none text-white/10 tabular-nums">
+                    {totalCount}
+                  </p>
+                  <p className="text-[10px] text-white/20 uppercase tracking-[0.14em] font-medium mt-1">
+                    {pluralLabel} gesamt
+                  </p>
+                </>
+              )}
             </div>
           )}
         </div>

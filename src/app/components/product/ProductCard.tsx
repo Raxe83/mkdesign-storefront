@@ -4,7 +4,7 @@ import type { Product } from "@/app/types/shopify";
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ShoppingBag, ShoppingCart, Check } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { useCart } from "@/app/context/CartContext";
 import { useToast } from "@/app/context/ToastContext";
 import Price from "@/app/components/ui/Price";
@@ -15,9 +15,9 @@ export interface ProductCardProps {
   isLoading?: boolean;
 }
 
-// ─── Inline cart button (icon-only, compact) ──────────────────────────────────
+// ─── Inline cart button ───────────────────────────────────────────────────────
 
-function CartIconButton({
+function CartButton({
   variantId,
   available,
   title,
@@ -51,13 +51,9 @@ function CartIconButton({
       onClick={handle}
       aria-label={`${title} in den Warenkorb`}
       disabled={state === "loading"}
-      className="h-10 w-10 flex items-center justify-center rounded-sm border border-zinc-200 dark:border-zinc-700 text-muted hover:border-rust hover:text-rust transition-colors duration-200 disabled:opacity-40 flex-shrink-0"
+      className="h-10 w-full flex items-center justify-center text-[10px] font-semibold uppercase tracking-widest rounded-sm border border-zinc-200 dark:border-zinc-700 text-muted hover:border-rust hover:text-rust transition-colors duration-200 disabled:opacity-40"
     >
-      {state === "done" ? (
-        <Check size={14} className="text-emerald-500" />
-      ) : (
-        <ShoppingCart size={14} />
-      )}
+      {state === "done" ? "Hinzugefügt" : "Kaufen"}
     </button>
   );
 }
@@ -152,8 +148,8 @@ const ProductCard = ({ product, isLoading = false }: ProductCardProps) => {
         )}
 
         {/* Price + actions */}
-        <div className="flex items-center justify-between gap-2 pt-3 mt-auto border-t border-zinc-100 dark:border-zinc-800">
-          <div className="flex items-baseline gap-1 min-w-0">
+        <div className="flex flex-col gap-3 pt-3 mt-auto border-t border-zinc-100 dark:border-zinc-800">
+          <div className="flex items-baseline gap-1">
             {hasMultipleVariants && (
               <span className="text-[10px] text-muted shrink-0">ab</span>
             )}
@@ -164,8 +160,8 @@ const ProductCard = ({ product, isLoading = false }: ProductCardProps) => {
             />
           </div>
 
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            <CartIconButton
+          <div className={`grid gap-2 ${available ? "grid-cols-2" : "grid-cols-1"}`}>
+            <CartButton
               variantId={firstVariant?.id ?? ""}
               available={available}
               title={product.title}
@@ -173,7 +169,7 @@ const ProductCard = ({ product, isLoading = false }: ProductCardProps) => {
             <Link
               href={`/pages/products/${product.handle}`}
               prefetch={false}
-              className="h-10 px-4 flex items-center text-[10px] font-semibold uppercase tracking-widest border border-zinc-300 dark:border-zinc-600 text-primary rounded-sm hover:border-accent hover:text-accent transition-colors duration-200"
+              className="h-10 w-full flex items-center justify-center text-[10px] font-semibold uppercase tracking-widest border border-zinc-300 dark:border-zinc-600 text-primary rounded-sm hover:border-accent hover:text-accent transition-colors duration-200"
             >
               Ansehen
             </Link>
