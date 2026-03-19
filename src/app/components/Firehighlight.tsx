@@ -27,7 +27,7 @@ export function FireHighlight({
   title = "Feuertonnen &amp;<br/><em>Stehtische</em>",
   description = "Unsere Feuertonnen und beheizbaren Stehtische werden in aufwendiger Handarbeit aus gebrauchten Stahlblechtonnen gefertigt. Robuster Industriestil trifft gemütliche Feuerstelle.",
   features = DEFAULT_FEATURES,
-  cta = { label: "Feuertonnen entdecken", href: "/collections/feuertonne" },
+  cta = { label: "Feuertonnen entdecken", href: "/pages/products?collection=feuertonne" },
   image,
   imagePosition = "left",
   className,

@@ -131,7 +131,7 @@ const DEFAULT_CARDS: GiftCard[] = [
     title: "Für Männer & Väter",
     description:
       "Zippos mit Gravur, Flachmänner, Feuertonnen, Untersetzer mit Spruch – robuste Geschenke mit Charakter.",
-    cta: { label: "Jetzt stöbern", href: "/collections/all" },
+    cta: { label: "Jetzt stöbern", href: "/pages/products" },
   },
   {
     id: "frauen",
@@ -139,7 +139,7 @@ const DEFAULT_CARDS: GiftCard[] = [
     title: "Für Sie & Frauen",
     description:
       "Schmuck mit Gravur, Halsketten, Schieferuhren, Schlummerlichter – persönliche Geschenke mit Herz.",
-    cta: { label: "Schmuck ansehen", href: "/collections/schmuck" },
+    cta: { label: "Schmuck ansehen", href: "/pages/products?collection=schmuck" },
   },
   {
     id: "zuhause",
@@ -147,7 +147,7 @@ const DEFAULT_CARDS: GiftCard[] = [
     title: "Für Zuhause & Garten",
     description:
       "Schieferschilder, Nachtlichter, 3D-Druck Vasen, Fassmöbel – Deko mit Geschichte und Persönlichkeit.",
-    cta: { label: "Deko entdecken", href: "/collections/all" },
+    cta: { label: "Deko entdecken", href: "/pages/products" },
   },
   {
     id: "tiere",
@@ -155,7 +155,7 @@ const DEFAULT_CARDS: GiftCard[] = [
     title: "Für Tier-Liebhaber",
     description:
       "Hundemarken aus Edelstahl, Untersetzer mit Tier-Motiven – für alle, die ihre Tiere lieben.",
-    cta: { label: "Jetzt ansehen", href: "/collections/schlusselanhanger" },
+    cta: { label: "Jetzt ansehen", href: "/pages/products?collection=schlusselanhanger" },
   },
   {
     id: "anlaesse",
@@ -165,7 +165,7 @@ const DEFAULT_CARDS: GiftCard[] = [
       "Hochzeiten, Geburtstage, Jubiläen – personalisierte Produkte mit eigenem Datum und Namen.",
     cta: {
       label: "Personalisieren",
-      href: "/collections/wunschmotiv-und-personalisierung",
+      href: "/pages/products?collection=wunschmotiv-und-personalisierung",
     },
   },
   {

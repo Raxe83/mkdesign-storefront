@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
@@ -18,22 +18,20 @@ const ProductsPageContent = () => {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [collectionHandle, setCollectionHandle] = useState<string | null>(null);
 
   const searchParams = useSearchParams();
   const [t] = useTranslation();
 
-  // Pre-select productType from URL param (e.g. ?productType=Shirts)
-  const initialTypes = useMemo(() => {
-    const t = searchParams.get("productType");
-    return t ? new Set([t]) : undefined;
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // Derive directly from URL — always in sync, no double-fetch
+  const collectionHandle = searchParams.get("collection");
+  const productTypeParam = searchParams.get("productType");
 
-  const filter = useProductFilter(allProducts, initialTypes);
+  const filter = useProductFilter(allProducts);
 
+  // Sync productType filter with URL param (handles mount + in-page navigation)
   useEffect(() => {
-    setCollectionHandle(searchParams.get("collection"));
-  }, [searchParams]);
+    filter.setSelectedTypes(productTypeParam ? new Set([productTypeParam]) : new Set());
+  }, [productTypeParam]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -57,14 +55,20 @@ const ProductsPageContent = () => {
   return (
     <div className="pb-12">
       <PageHeader
-        title={collectionHandle ?? t("product.allProducts")}
-        eyebrow={collectionHandle ? "Kollektion" : "Sortiment"}
+        title={collectionHandle ?? productTypeParam ?? t("product.allProducts")}
+        eyebrow={collectionHandle ? "Kollektion" : productTypeParam ? "Kategorie" : "Sortiment"}
         breadcrumbs={
           collectionHandle
             ? [
                 { label: "Start", href: "/" },
                 { label: "Produkte", href: "/pages/products" },
                 { label: collectionHandle },
+              ]
+            : productTypeParam
+            ? [
+                { label: "Start", href: "/" },
+                { label: "Produkte", href: "/pages/products" },
+                { label: productTypeParam },
               ]
             : [{ label: "Start", href: "/" }, { label: "Produkte" }]
         }

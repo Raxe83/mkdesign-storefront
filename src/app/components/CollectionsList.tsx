@@ -94,7 +94,7 @@ function CategoryCard({ collection, config }: CategoryCardProps) {
 
   return (
     <Link
-      href={`/collections/${collection.handle}`}
+      href={`/pages/products?collection=${collection.handle}`}
       className={cn(
         "group relative overflow-hidden rounded-sm bg-graphite",
         "block min-h-[240px]",
