@@ -5,8 +5,8 @@ import {
   LayoutGrid,
   Menu,
   Package,
+  Palette,
   ShoppingCart,
-  Users,
   X,
 } from "lucide-react";
 import { useCart } from "../context/CartContext";
@@ -39,9 +39,9 @@ const useNavItems = () => {
       icon: <LayoutGrid size={20} />,
     },
     {
-      url: "/pages/aboutus",
-      title: t("nav.aboutUs"),
-      icon: <Users size={20} />,
+      url: "/pages/design",
+      title: "Eigenes Design",
+      icon: <Palette size={20} />,
     },
   ];
 };
@@ -109,7 +109,7 @@ const Header = () => {
                 <NavLink url="/" title={t("nav.home")} />
                 <NavLink url="/pages/products" title={t("nav.products")} />
                 <NavLink url="/pages/categories" title="Kategorien" />
-                <NavLink url="/pages/aboutus" title={t("nav.aboutUs")} />
+                <NavLink url="/pages/design" title="Eigenes Design" />
               </ul>
             </nav>
           </div>

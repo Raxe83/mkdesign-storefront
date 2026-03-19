@@ -87,8 +87,8 @@ export const updateItemQuantity = async (
 
 // Produkte abrufen mit optionaler Sprachunterstützung
 const PRODUCTS_QUERY = `
-  query getProducts($first: Int!, $after: String) {
-    products(first: $first, after: $after, sortKey: BEST_SELLING) {
+  query getProducts($first: Int!, $after: String, $query: String) {
+    products(first: $first, after: $after, sortKey: BEST_SELLING, query: $query) {
       pageInfo {
         hasNextPage
         endCursor
@@ -151,6 +151,7 @@ type ProductsResponse = {
 export async function getProducts(
   first?: number,
   locale?: string,
+  tag?: string,
 ): Promise<Product[]> {
   const BATCH = 250;
   const all: Product[] = [];
@@ -162,7 +163,7 @@ export async function getProducts(
 
     const response: ProductsResponse = await shopifyFetch<ProductsResponse>({
       query: PRODUCTS_QUERY,
-      variables: { first: limit, after: cursor ?? undefined },
+      variables: { first: limit, after: cursor ?? undefined, query: tag ? `tag:${tag}` : undefined },
       locale,
     });
 

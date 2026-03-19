@@ -16,6 +16,7 @@ export interface PersonalizationProps {
   description?: string;
   steps?: PersonalizationStep[];
   cta?: { label: string; href: string };
+  secondaryCta?: { label: string; href: string };
   image: { src: string; alt: string };
   pullQuote?: string;
   className?: string;
@@ -45,6 +46,7 @@ export function Personalization({
   description = "Personalisierung ist bei uns keine Ausnahme – es ist der Standard. Fast jedes Produkt kann mit Eurem Namen, Wunschdatum oder Motiv versehen werden.",
   steps = DEFAULT_STEPS,
   cta = { label: "Jetzt personalisieren", href: "/collections/wunschmotiv-und-personalisierung" },
+  secondaryCta,
   image,
   pullQuote = "„Kein Produkt wie das andere",
   className,
@@ -84,13 +86,25 @@ export function Personalization({
                 </li>
               ))}
             </ol>
-            {cta && (
-              <Link
-                href={cta.href}
-                className="inline-flex items-center justify-center mt-10 px-8 py-3.5 rounded-sm bg-rust text-white text-sm font-medium tracking-[0.04em] uppercase transition-colors duration-200 hover:bg-rust-mid focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust focus-visible:ring-offset-2"
-              >
-                {cta.label}
-              </Link>
+            {(cta || secondaryCta) && (
+              <div className="flex flex-wrap gap-3 mt-10">
+                {cta && (
+                  <Link
+                    href={cta.href}
+                    className="inline-flex items-center justify-center px-8 py-3.5 rounded-sm bg-rust text-white text-sm font-medium tracking-[0.04em] uppercase transition-colors duration-200 hover:bg-rust-mid focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust focus-visible:ring-offset-2"
+                  >
+                    {cta.label}
+                  </Link>
+                )}
+                {secondaryCta && (
+                  <Link
+                    href={secondaryCta.href}
+                    className="inline-flex items-center justify-center px-8 py-3.5 rounded-sm border border-rust text-rust text-sm font-medium tracking-[0.04em] uppercase transition-colors duration-200 hover:bg-rust hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust focus-visible:ring-offset-2"
+                  >
+                    {secondaryCta.label}
+                  </Link>
+                )}
+              </div>
             )}
           </div>
 

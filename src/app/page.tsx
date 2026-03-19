@@ -116,6 +116,7 @@ const HomePage = () => {
           src: require("./img/Ornate Fire Pits.png").default,
           alt: "",
         }}
+        secondaryCta={{ label: "Design selbst gestalten", href: "/pages/design" }}
       />
       <Reviews reviewStats={reviewStats} />
       <JoinUs />

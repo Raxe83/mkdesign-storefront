@@ -138,25 +138,39 @@ const CartPage = () => {
                           }}
                         >
                           {/* Thumbnail */}
-                          <Link
-                            href={`/pages/products/${node.merchandise.product.handle}`}
-                            className="h-20 w-20 shrink-0 rounded-sm border border-zinc-200 dark:border-zinc-700 overflow-hidden bg-zinc-50 dark:bg-zinc-800 hover:opacity-80 transition-opacity duration-200"
-                          >
-                            {node.merchandise.product.featuredImage ? (
-                              <img
-                                src={node.merchandise.product.featuredImage.url}
-                                alt={
-                                  node.merchandise.product.featuredImage
-                                    .altText || node.merchandise.product.title
-                                }
-                                className="h-full w-full object-cover"
-                              />
-                            ) : (
-                              <div className="flex h-full w-full items-center justify-center">
-                                <ShoppingBag size={18} className="text-muted" />
+                          {(() => {
+                            const isCustomDesign = (node.attributes ?? []).some(a => a.key === "_design_json");
+                            const previewUrl = (node.attributes ?? []).find(a => a.key === "Design-Vorschau")?.value;
+                            return isCustomDesign && previewUrl ? (
+                              <div className="h-20 w-20 shrink-0 rounded-sm border border-rust/30 overflow-hidden bg-stone-50 dark:bg-zinc-800">
+                                <img
+                                  src={previewUrl}
+                                  alt="Dein Design"
+                                  className="h-full w-full object-contain p-1"
+                                />
                               </div>
-                            )}
-                          </Link>
+                            ) : (
+                              <Link
+                                href={`/pages/products/${node.merchandise.product.handle}`}
+                                className="h-20 w-20 shrink-0 rounded-sm border border-zinc-200 dark:border-zinc-700 overflow-hidden bg-zinc-50 dark:bg-zinc-800 hover:opacity-80 transition-opacity duration-200"
+                              >
+                                {node.merchandise.product.featuredImage ? (
+                                  <img
+                                    src={node.merchandise.product.featuredImage.url}
+                                    alt={
+                                      node.merchandise.product.featuredImage
+                                        .altText || node.merchandise.product.title
+                                    }
+                                    className="h-full w-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="flex h-full w-full items-center justify-center">
+                                    <ShoppingBag size={18} className="text-muted" />
+                                  </div>
+                                )}
+                              </Link>
+                            );
+                          })()}
 
                           {/* Info */}
                           <div className="flex-1 min-w-0">
@@ -174,18 +188,24 @@ const CartPage = () => {
                               </p>
                             )}
 
-                            {(node.attributes ?? []).length > 0 && (
-                              <div className="mt-1 space-y-0.5">
-                                {(node.attributes ?? []).map((attr) => (
-                                  <p
-                                    key={attr.key}
-                                    className="text-xs text-muted"
-                                  >
-                                    {attr.key}: {attr.value}
-                                  </p>
-                                ))}
-                              </div>
-                            )}
+                            {(() => {
+                              const isCustomDesign = (node.attributes ?? []).some(a => a.key === "_design_json");
+                              if (isCustomDesign) {
+                                return (
+                                  <p className="mt-1 text-xs text-rust font-medium">Individuelles Design</p>
+                                );
+                              }
+                              const visible = (node.attributes ?? []).filter(a => !a.key.startsWith("_"));
+                              return visible.length > 0 ? (
+                                <div className="mt-1 space-y-0.5">
+                                  {visible.map((attr) => (
+                                    <p key={attr.key} className="text-xs text-muted">
+                                      {attr.key}: {attr.value}
+                                    </p>
+                                  ))}
+                                </div>
+                              ) : null;
+                            })()}
 
                             {/* Quantity stepper */}
                             <div className="mt-3 flex items-center gap-3">

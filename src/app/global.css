@@ -19,7 +19,7 @@
     --color-background-transparent: rgba(245, 243, 232, 0.904);
     --color-rust: #b85c2a; /* terracotta / warm rust */
     --color-stone: #78716c; /* warm gray (stone-500) */
-    --color-rust-light: #f0e8e0;
+    --color-rust-light: #edd2b7;
     --color-rust-mid: #d4652b;
 
     --serif: "Playfair Display", Georgia, serif;
@@ -47,4 +47,40 @@
   h3 {
     @apply font-display tracking-tight;
   }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Uploadcare Widget — angepasst ans Projekt-Design                   */
+/* ------------------------------------------------------------------ */
+
+.uploadcare-wrapper {
+  /* Uploadcare CSS Custom Properties für uc-light Theme */
+  --uc-primary:            var(--color-accent);
+  --uc-primary-foreground: #ffffff;
+  --uc-secondary:          var(--color-background);
+  --uc-font-family:        var(--sans);
+  --uc-border-radius:      0.25rem; /* rounded */
+
+  width: 100%;
+}
+
+/* Den Trigger-Button der Komponente stilistisch ans Projekt angleichen */
+.uploadcare-wrapper .uc-upload-button,
+.uploadcare-wrapper [data-testid="upload-button"] {
+  width:            100%;
+  font-family:      var(--sans);
+  font-size:        0.875rem;
+  font-weight:      500;
+  background:       transparent;
+  color:            var(--color-primary);
+  border:           1px solid rgba(214, 211, 209, 0.8);
+  border-radius:    0.25rem;
+  padding:          0.375rem 0.75rem;
+  transition:       background-color 0.2s, color 0.2s;
+  cursor:           pointer;
+}
+
+.uploadcare-wrapper .uc-upload-button:hover,
+.uploadcare-wrapper [data-testid="upload-button"]:hover {
+  background: rgba(214, 211, 209, 0.3);
 }

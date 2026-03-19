@@ -83,19 +83,29 @@ const CartPopup = () => {
             {cart?.lines?.edges?.map(({ node }) => (
               <div key={node.id} className="px-4 py-3 flex items-start gap-3">
                 {/* Thumbnail */}
-                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-sm border border-sand/40 dark:border-zinc-700 bg-white dark:bg-zinc-800">
-                  {node.merchandise.product.featuredImage ? (
-                    <img
-                      src={node.merchandise.product.featuredImage.url || "/placeholder.svg"}
-                      alt={node.merchandise.product.featuredImage.altText || node.merchandise.product.title}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center">
-                      <span className="text-[10px] text-muted">{t("common.noImg")}</span>
+                {(() => {
+                  const isCustomDesign = (node.attributes ?? []).some(a => a.key === "_design_json");
+                  const previewUrl = (node.attributes ?? []).find(a => a.key === "Design-Vorschau")?.value;
+                  return isCustomDesign && previewUrl ? (
+                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-sm border border-rust/30 bg-stone-50 dark:bg-zinc-800">
+                      <img src={previewUrl} alt="Dein Design" className="h-full w-full object-contain p-0.5" />
                     </div>
-                  )}
-                </div>
+                  ) : (
+                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-sm border border-sand/40 dark:border-zinc-700 bg-white dark:bg-zinc-800">
+                      {node.merchandise.product.featuredImage ? (
+                        <img
+                          src={node.merchandise.product.featuredImage.url || "/placeholder.svg"}
+                          alt={node.merchandise.product.featuredImage.altText || node.merchandise.product.title}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center">
+                          <span className="text-[10px] text-muted">{t("common.noImg")}</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
@@ -103,17 +113,20 @@ const CartPopup = () => {
                     {node.merchandise.product.title}
                   </p>
                   <p className="text-xs text-stone dark:text-muted mt-0.5">
-                    {t("cart.amoun")}: {node.quantity}
+                    {t("common.amount")}: {node.quantity}
                   </p>
-                  {(node.attributes ?? []).length > 0 && (
-                    <div className="text-xs text-stone dark:text-muted mt-0.5 space-y-0.5">
-                      {(node.attributes ?? []).map((attribute, idx) => (
-                        <div key={idx}>
-                          {attribute.key}: {attribute.value}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  {(() => {
+                    const isCustomDesign = (node.attributes ?? []).some(a => a.key === "_design_json");
+                    if (isCustomDesign) return <p className="text-xs text-rust font-medium mt-0.5">Individuelles Design</p>;
+                    const visible = (node.attributes ?? []).filter(a => !a.key.startsWith("_"));
+                    return visible.length > 0 ? (
+                      <div className="text-xs text-stone dark:text-muted mt-0.5 space-y-0.5">
+                        {visible.map((attribute, idx) => (
+                          <div key={idx}>{attribute.key}: {attribute.value}</div>
+                        ))}
+                      </div>
+                    ) : null;
+                  })()}
                 </div>
 
                 {/* Price + delete */}
