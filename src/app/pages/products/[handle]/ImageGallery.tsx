@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import type { Image as ShopifyImage } from "../../../types/shopify";
@@ -16,6 +16,7 @@ export default function ImageGallery({ images, productTitle, initialImage }: Pro
   const [selectedImage, setSelectedImage] = useState(initialImage);
   const [currentIndex, setCurrentIndex]   = useState(0);
   const [imgLoaded, setImgLoaded]         = useState(false);
+  const touchStartX = useRef<number | null>(null);
 
   const goTo = (index: number) => {
     const next = (index + images.length) % images.length;
@@ -29,6 +30,17 @@ export default function ImageGallery({ images, productTitle, initialImage }: Pro
     if (e.key === "ArrowRight") goTo(currentIndex + 1);
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) goTo(currentIndex + (diff > 0 ? 1 : -1));
+    touchStartX.current = null;
+  };
+
   return (
     <div
       className="flex flex-col gap-3 md:sticky md:top-8"
@@ -37,7 +49,11 @@ export default function ImageGallery({ images, productTitle, initialImage }: Pro
       aria-label="Bilder-Galerie"
     >
       {/* Main image */}
-      <div className="relative aspect-[3/4] overflow-hidden rounded bg-zinc-100 dark:bg-zinc-800">
+      <div
+        className="relative aspect-[3/4] overflow-hidden rounded bg-zinc-100 dark:bg-zinc-800"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         {selectedImage ? (
           <Image
             src={selectedImage}

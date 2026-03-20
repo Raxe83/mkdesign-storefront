@@ -61,7 +61,7 @@ const HomePage = () => {
       <Hero
         title={"Jedes Stück ein Unikat"}
         description={
-          "Personalisierte Produkte in Handarbeit gefertigt – von Feuertonnen über Schmuck bis hin zu Schieferuhren. Direkt aus Bleckede an Euch."
+          "Personalisierte Produkte in Handarbeit gefertigt – von Feuertonnen über Schmuck bis hin zu Schieferuhren. Direkt aus Bleckede zu Euch."
         }
         image={{
           src: require("./img/feuertonne_nice.jpeg").default,

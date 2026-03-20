@@ -397,7 +397,16 @@ export function ProductReviews({ productId, short = false }: ProductReviewsProps
             ))}
           </div>
 
-          <div className="flex items-center justify-center gap-3 mt-6">
+          <div className="relative flex items-center justify-center mt-6">
+            {page > 1 && (
+              <button
+                onClick={() => fetchReviews(1)}
+                disabled={loading}
+                className="absolute left-0 px-4 py-2.5 rounded-sm border border-zinc-300 dark:border-zinc-700 text-sm text-muted hover:border-zinc-500 hover:text-primary dark:hover:border-zinc-500 dark:hover:text-neutral-200 transition-colors duration-200 disabled:opacity-40"
+              >
+                Weniger anzeigen
+              </button>
+            )}
             {hasNextPage && (
               <button
                 onClick={() => fetchReviews(page + 1)}
@@ -405,15 +414,6 @@ export function ProductReviews({ productId, short = false }: ProductReviewsProps
                 className="px-6 py-2.5 rounded-sm border border-zinc-300 dark:border-zinc-700 text-sm text-muted hover:border-accent hover:text-accent transition-colors duration-200 disabled:opacity-40"
               >
                 Mehr laden
-              </button>
-            )}
-            {page > 1 && (
-              <button
-                onClick={() => fetchReviews(1)}
-                disabled={loading}
-                className="px-6 py-2.5 rounded-sm border border-zinc-300 dark:border-zinc-700 text-sm text-muted hover:border-zinc-500 hover:text-primary dark:hover:border-zinc-500 dark:hover:text-neutral-200 transition-colors duration-200 disabled:opacity-40"
-              >
-                Weniger anzeigen
               </button>
             )}
           </div>

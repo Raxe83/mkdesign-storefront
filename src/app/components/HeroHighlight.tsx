@@ -3,7 +3,7 @@ import { CirclePlay, Mail, Star, Truck } from "lucide-react";
 const items = [
   {
     title: "Handarbeit",
-    description: "Jedes Produkt wird von Markus persönlich in Handarbeit gefertigt",
+    description: "Jedes Produkt wird mit Liebe zum Detail in Handarbeit gefertigt",
     icon: CirclePlay,
   },
   {
@@ -13,7 +13,7 @@ const items = [
   },
   {
     title: "Schneller Versand",
-    description: "GLS & UPS Versand direkt ab Werkstatt in Bleckede",
+    description: "DHL & GLS Versand direkt nach fertigung an Euch",
     icon: Truck,
   },
   {
