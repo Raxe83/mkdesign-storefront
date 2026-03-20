@@ -52,7 +52,6 @@ function ResultRow({
     : { href: result.href, onClick: onClose };
 
   return (
-    // @ts-expect-error – polymorphic link/anchor
     <Tag
       {...linkProps}
       onClick={onClose}
