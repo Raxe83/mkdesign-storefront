@@ -121,7 +121,7 @@ const HomePage = () => {
       <GiftFinder />
       <Personalization
         image={{
-          src: require("./img/Ornate Fire Pits.png").default,
+          src: require("./img/feuertonne_blank.png").default,
           alt: "",
         }}
         secondaryCta={{

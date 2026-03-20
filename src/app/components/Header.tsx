@@ -2,6 +2,7 @@
 
 import {
   House,
+  Instagram,
   LayoutGrid,
   Menu,
   Package,
@@ -149,13 +150,6 @@ const Header = () => {
               className="md:hidden relative p-2.5 text-muted hover:text-primary transition-colors duration-200"
               aria-label="Warenkorb"
             >
-              <User size={22} />
-            </Link>
-            <Link
-              href="/pages/cart"
-              className="md:hidden relative p-2.5 text-muted hover:text-primary transition-colors duration-200"
-              aria-label="Warenkorb"
-            >
               <ShoppingCart size={22} />
               {itemCount > 0 && (
                 <span className="absolute top-1.5 right-1.5 bg-accent text-white text-[9px] font-medium rounded-full h-4 w-4 flex items-center justify-center leading-none">
@@ -244,8 +238,10 @@ const Header = () => {
           </button>
         </div>
 
-        {/* Nav items */}
-        <nav className="flex-1 overflow-y-auto px-3 py-3">
+        {/* ── Scrollbarer Bereich ── */}
+        <nav className="flex-1 overflow-y-auto px-3 py-3 flex flex-col">
+
+          {/* Haupt-Navigation */}
           <ul className="space-y-0.5">
             {navItems.map((item) => {
               const isActive = pathname === item.url;
@@ -262,29 +258,21 @@ const Header = () => {
                         : "text-charcoal dark:text-primary hover:bg-sand/30 dark:hover:bg-zinc-800",
                     )}
                   >
-                    <span
-                      className={cn(
-                        "shrink-0",
-                        isActive ? "text-rust" : "text-muted",
-                      )}
-                    >
+                    <span className={cn("shrink-0", isActive ? "text-rust" : "text-muted")}>
                       {item.icon}
                     </span>
                     {item.title}
-                    {isActive && (
-                      <span className="ml-auto w-1.5 h-1.5 rounded-full bg-rust shrink-0" />
-                    )}
+                    {isActive && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-rust shrink-0" />}
                   </Link>
                 </li>
               );
             })}
           </ul>
 
-          {/* Divider */}
-          <div className="my-4 mx-4 h-px bg-sand/40 dark:bg-zinc-800" />
+          <div className="my-3 mx-4 h-px bg-sand/40 dark:bg-zinc-800" />
 
-          {/* Cart */}
-          <ul>
+          {/* Warenkorb + Anmelden */}
+          <ul className="space-y-0.5">
             <li>
               <Link
                 href="/pages/cart"
@@ -301,14 +289,68 @@ const Header = () => {
                 </span>
                 Warenkorb
                 {itemCount > 0 && (
-                  <span className="ml-auto text-xs font-medium text-accent">
-                    {itemCount} Artikel
-                  </span>
+                  <span className="ml-auto text-xs font-medium text-accent">{itemCount} Artikel</span>
                 )}
               </Link>
             </li>
+            <li>
+              <button
+                className="w-full flex items-center gap-3.5 px-4 py-4 rounded-sm text-base font-medium text-charcoal dark:text-primary hover:bg-sand/30 dark:hover:bg-zinc-800 transition-colors duration-150"
+              >
+                <span className="shrink-0 text-muted"><User size={20} /></span>
+                Anmelden
+              </button>
+            </li>
           </ul>
+
+          <div className="my-3 mx-4 h-px bg-sand/40 dark:bg-zinc-800" />
+
+          {/* Sekundäre Links */}
+          <div>
+            <p className="px-4 pb-1.5 text-[10px] font-medium text-muted uppercase tracking-[0.14em]">
+              Weitere Seiten
+            </p>
+            <ul className="space-y-0.5">
+              {[
+                { url: "/pages/contact", title: "Kontakt" },
+                { url: "/pages/aboutus", title: "Über uns" },
+                { url: "/pages/shipping", title: "Versand & Lieferung" },
+                { url: "/pages/imprint", title: "Impressum" },
+                { url: "/pages/privacy", title: "Datenschutz" },
+                { url: "/pages/tos", title: "AGB" },
+              ].map((item) => (
+                <li key={item.url}>
+                  <Link
+                    href={item.url}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center px-4 py-2.5 rounded-sm text-sm text-stone dark:text-muted hover:text-primary dark:hover:text-primary hover:bg-sand/30 dark:hover:bg-zinc-800 transition-colors duration-150"
+                  >
+                    {item.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Spacer so footer is pushed down */}
+          <div className="flex-1" />
         </nav>
+
+        {/* ── Social Footer (pinned bottom) ── */}
+        <div className="shrink-0 px-5 py-4 border-t border-sand/40 dark:border-zinc-800 flex items-center gap-3">
+          <p className="text-[10px] font-medium text-muted uppercase tracking-[0.14em] mr-auto">
+            Folg uns
+          </p>
+          <a
+            href="https://instagram.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram"
+            className="p-2 text-muted hover:text-rust transition-colors duration-200 rounded-sm hover:bg-sand/30 dark:hover:bg-zinc-800"
+          >
+            <Instagram size={18} />
+          </a>
+        </div>
       </div>
 
       <CartPopup />

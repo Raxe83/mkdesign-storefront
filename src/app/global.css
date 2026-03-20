@@ -50,6 +50,70 @@
 }
 
 /* ------------------------------------------------------------------ */
+/*  PersonalizationVisual — Design-Animation                           */
+/* ------------------------------------------------------------------ */
+
+@keyframes pv-cursor {
+  /* einblenden & zum Dreieck fahren */
+  0%, 5%    { transform: translate(0px, 0px); opacity: 0; }
+  10%       { transform: translate(0px, 0px); opacity: 1; }
+  24%       { transform: translate(-55px, -175px); opacity: 1; }
+  /* Klick */
+  28%       { transform: translate(-55px, -175px) scale(0.76); }
+  32%       { transform: translate(-55px, -175px) scale(1); }
+  /* zu Resize-Handle (unten-rechts Ecke) */
+  36%       { transform: translate(-42px, -161px); }
+  /* ziehen — weit nach unten-rechts */
+  66%       { transform: translate(28px, -108px); }
+  /* loslassen & zurück */
+  72%       { transform: translate(28px, -108px); }
+  84%       { transform: translate(0px, 0px); opacity: 1; }
+  94%, 100% { transform: translate(0px, 0px); opacity: 0; }
+}
+
+@keyframes pv-zone-pulse {
+  0%, 100% { opacity: 0.45; box-shadow: 0 0 0 0 rgba(184, 92, 42, 0); }
+  50%      { opacity: 0.9;  box-shadow: 0 0 0 4px rgba(184, 92, 42, 0.12); }
+}
+
+@keyframes pv-caret {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+
+@keyframes pv-triangle-scale {
+  /* Klick-Compress */
+  0%,  27% { transform: scale(1); }
+  31%      { transform: scale(0.84); }
+  35%      { transform: scale(1); }
+  /* wächst mit dem Cursor-Drag */
+  66%      { transform: scale(3.2); }
+  72%      { transform: scale(3.2); }
+  /* zurück */
+  86%      { transform: scale(1); }
+  100%     { transform: scale(1); }
+}
+
+@keyframes pv-selection-show {
+  /* erscheint nach dem Klick, bleibt bis Dreieck zurückschrumpft */
+  0%,  33% { opacity: 0; }
+  37%      { opacity: 1; }
+  73%      { opacity: 1; }
+  80%      { opacity: 0; }
+  100%     { opacity: 0; }
+}
+
+@keyframes pv-tool-drift {
+  0%, 100% { transform: translateY(0px) rotate(-1deg); }
+  50%      { transform: translateY(-4px) rotate(1deg); }
+}
+
+@keyframes pv-panel-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+/* ------------------------------------------------------------------ */
 /*  Uploadcare Widget — angepasst ans Projekt-Design                   */
 /* ------------------------------------------------------------------ */
 

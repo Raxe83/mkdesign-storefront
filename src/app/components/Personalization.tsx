@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { cn } from "../utils/utils";
+import { PersonalizationVisual } from "./PersonalizationVisual";
 
 export interface PersonalizationStep {
   step: number;
@@ -108,19 +108,11 @@ export function Personalization({
             )}
           </div>
 
-          {/* ── Right: Bild + Pull Quote ── */}
+          {/* ── Right: Animiertes Design-Visual ── */}
           <div className="relative">
-            <div className="relative w-full aspect-[3/4] rounded-sm overflow-hidden">
-              <Image
-                src={image.src}
-                alt={image.alt}
-                fill
-                sizes="(max-width: 1024px) 70vw, 50vw"
-                className="object-cover"
-              />
-            </div>
+            <PersonalizationVisual src={image.src} alt={image.alt} />
             {pullQuote && (
-              <div className="absolute -bottom-4 -right-4 lg:-right-6 bg-rust text-white px-5 py-3 rounded-sm max-w-[200px]">
+              <div className="absolute -bottom-4 -right-4 lg:-right-6 bg-rust text-white px-5 py-3 rounded-sm max-w-[200px] z-10">
                 <p className="font-display italic text-sm leading-snug">{pullQuote}</p>
               </div>
             )}
