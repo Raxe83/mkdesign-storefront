@@ -18,6 +18,14 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "mkdesignweb.de",
       },
+      {
+        protocol: "https",
+        hostname: "judgeme-review-images.s3.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.judge.me",
+      },
     ],
   },
   webpack(config, { isServer }) {
