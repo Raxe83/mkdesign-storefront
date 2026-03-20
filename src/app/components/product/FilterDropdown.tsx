@@ -101,7 +101,7 @@ export type FilterDropdownProps = Pick<
   | "setPriceMax"
   | "clearFilters"
   | "toggleType"
-> & { dark?: boolean };
+> & { dark?: boolean; isLoading?: boolean };
 
 export default function FilterDropdown({
   search,
@@ -121,6 +121,7 @@ export default function FilterDropdown({
   clearFilters,
   toggleType,
   dark = false,
+  isLoading = false,
 }: FilterDropdownProps) {
   const [open, setOpen] = useState<OpenPanel>(null);
   const barRef = useRef<HTMLDivElement>(null);
@@ -237,7 +238,14 @@ export default function FilterDropdown({
         </FilterButton>
 
         {/* ── Produkttyp ── */}
-        {allProductTypes.length > 0 && (
+        {isLoading ? (
+          <div className={`flex items-center gap-1.5 px-3 py-2 text-sm rounded-sm border animate-pulse ${
+            dark ? "border-white/15 bg-white/10" : "border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800"
+          }`}>
+            <div className={`h-3 w-20 rounded ${dark ? "bg-white/20" : "bg-zinc-300 dark:bg-zinc-600"}`} />
+            <div className={`h-2.5 w-2.5 rounded-full ${dark ? "bg-white/20" : "bg-zinc-300 dark:bg-zinc-600"}`} />
+          </div>
+        ) : allProductTypes.length > 0 ? (
           <FilterButton
             label="Produkttyp"
             active={selectedTypes.size > 0}
@@ -262,7 +270,7 @@ export default function FilterDropdown({
               </div>
             </Panel>
           </FilterButton>
-        )}
+        ) : null}
 
         {/* ── Sortieren ── */}
         <FilterButton

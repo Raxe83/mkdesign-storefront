@@ -2,11 +2,9 @@
 
 import { Phone, MapPin, Mail } from "lucide-react";
 import Link from "next/link";
-import { useTranslation } from "react-i18next";
 import { shopDetails } from "../global";
 
 const Footer = () => {
-  const [t] = useTranslation();
   return (
     <footer className="bg-[#18181b] border-t border-zinc-800 text-zinc-400">
       <div className="max-w-screen-xl mx-auto px-6 py-14">
@@ -37,7 +35,7 @@ const Footer = () => {
                   href="/pages/products"
                   className="text-sm hover:text-white transition-colors duration-150"
                 >
-                  {t("product.allProducts")}
+                  Produkte
                 </Link>
               </li>
               <li>
@@ -95,7 +93,7 @@ const Footer = () => {
           {/* Kontakt */}
           <div>
             <p className="text-xs uppercase tracking-widest text-zinc-500 mb-4">
-              {t("common.contact")}
+              Kontakt
             </p>
             <address className="not-italic space-y-3">
               <div className="flex items-start gap-2.5 text-sm">
@@ -131,26 +129,26 @@ const Footer = () => {
         <div className="border-t border-zinc-800 mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-zinc-600">
           <p>
             &copy; {new Date().getFullYear()} {shopDetails.shopname}.{" "}
-            {t("footer.allRights")}
+            Alle Rechte vorbehalten
           </p>
           <div className="flex gap-4">
             <Link
               href="/pages/privacy"
               className="hover:text-zinc-400 transition-colors duration-150"
             >
-              {t("footer.dataProtection")}
+              Datenschutz
             </Link>
             <Link
               href="/pages/tos"
               className="hover:text-zinc-400 transition-colors duration-150"
             >
-              {t("footer.tou")}
+              Nutzungsbedingungen
             </Link>
             <Link
               href="/pages/imprint"
               className="hover:text-zinc-400 transition-colors duration-150"
             >
-              {t("footer.imprint")}
+              Impressum
             </Link>
           </div>
         </div>

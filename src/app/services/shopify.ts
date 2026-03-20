@@ -10,18 +10,15 @@ async function shopifyFetch<T>({
   query,
   variables = {},
   locale,
+  revalidate,
 }: {
   query: string;
-  variables?: any;
+  variables?: Record<string, unknown>;
   locale?: string;
+  /** Next.js ISR revalidation in seconds. Omit for no caching. */
+  revalidate?: number | false;
 }): Promise<T> {
-  // Füge locale zu variables hinzu, wenn es angegeben wurde
-  const variablesWithLocale = locale
-    ? {
-        ...variables,
-        locale,
-      }
-    : variables;
+  const variablesWithLocale = locale ? { ...variables, locale } : variables;
 
   try {
     const headers: Record<string, string> = {
@@ -29,17 +26,15 @@ async function shopifyFetch<T>({
       "X-Shopify-Storefront-Access-Token": SHOPIFY_STOREFRONT_TOKEN as string,
     };
 
-    // Füge Accept-Language nur hinzu, wenn locale angegeben wurde
-    if (locale) {
-      headers["Accept-Language"] = locale;
-    }
+    if (locale) headers["Accept-Language"] = locale;
 
     const response = await fetch(
-      `https://${SHOPIFY_DOMAIN}/api/2023-10/graphql.json`,
+      `https://${SHOPIFY_DOMAIN}/api/2024-10/graphql.json`,
       {
         method: "POST",
         headers,
         body: JSON.stringify({ query, variables: variablesWithLocale }),
+        ...(revalidate !== undefined && { next: { revalidate } }),
       },
     );
 
@@ -242,6 +237,8 @@ export async function getProductByHandle(
         handle
         description
         descriptionHtml
+        tags
+        productType
         featuredImage {
           url
           altText
@@ -781,4 +778,78 @@ export async function removeCartItem(
   });
 
   return response.cartLinesRemove.cart;
+}
+
+// ─── Metaobjects ─────────────────────────────────────────────────────────────
+
+import type { Metaobject } from "../types/shopify";
+
+const METAOBJECT_QUERY = `
+  query getMetaobjectsByType($type: String!) {
+    metaobjects(type: $type, first: 10) {
+      edges {
+        node {
+          id
+          handle
+          type
+          fields {
+            key
+            value
+            type
+            reference {
+              ... on MediaImage {
+                image {
+                  url
+                  altText
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+interface MetaobjectResponse {
+  metaobjects: { edges: Array<{ node: Metaobject }> };
+}
+
+/**
+ * Fetch a single Shopify Metaobject by handle + type.
+ * Cached via Next.js ISR (revalidates every hour).
+ *
+ * @example
+ *   const obj = await getMetaobjectByHandle("homepage-hero", "hero_banner");
+ *   const title = obj?.fields.find(f => f.key === "title")?.value;
+ */
+/**
+ * Fetch category-specific extra info from a Shopify Metaobject.
+ *
+ * Builds the Metaobject type as `{category}_extra_info`
+ * (hyphens replaced with underscores for Shopify compatibility).
+ * Returns the first entry of that type.
+ *
+ * Shopify Admin: Einstellungen → Benutzerdefinierte Daten → Metaobjekte
+ * Metaobject-Typen: stehtisch_extra_info | feuertonne_extra_info | laser_extra_info | …
+ *
+ * @example
+ *   const info = await getExtraInfoByType("stehtisch");
+ *   const info = await getExtraInfoByType("3d-druck"); // → type: 3d_druck_extra_info
+ */
+export async function getExtraInfoByType(
+  category: string,
+): Promise<Metaobject[]> {
+  const metaobjectType = `${category.replace(/-/g, "_")}_extra_info`;
+  try {
+    const data = await shopifyFetch<MetaobjectResponse>({
+      query: METAOBJECT_QUERY,
+      variables: { type: metaobjectType },
+      revalidate: 3600,
+    });
+    return data.metaobjects.edges.map((e) => e.node);
+  } catch (error) {
+    console.error(`getExtraInfoByType error [${metaobjectType}]:`, error);
+    return [];
+  }
 }

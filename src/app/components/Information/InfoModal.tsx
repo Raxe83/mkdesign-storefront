@@ -3,8 +3,6 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
-import { useTranslation } from "react-i18next";
-
 interface InfoModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -13,7 +11,6 @@ interface InfoModalProps {
 }
 
 const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose, title, message }) => {
-  const [ t ] = useTranslation();
   return (
     <AnimatePresence>
       {isOpen && (
@@ -38,7 +35,7 @@ const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose, title, message }
                 onClick={onClose}
                 className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
               >
-                {t("common.check")}
+                OK
               </button>
             </div>
           </motion.div>

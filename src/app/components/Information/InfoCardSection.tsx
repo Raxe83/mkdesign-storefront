@@ -4,8 +4,6 @@ import React from "react";
 import DynamicIconComponent from "../../utils/GetIcon";
 import { IconName } from "lucide-react/dynamic";
 import { recolorText } from "../../utils/recolorString";
-import { useTranslation } from "react-i18next";
-
 // Separate Card-Komponente für eine sauberere Struktur
 const InfoCard = ({
   icon,
@@ -26,22 +24,20 @@ const InfoCard = ({
 };
 
 const InfoCardSection = () => {
-  const [t] = useTranslation();
-
   const InfoValues = [
     {
-      title: t("infoCard.safe.header"),
-      description: t("infoCard.safe.desc"),
+      title: "Sicher & Vertrauenswürdig",
+      description: "Alle Produkte werden sorgfältig geprüft und sicher verpackt.",
       icon: "shield" as IconName,
     },
     {
-      title: t("infoCard.stil.header"),
-      description: t("infoCard.stil.desc"),
+      title: "Einzigartiger Stil",
+      description: "Handgefertigte Unikate mit persönlicher Note.",
       icon: "flower" as IconName,
     },
     {
-      title: t("infoCard.place.header"),
-      description: t("infoCard.place.desc"),
+      title: "Leicht zu finden",
+      description: "Durchstöbere unser Sortiment und finde das Passende.",
       icon: "search" as IconName,
     },
   ];
@@ -50,7 +46,7 @@ const InfoCardSection = () => {
     <section className="py-16">
       <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
         {recolorText({
-          text: t("infoCard.header"),
+          text: "Warum bei uns kaufen",
           wordsToRecolor: 2,
           styleVariant: "JohnnyGreen",
         })}

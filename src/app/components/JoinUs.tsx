@@ -2,10 +2,7 @@
 
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useTranslation } from "react-i18next";
-
 const JoinUs = () => {
-  const [t] = useTranslation();
 
   return (
     <div className="w-full bg-background border-t border-zinc-200 dark:border-zinc-800">
@@ -28,7 +25,7 @@ const JoinUs = () => {
           >
             <input
               type="email"
-              placeholder={t("common.enterMail")}
+              placeholder="E-Mail-Adresse eingeben"
               className="flex-1 px-4 py-2.5 text-sm rounded-sm border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-primary placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-rust focus:border-rust/40 transition-colors duration-200"
             />
             <button
@@ -39,10 +36,10 @@ const JoinUs = () => {
             </button>
           </form>
           <p className="text-xs text-muted">
-            {t("joinUs.agreement")}{" "}
-            <Link href="/pages/tos" className="hover:text-primary underline underline-offset-2 transition-colors duration-150">{t("common.tos")}</Link>
-            {" "}{t("common.and")}{" "}
-            <Link href="/pages/privacy" className="hover:text-primary underline underline-offset-2 transition-colors duration-150">{t("common.privacy")}</Link>.
+            Mit der Anmeldung stimmst du unseren{" "}
+            <Link href="/pages/tos" className="hover:text-primary underline underline-offset-2 transition-colors duration-150">Nutzungsbedingungen</Link>
+            {" "}und der{" "}
+            <Link href="/pages/privacy" className="hover:text-primary underline underline-offset-2 transition-colors duration-150">Datenschutzerklärung</Link> zu.
           </p>
         </div>
       </div>

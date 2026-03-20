@@ -1,3 +1,26 @@
+// ─── Metaobjects ─────────────────────────────────────────────────────────────
+
+export interface MetaobjectField {
+  key: string;
+  value: string | null;
+  type: string;
+  reference?: {
+    image?: {
+      url: string;
+      altText: string | null;
+    };
+  } | null;
+}
+
+export interface Metaobject {
+  id: string;
+  handle: string;
+  type: string;
+  fields: MetaobjectField[];
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 export interface Money {
   amount: string
   currencyCode: string

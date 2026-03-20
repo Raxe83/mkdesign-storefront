@@ -17,8 +17,8 @@
 /.next/
 /out/
 
-# Claude
-/claude.md
+# AI Assistant Rules
+Claude.md
 
 # production
 /build

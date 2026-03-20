@@ -5,7 +5,6 @@ import { useState } from "react";
 import { ShoppingCart } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import { useToast } from "../../context/ToastContext";
-import { useTranslation } from "react-i18next";
 
 interface AddToCartButtonProps {
   variantId: string;
@@ -27,7 +26,6 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const { addItem } = useCart();
   const { addToast } = useToast();
-  const [ t ] = useTranslation();
 
   const handleAddToCart = async () => {
     if (!variantId) return;
@@ -51,10 +49,10 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
     >
       {icon && <ShoppingCart size={18} className="mr-2" />}
       {!available
-        ? t("product.notAvailableShort")
+        ? "Nicht verfügbar"
         : isLoading
-        ? t("common.adding") + "..."
-        : t("common.addToCart")}
+        ? "Hinzufügen..."
+        : "In den Warenkorb"}
     </button>
   );
 };

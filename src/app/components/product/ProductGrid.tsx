@@ -4,7 +4,6 @@ import type React from "react";
 import type { Product } from "@/app/types/shopify";
 import ProductCard from "./ProductCard";
 import Skeleton from "@/app/components/ui/Skeleton";
-import { useTranslation } from "react-i18next";
 import Link from "next/link";
 
 export interface ProductGridProps {
@@ -20,7 +19,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   isLoading = false,
   skeletonCount = 6,
 }) => {
-  const [t] = useTranslation();
 
   if (isLoading) {
     return (
@@ -40,12 +38,12 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   if (products.length === 0) {
     return (
       <div className="text-center py-16">
-        <p className="text-muted mb-4">{t("products.noProducts")}</p>
+        <p className="text-muted mb-4">Keine Produkte gefunden.</p>
         <Link
           href="/"
           className="text-sm text-accent hover:underline font-medium"
         >
-          {t("product.backToProducts")}
+          Zurück zu den Produkten
         </Link>
       </div>
     );

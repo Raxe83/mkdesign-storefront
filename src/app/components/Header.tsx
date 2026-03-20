@@ -15,8 +15,6 @@ import { usePathname } from "next/navigation";
 
 import NavLink from "./NavLink";
 import CartPopup from "./Information/CartPopup";
-import LanguageSwitcher from "../language/LanguageSwitcher";
-import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { shopDetails } from "../global";
 import { cn } from "../utils/utils";
@@ -25,12 +23,11 @@ import Image from "next/image";
 // ─── Nav items config ──────────────────────────────────────────────────────────
 
 const useNavItems = () => {
-  const [t] = useTranslation();
   return [
-    { url: "/", title: t("nav.home"), icon: <House size={20} /> },
+    { url: "/", title: "Startseite", icon: <House size={20} /> },
     {
       url: "/pages/products",
-      title: t("nav.products"),
+      title: "Produkte",
       icon: <Package size={20} />,
     },
     {
@@ -52,7 +49,6 @@ const Header = () => {
   const { itemCount, showCartPopup, setShowCartPopup } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [t] = useTranslation();
   const pathname = usePathname();
   const navItems = useNavItems();
 
@@ -106,8 +102,8 @@ const Header = () => {
             {/* Desktop nav */}
             <nav className="hidden lg:flex">
               <ul className="flex items-center gap-8">
-                <NavLink url="/" title={t("nav.home")} />
-                <NavLink url="/pages/products" title={t("nav.products")} />
+                <NavLink url="/" title="Startseite" />
+                <NavLink url="/pages/products" title="Produkte" />
                 <NavLink url="/pages/categories" title="Kategorien" />
                 <NavLink url="/pages/design" title="Eigenes Design" />
               </ul>
@@ -265,7 +261,7 @@ const Header = () => {
                     </span>
                   )}
                 </span>
-                {t("nav.cart")}
+                Warenkorb
                 {itemCount > 0 && (
                   <span className="ml-auto text-xs font-medium text-accent">
                     {itemCount} Artikel
@@ -276,10 +272,6 @@ const Header = () => {
           </ul>
         </nav>
 
-        {/* Drawer footer — language switcher */}
-        <div className="shrink-0 px-5 py-5 border-t border-sand/40 dark:border-zinc-800">
-          <LanguageSwitcher />
-        </div>
       </div>
 
       <CartPopup />

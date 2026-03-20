@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import Button from "./ui/Button";
 import { setCookie, getCookie } from "../lib/cookies";
 import { motion } from "framer-motion";
-import { useTranslation } from "react-i18next";
 import Link from "next/link";
 
 export default function CookieConsent() {
@@ -17,8 +16,6 @@ export default function CookieConsent() {
     analytics: false,
     marketing: false,
   });
-
-  const [t] = useTranslation();
   useEffect(() => {
     const cookieConsent = getCookie("cookie-consent");
     if (!cookieConsent) {
@@ -74,28 +71,28 @@ export default function CookieConsent() {
         <div className="grid gap-4 md:grid-cols-[2fr_1fr]">
           <div>
             <h3 className="text-lg font-semibold mb-2 text-gray-900">
-              {t("cookies.settingsHeader")}
+              Wir verwenden Cookies
             </h3>
             <p className="text-sm text-gray-600 mb-4">
-              {t("cookies.mainDesc")}{" "}
+              Wir nutzen Cookies, um dir die bestmögliche Erfahrung zu bieten.{" "}
               <Link
                 href="/privacy"
                 className="underline font-medium text-blue-600"
               >
-                {t("common.privacy")}
+                Datenschutz
               </Link>
               .
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 items-center justify-end">
             <Button color="outline_weed" onClick={() => setIsVisible(false)}>
-              {t("cookies.decline")}
+              Ablehnen
             </Button>
             <Button color="outline_weed" onClick={handleAcceptSelected}>
-              {t("cookies.acceptCurrent")}
+              Auswahl akzeptieren
             </Button>
             <Button color="earthy" onClick={handleAcceptAll}>
-              {t("cookies.acceptAll")}
+              Akzeptieren
             </Button>
           </div>
         </div>
@@ -123,10 +120,10 @@ export default function CookieConsent() {
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="font-medium text-gray-900">
-                    {t("cookies.necessaryCookies")}
+                    Notwendige Cookies
                   </h4>
                   <p className="text-sm text-gray-600">
-                    {t("cookies.necessaryDesc")}
+                    Diese Cookies sind für die Grundfunktionen der Website erforderlich.
                   </p>
                 </div>
                 <input
@@ -141,10 +138,10 @@ export default function CookieConsent() {
                 <div>
                   <h4 className="font-medium text-gray-900">
                     {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}{" "}
-                    {t("cookies.cookies")}
+                    Cookies
                   </h4>
                   <p className="text-sm text-gray-600">
-                    {t("cookies.cookiesFunction")}
+                    Diese Cookies verbessern die Funktionalität der Website.
                   </p>
                 </div>
                 <input

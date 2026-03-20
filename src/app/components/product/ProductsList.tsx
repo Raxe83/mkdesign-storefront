@@ -5,7 +5,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import ProductCard from "./ProductCard";
 import type { Product } from "@/app/types/shopify";
-import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { cn } from "@/app/utils/utils";
 
@@ -59,7 +58,6 @@ const ProductsList = ({
   sectionLabel = "Featured",
   title,
 }: ProductsListProps) => {
-  const [t] = useTranslation();
   const [page, setPage] = useState(0);
   const [dir, setDir] = useState(1);
 
@@ -87,7 +85,7 @@ const ProductsList = ({
             {sectionLabel}
           </span>
           <h2 className="font-display font-bold leading-[1.15] tracking-tight text-[clamp(1.75rem,3.5vw,2.6rem)] text-charcoal dark:text-primary">
-            {title ?? t("common.products")}
+            {title ?? "Produkte"}
           </h2>
         </div>
 
@@ -95,7 +93,7 @@ const ProductsList = ({
           href="/pages/products"
           className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:gap-3 transition-all duration-200"
         >
-          {t("common.showAll")}
+          Alle anzeigen
           <ArrowRight size={15} />
         </Link>
       </div>
@@ -203,7 +201,7 @@ const ProductsList = ({
           href="/pages/products"
           className="mt-5 flex items-center justify-center gap-1.5 text-sm font-medium text-accent"
         >
-          {t("common.showAll")}
+          Alle anzeigen
           <ArrowRight size={14} />
         </Link>
       </div>

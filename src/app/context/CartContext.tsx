@@ -16,8 +16,6 @@ import {
   removeCartItem,
   getCart,
 } from "../services/shopify";
-import i18n from "../i18n";
-
 interface CartContextType {
   cart: Cart | null;
   isLoading: boolean;
@@ -57,7 +55,7 @@ interface CartProviderProps {
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [cart, setCart] = useState<Cart | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const shopifyLocale = i18n.language
+  const shopifyLocale = "de"
 
   const [showCartPopup, setShowCartPopup] = useState<boolean>(false);
 

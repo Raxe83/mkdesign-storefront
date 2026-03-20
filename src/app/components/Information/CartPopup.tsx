@@ -5,7 +5,6 @@ import { ShoppingBag, Trash2, Truck, X } from "lucide-react";
 import Link from "next/link";
 import { useCart } from "../../context/CartContext";
 import { formatPrice } from "../../utils/formatPrice";
-import { useTranslation } from "react-i18next";
 import { Loader } from "../Loader";
 import { cn } from "../../utils/utils";
 
@@ -18,7 +17,6 @@ const CartPopup = () => {
     showCartPopup,
     setShowCartPopup,
   } = useCart();
-  const [t] = useTranslation();
 
   useEffect(() => {
     if (!showCartPopup) return;
@@ -60,7 +58,7 @@ const CartPopup = () => {
       {/* Header */}
       <div className="px-4 py-3 border-b border-sand/40 dark:border-zinc-800 flex items-center justify-between">
         <h3 className="font-display font-medium text-sm tracking-tight text-charcoal dark:text-primary">
-          {t("cart.header")}
+          Warenkorb
         </h3>
         <button
           onClick={() => setShowCartPopup(false)}
@@ -74,7 +72,7 @@ const CartPopup = () => {
       {isEmpty ? (
         <div className="px-4 py-8 text-center">
           <ShoppingBag className="h-8 w-8 mx-auto text-sand mb-3" />
-          <p className="text-sm text-stone dark:text-muted">{t("cart.empty")}</p>
+          <p className="text-sm text-stone dark:text-muted">Dein Warenkorb ist leer</p>
         </div>
       ) : (
         <>
@@ -100,7 +98,7 @@ const CartPopup = () => {
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center">
-                          <span className="text-[10px] text-muted">{t("common.noImg")}</span>
+                          <span className="text-[10px] text-muted">Kein Bild</span>
                         </div>
                       )}
                     </div>
@@ -113,7 +111,7 @@ const CartPopup = () => {
                     {node.merchandise.product.title}
                   </p>
                   <p className="text-xs text-stone dark:text-muted mt-0.5">
-                    {t("common.amount")}: {node.quantity}
+                    Menge: {node.quantity}
                   </p>
                   {(() => {
                     const isCustomDesign = (node.attributes ?? []).some(a => a.key === "_design_json");
@@ -142,7 +140,7 @@ const CartPopup = () => {
                     onClick={() => removeItem(node.id)}
                   >
                     <Trash2 className="h-3 w-3" />
-                    <span>{t("common.delete")}</span>
+                    <span>Löschen</span>
                   </button>
                 </div>
               </div>
@@ -153,7 +151,7 @@ const CartPopup = () => {
           <div className="px-4 py-4 border-t border-sand/40 dark:border-zinc-800 space-y-3">
             {/* Subtotal */}
             <div className="flex items-center justify-between">
-              <span className="text-sm text-stone dark:text-muted">{t("cart.subtotal")}</span>
+              <span className="text-sm text-stone dark:text-muted">Zwischensumme</span>
               <span className="text-sm font-medium text-charcoal dark:text-primary tabular-nums">
                 {formatPrice(
                   cart?.estimatedCost?.subtotalAmount?.amount || "0",
@@ -165,7 +163,7 @@ const CartPopup = () => {
             {/* Shipping note */}
             <div className="flex items-center gap-1.5 text-xs text-stone dark:text-muted">
               <Truck className="h-3.5 w-3.5 shrink-0" />
-              <span>{t("cart.shippingCost")}</span>
+              <span>Versandkosten werden an der Kasse berechnet.</span>
             </div>
 
             {/* Actions */}
@@ -176,7 +174,7 @@ const CartPopup = () => {
                   rel="noopener noreferrer"
                   className="block w-full bg-rust text-white text-center px-4 py-2.5 rounded-sm text-sm font-medium tracking-[0.03em] hover:bg-rust/90 transition-colors duration-200"
                 >
-                  {t("cart.checkout")}
+                  Zur Kasse
                 </a>
               )}
               <Link

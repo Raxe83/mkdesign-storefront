@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { Collection, Product } from "./types/shopify";
-import i18n from "./i18n";
 import { getCollections, getFeaturedProducts } from "./services/shopify";
 import Hero from "./components/Hero";
 import InfoCardSection from "./components/Information/InfoCardSection";
@@ -26,17 +24,15 @@ const HomePage = () => {
   const [collections, setCollections] = useState<ShopifyCollection[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [reviewStats, setReviewStats] = useState<{ total: number; average: number } | null>(null);
-  const [t] = useTranslation();
 
   useEffect(() => {
     const fetchData = async () => {
-      const shopifyLocale = i18n.language;
       try {
         setIsLoading(true);
 
         const [products, fetchedCollections] = await Promise.all([
-          getFeaturedProducts(8, shopifyLocale),
-          getCollections(6, shopifyLocale),
+          getFeaturedProducts(8, "de"),
+          getCollections(6, "de"),
         ]);
         setFeaturedProducts(products);
         setCollections(fetchedCollections);

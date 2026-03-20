@@ -11,7 +11,6 @@ import {
 import { useState, useEffect } from "react";
 import { useCart } from "../../context/CartContext";
 import { formatPrice } from "../../utils/formatPrice";
-import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import PageHeader from "../../components/PageHeader";
 
@@ -35,7 +34,6 @@ function CartItemSkeleton() {
 
 const CartPage = () => {
   const { cart, isLoading, removeItem, updateItemQuantityFunction } = useCart();
-  const [t] = useTranslation();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -47,11 +45,11 @@ const CartPage = () => {
     return (
       <div className="pb-16">
         <PageHeader
-          title={t("cart.header")}
+          title="Warenkorb"
           eyebrow="Deine Auswahl"
           breadcrumbs={[
             { label: "Start", href: "/" },
-            { label: t("cart.header") },
+            { label: "Warenkorb" },
           ]}
           singularLabel="Artikel"
           pluralLabel="Artikel"
@@ -63,11 +61,11 @@ const CartPage = () => {
   return (
     <div className="pb-16">
       <PageHeader
-        title={t("cart.header")}
+        title="Warenkorb"
         eyebrow="Deine Auswahl"
         breadcrumbs={[
           { label: "Start", href: "/" },
-          { label: t("cart.header") },
+          { label: "Warenkorb" },
         ]}
         count={isLoading ? undefined : itemCount}
         totalCount={isLoading ? undefined : itemCount}
@@ -84,16 +82,16 @@ const CartPage = () => {
           </div>
           <div>
             <h2 className="font-display font-semibold text-xl text-primary mb-2">
-              {t("cart.empty")}
+              Dein Warenkorb ist leer
             </h2>
-            <p className="text-sm text-muted">{t("cart.addProducts")}</p>
+            <p className="text-sm text-muted">Füge Produkte hinzu, um fortzufahren.</p>
           </div>
           <Link
             href="/pages/products"
             className="inline-flex items-center gap-2 px-6 py-2.5 bg-rust text-white text-sm font-medium rounded-sm hover:bg-rust/90 transition-colors duration-200"
           >
             <ArrowLeft size={15} />
-            {t("product.discoverProducts")}
+            Produkte entdecken
           </Link>
         </div>
       )}
@@ -107,7 +105,7 @@ const CartPage = () => {
               {/* List header */}
               <div className="px-5 sm:px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
                 <h2 className="text-sm font-semibold text-primary uppercase tracking-[0.08em]">
-                  {t("cart.articles")}
+                  Artikel
                 </h2>
                 {!isLoading && (
                   <span className="text-xs text-muted tabular-nums">
@@ -245,7 +243,7 @@ const CartPage = () => {
                                 className="flex items-center gap-1 text-xs text-muted hover:text-rust transition-colors duration-150"
                               >
                                 <Trash2 size={13} />
-                                {t("common.delete")}
+                                Löschen
                               </button>
                             </div>
                           </div>
@@ -294,7 +292,7 @@ const CartPage = () => {
                 {/* subtle rust glow */}
                 <div className="absolute inset-0 bg-gradient-to-br from-rust/10 via-transparent to-transparent pointer-events-none" />
                 <h2 className="font-display font-semibold text-white text-base tracking-tight relative">
-                  {t("cart.summary")}
+                  Bestellübersicht
                 </h2>
                 {!isLoading && (
                   <p className="text-white/45 text-xs mt-0.5 relative">
@@ -310,7 +308,7 @@ const CartPage = () => {
                 {/* Subtotal */}
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted">
-                    {t("cart.subtotal")}
+                    Zwischensumme
                   </span>
                   {isLoading ? (
                     <div className="h-4 w-20 rounded bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
@@ -329,7 +327,7 @@ const CartPage = () => {
                 {/* Shipping */}
                 <div className="flex items-start gap-2 text-xs text-muted">
                   <Truck size={14} className="shrink-0 mt-0.5" />
-                  <span>{t("cart.shippingCost")}</span>
+                  <span>Versandkosten werden an der Kasse berechnet.</span>
                 </div>
 
                 {/* Divider */}
@@ -338,7 +336,7 @@ const CartPage = () => {
                 {/* Total */}
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-primary">
-                    {t("cart.total")}
+                    Gesamtsumme
                   </span>
                   {isLoading ? (
                     <div className="h-5 w-24 rounded bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
@@ -361,7 +359,7 @@ const CartPage = () => {
                     rel="noopener noreferrer"
                     className="block w-full bg-rust text-white text-center px-4 py-3 rounded-sm text-sm font-semibold tracking-[0.03em] hover:bg-rust/90 active:scale-[0.98] transition-all duration-200 mt-2"
                   >
-                    {t("cart.checkout")}
+                    Zur Kasse
                   </a>
                 )}
 

@@ -3,7 +3,6 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useTranslation } from "react-i18next";
 import type { Product } from "../../types/shopify";
 import { getProducts, getProductsByCollection } from "../../services/shopify";
 import { useProductFilter, PRODUCTS_PER_PAGE } from "../../hooks/useProductFilter";
@@ -12,7 +11,6 @@ import FilterDropdown from "../../components/product/FilterDropdown";
 import ProductPagination from "../../components/product/ProductPagination";
 import Skeleton from "../../components/ui/Skeleton";
 import PageHeader from "../../components/PageHeader";
-import i18n from "../../i18n";
 
 const ProductsPageContent = () => {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -20,7 +18,6 @@ const ProductsPageContent = () => {
   const [error, setError] = useState<string | null>(null);
 
   const searchParams = useSearchParams();
-  const [t] = useTranslation();
 
   // Derive directly from URL — always in sync, no double-fetch
   const collectionHandle = searchParams.get("collection");
@@ -38,13 +35,12 @@ const ProductsPageContent = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const locale = i18n.language;
         const fetched = collectionHandle
-          ? await getProductsByCollection(collectionHandle, undefined, locale)
-          : await getProducts(undefined, locale);
+          ? await getProductsByCollection(collectionHandle, undefined, "de")
+          : await getProducts(undefined, "de");
         setAllProducts(fetched);
       } catch {
-        setError(t("product.loadError"));
+        setError("Fehler beim Laden der Produkte.");
       } finally {
         setIsLoading(false);
       }
@@ -55,7 +51,7 @@ const ProductsPageContent = () => {
   return (
     <div className="pb-12">
       <PageHeader
-        title={collectionHandle ?? productTypeParam ?? t("product.allProducts")}
+        title={collectionHandle ?? productTypeParam ?? "Alle Produkte"}
         eyebrow={collectionHandle ? "Kollektion" : productTypeParam ? "Kategorie" : "Sortiment"}
         breadcrumbs={
           collectionHandle
@@ -96,6 +92,7 @@ const ProductsPageContent = () => {
           setPriceMax={filter.setPriceMax}
           clearFilters={filter.clearFilters}
           toggleType={filter.toggleType}
+          isLoading={isLoading}
           dark
         />
       </PageHeader>
@@ -114,7 +111,7 @@ const ProductsPageContent = () => {
         <div className="text-center py-16">
           <p className="text-muted mb-4">{error}</p>
           <Link href="/" className="text-accent hover:underline text-sm font-medium">
-            {t("common.backToHome")}
+            Zurück zur Startseite
           </Link>
         </div>
       )}
@@ -125,7 +122,7 @@ const ProductsPageContent = () => {
           <p className="font-display text-lg text-primary mb-1">
             Keine Produkte gefunden
           </p>
-          <p className="text-sm text-muted mb-5">{t("product.noProducts")}</p>
+          <p className="text-sm text-muted mb-5">Versuche andere Filter oder Suchbegriffe.</p>
           {filter.hasActiveFilters && (
             <button
               onClick={filter.clearFilters}
