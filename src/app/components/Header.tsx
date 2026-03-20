@@ -6,7 +6,9 @@ import {
   Menu,
   Package,
   Palette,
+  Search,
   ShoppingCart,
+  User,
   X,
 } from "lucide-react";
 import { useCart } from "../context/CartContext";
@@ -15,6 +17,7 @@ import { usePathname } from "next/navigation";
 
 import NavLink from "./NavLink";
 import CartPopup from "./Information/CartPopup";
+import HeaderSearch from "./HeaderSearch";
 import Link from "next/link";
 import { shopDetails } from "../global";
 import { cn } from "../utils/utils";
@@ -49,8 +52,12 @@ const Header = () => {
   const { itemCount, showCartPopup, setShowCartPopup } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   const pathname = usePathname();
   const navItems = useNavItems();
+
+  // Close search on route change
+  useEffect(() => { setShowSearch(false); }, [pathname]);
 
   // Shrink header on scroll
   useEffect(() => {
@@ -129,7 +136,21 @@ const Header = () => {
 
           {/* ── Rechts: Cart ── */}
           <div className="flex items-center gap-1 ml-auto">
-            {/* Cart — mobile: direct link to cart page */}
+            {/* Search — mobile */}
+            <button
+              onClick={() => setShowSearch(true)}
+              className="md:hidden relative p-2.5 text-muted hover:text-primary transition-colors duration-200"
+              aria-label="Suche öffnen"
+            >
+              <Search size={22} />
+            </button>
+            <Link
+              href="/pages/cart"
+              className="md:hidden relative p-2.5 text-muted hover:text-primary transition-colors duration-200"
+              aria-label="Warenkorb"
+            >
+              <User size={22} />
+            </Link>
             <Link
               href="/pages/cart"
               className="md:hidden relative p-2.5 text-muted hover:text-primary transition-colors duration-200"
@@ -144,6 +165,23 @@ const Header = () => {
             </Link>
 
             {/* Cart — desktop: opens popup */}
+
+            {/* Search — desktop */}
+            <button
+              onClick={() => setShowSearch(true)}
+              aria-label="Suche öffnen"
+              className="hidden md:flex relative p-2.5 text-muted hover:text-primary transition-colors duration-200"
+            >
+              <Search size={20} />
+            </button>
+            <button
+              onClick={() => setShowCartPopup((v) => !v)}
+              aria-label="Warenkorb"
+              aria-expanded={showCartPopup}
+              className="hidden md:flex relative p-2.5 text-muted hover:text-primary transition-colors duration-200"
+            >
+              <User size={20} />
+            </button>
             <button
               onClick={() => setShowCartPopup((v) => !v)}
               aria-label="Warenkorb"
@@ -271,10 +309,10 @@ const Header = () => {
             </li>
           </ul>
         </nav>
-
       </div>
 
       <CartPopup />
+      <HeaderSearch isOpen={showSearch} onClose={() => setShowSearch(false)} />
     </>
   );
 };
