@@ -55,8 +55,9 @@ export interface JudgemeReviewsResponse {
   reviews: JudgemeReview[];
   current_page: number;
   per_page: number;
-  /** Computed: true if reviews.length >= per_page (Judge.me returns no total field) */
   hasNextPage: boolean;
+  /** Total review count from Judge.me product record */
+  totalCount?: number;
 }
 
 export interface JudgemeWidgetData {
@@ -75,11 +76,16 @@ export function extractProductId(gid: string): number {
 
 // ─── API Functions ────────────────────────────────────────────────────────────
 
+interface JudgemeProduct {
+  id: number;
+  reviews_count: number;
+}
+
 /**
- * Resolves the Judge.me internal product ID from the Shopify external ID.
- * Judge.me uses their own numeric IDs — the Shopify ID is too large for their API.
+ * Resolves the Judge.me internal product data from the Shopify external ID.
+ * Returns id + reviews_count (total, not just loaded pages).
  */
-async function resolveJudgemeProductId(shopifyProductId: number): Promise<number | null> {
+async function resolveJudgemeProduct(shopifyProductId: number): Promise<JudgemeProduct | null> {
   const { token, domain } = getCredentials();
 
   const url = new URL(`${JUDGEME_BASE}/products/-1`);
@@ -91,7 +97,9 @@ async function resolveJudgemeProductId(shopifyProductId: number): Promise<number
   if (!res.ok) return null;
 
   const data = await res.json();
-  return data.product?.id ?? null;
+  const p = data.product;
+  if (!p?.id) return null;
+  return { id: p.id, reviews_count: p.reviews_count ?? 0 };
 }
 
 /** Fetch paginated reviews for a specific product */
@@ -102,16 +110,15 @@ export async function getReviewsForProduct(
 ): Promise<JudgemeReviewsResponse> {
   const { token, domain } = getCredentials();
 
-  const judgemeId = await resolveJudgemeProductId(shopifyProductId);
-  if (!judgemeId) {
-    // Produkt noch nicht in Judge.me — leeres Ergebnis statt Fehler
-    return { reviews: [], current_page: page, per_page: perPage, hasNextPage: false };
+  const judgemeProduct = await resolveJudgemeProduct(shopifyProductId);
+  if (!judgemeProduct) {
+    return { reviews: [], current_page: page, per_page: perPage, hasNextPage: false, totalCount: 0 };
   }
 
   const url = new URL(`${JUDGEME_BASE}/reviews`);
   url.searchParams.set("api_token", token);
   url.searchParams.set("shop_domain", domain);
-  url.searchParams.set("product_id", String(judgemeId));
+  url.searchParams.set("product_id", String(judgemeProduct.id));
   url.searchParams.set("page", String(page));
   url.searchParams.set("per_page", String(perPage));
 
@@ -121,7 +128,11 @@ export async function getReviewsForProduct(
     throw new Error(`Judge.me API Fehler: ${res.status} — ${body}`);
   }
   const data = await res.json();
-  return { ...data, hasNextPage: (data.reviews?.length ?? 0) >= perPage };
+  return {
+    ...data,
+    hasNextPage: (data.reviews?.length ?? 0) >= perPage,
+    totalCount: judgemeProduct.reviews_count,
+  };
 }
 
 /** Fetch all store reviews (for the reviews overview page) */

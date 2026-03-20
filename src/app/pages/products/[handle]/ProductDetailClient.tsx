@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ArrowLeft, Minus, Plus, Truck, RotateCcw } from "lucide-react";
 import Link from "next/link";
-import type { Product, Metaobject } from "../../../types/shopify";
+import type { Product } from "../../../types/shopify";
 import type { HeroCard } from "@/app/components/product/product-category";
 import { formatPrice } from "../../../utils/formatPrice";
 import AddToCartButton from "../../../components/ui/AddToCartButton";
@@ -12,19 +12,18 @@ import ColorChooser from "../../../components/product/ColorChooser";
 import { ProductReviews } from "@/app/components/product/product-reviews";
 import { ProductHeroCards } from "@/app/components/product/ProductHeroCards";
 import { RelatedProducts } from "@/app/components/product/RelatedProducts";
-import { ProductExtraContent } from "@/app/components/product/ProductExtraContent";
 import ImageGallery from "./ImageGallery";
 
 interface Props {
-  product:          Product;
-  heroCards:        HeroCard[];
-  relatedProducts:  Product[];
-  relatedLabel:     string;
-  extraContent:     Metaobject[];
+  product:             Product;
+  heroCards:           HeroCard[];
+  relatedProducts:     Product[];
+  relatedLabel:        string;
+  extraContentSlot?:   React.ReactNode;
 }
 
 export default function ProductDetailClient({
-  product, heroCards, relatedProducts, relatedLabel, extraContent,
+  product, heroCards, relatedProducts, relatedLabel, extraContentSlot,
 }: Props) {
   const images       = product.images.edges.map((e) => e.node);
   const firstVariant = product.variants.edges[0]?.node;
@@ -61,7 +60,7 @@ export default function ProductDetailClient({
             {formatPrice(price, currencyCode)}
           </p>
 
-          <ProductReviews productId={product.id} short />
+          <ProductReviews productId={product.id} productHandle={product.handle} short />
 
           <hr className="border-zinc-200/60 dark:border-zinc-800" />
 
@@ -120,12 +119,8 @@ export default function ProductDetailClient({
         </div>
       </div>
 
-      {/* ── Extra Content ── */}
-      {extraContent.length > 0 && (
-        <div className="mt-16 pt-10 border-t border-zinc-200/60 dark:border-zinc-800">
-          <ProductExtraContent metaobjects={extraContent} />
-        </div>
-      )}
+      {/* ── Extra Content (RSC-Slot mit Suspense-Skeleton aus page.tsx) ── */}
+      {extraContentSlot}
 
       {/* ── Hero-Karten ── */}
       {/* <div className="mt-16">
@@ -144,7 +139,7 @@ export default function ProductDetailClient({
 
       {/* ── Kundenbewertungen ── */}
       <div className="mt-16 pt-10 border-t border-zinc-200/60 dark:border-zinc-800">
-        <ProductReviews productId={product.id} />
+        <ProductReviews productId={product.id} productHandle={product.handle} />
       </div>
     </div>
   );

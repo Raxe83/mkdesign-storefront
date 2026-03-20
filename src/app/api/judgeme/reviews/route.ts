@@ -2,21 +2,31 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   getReviewsForProduct,
   getAllStoreReviews,
+  getAllReviewsCached,
   createReview,
 } from "@/app/services/judgeme";
 
-// GET /api/judgeme/reviews?productId=123&page=1&perPage=10
+// GET /api/judgeme/reviews?productId=123&handle=my-product&page=1&perPage=10
 // GET /api/judgeme/reviews?page=1&perPage=30  ← all store reviews
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = req.nextUrl;
     const productId = searchParams.get("productId");
+    const handle = searchParams.get("handle");
     const page = parseInt(searchParams.get("page") ?? "1", 10);
     const perPage = parseInt(searchParams.get("perPage") ?? "10", 10);
 
     let data;
     if (productId) {
-      data = await getReviewsForProduct(Number(productId), page, perPage);
+      // Fetch paginated reviews + true total count from cached store reviews
+      const [pageData, { reviews: allReviews }] = await Promise.all([
+        getReviewsForProduct(Number(productId), page, perPage),
+        getAllReviewsCached(),
+      ]);
+      const totalCount = handle
+        ? allReviews.filter((r) => r.product_handle === handle).length
+        : pageData.totalCount;
+      data = { ...pageData, totalCount };
     } else {
       data = await getAllStoreReviews(page, perPage);
     }

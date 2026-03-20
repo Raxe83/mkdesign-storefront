@@ -23,7 +23,10 @@ const HomePage = () => {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [collections, setCollections] = useState<ShopifyCollection[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [reviewStats, setReviewStats] = useState<{ total: number; average: number } | null>(null);
+  const [reviewStats, setReviewStats] = useState<{
+    total: number;
+    average: number;
+  } | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -80,13 +83,19 @@ const HomePage = () => {
           },
         ]}
         stats={[
-          { value: reviewStats ? `${reviewStats.average}★` : "4.9★", label: "Bewertung" },
+          {
+            value: reviewStats ? `${reviewStats.average}★` : "4.9★",
+            label: "Bewertung",
+          },
           { value: "25+", label: "Kategorien" },
           { value: "100%", label: "Handarbeit" },
-          { value: reviewStats ? `${reviewStats.total}+` : "874+", label: "Bewertungen" },
+          {
+            value: reviewStats ? `${reviewStats.total}+` : "500+",
+            label: "Bewertungen",
+          },
         ]}
       />
-      <HeroHighlight />
+      <HeroHighlight reviewStats={reviewStats} />
 
       {isLoading ? (
         <Skeleton.CollectionsGrid />
@@ -97,7 +106,10 @@ const HomePage = () => {
       {isLoading ? (
         <Skeleton.ProductsGrid />
       ) : (
-        <ProductsList featuredProducts={featuredProducts} />
+        <ProductsList
+          featuredProducts={featuredProducts}
+          title="Beliebt bei Kunden"
+        />
       )}
 
       <Firehighlight
@@ -112,7 +124,10 @@ const HomePage = () => {
           src: require("./img/Ornate Fire Pits.png").default,
           alt: "",
         }}
-        secondaryCta={{ label: "Design selbst gestalten", href: "/pages/design" }}
+        secondaryCta={{
+          label: "Design selbst gestalten",
+          href: "/pages/design",
+        }}
       />
       <Reviews reviewStats={reviewStats} />
       <JoinUs />

@@ -119,7 +119,7 @@ export function Hero({
         </div>
 
         {/* ── Right: Image ── */}
-        <div className="relative overflow-hidden bg-rust-light min-h-[60vw] sm:min-h-[45vw] lg:min-h-0">
+        <div className="relative overflow-hidden bg-rust-light min-h-[75vh] lg:min-h-0">
           <Image
             src={image.src}
             alt={image.alt}

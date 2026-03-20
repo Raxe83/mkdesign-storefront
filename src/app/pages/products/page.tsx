@@ -13,19 +13,20 @@ import Skeleton from "../../components/ui/Skeleton";
 import PageHeader from "../../components/PageHeader";
 
 const ProductsPageContent = () => {
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [allProducts, setAllProducts]       = useState<Product[]>([]);
+  const [collectionIds, setCollectionIds]   = useState<Set<string> | null>(null);
+  const [isLoading, setIsLoading]           = useState(true);
+  const [error, setError]                   = useState<string | null>(null);
 
-  const searchParams = useSearchParams();
-
-  // Derive directly from URL — always in sync, no double-fetch
+  const searchParams     = useSearchParams();
   const collectionHandle = searchParams.get("collection");
   const productTypeParam = searchParams.get("productType");
 
-  const filter = useProductFilter(allProducts);
+  // Pre-select type from ?productType= param; collection filtering done via collectionIds
+  const initialTypes = productTypeParam ? new Set([productTypeParam]) : undefined;
+  const filter = useProductFilter(allProducts, initialTypes, collectionIds);
 
-  // Sync productType filter with URL param (handles mount + in-page navigation)
+  // Keep selectedTypes in sync when navigating between ?productType= URLs
   useEffect(() => {
     filter.setSelectedTypes(productTypeParam ? new Set([productTypeParam]) : new Set());
   }, [productTypeParam]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -35,10 +36,17 @@ const ProductsPageContent = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const fetched = collectionHandle
-          ? await getProductsByCollection(collectionHandle, undefined, "de")
-          : await getProducts(undefined, "de");
-        setAllProducts(fetched);
+
+        // Always load ALL products so every filter option stays visible
+        const [allFetched, collectionFetched] = await Promise.all([
+          getProducts(undefined, "de"),
+          collectionHandle ? getProductsByCollection(collectionHandle, undefined, "de") : Promise.resolve(null),
+        ]);
+
+        setAllProducts(allFetched);
+        setCollectionIds(
+          collectionFetched ? new Set(collectionFetched.map((p) => p.id)) : null,
+        );
       } catch {
         setError("Fehler beim Laden der Produkte.");
       } finally {
@@ -46,7 +54,7 @@ const ProductsPageContent = () => {
       }
     };
     fetchProducts();
-  }, [collectionHandle]);
+  }, [collectionHandle]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="pb-12">
@@ -77,7 +85,6 @@ const ProductsPageContent = () => {
         <FilterDropdown
           search={filter.search}
           sort={filter.sort}
-          onlyAvailable={filter.onlyAvailable}
           selectedTypes={filter.selectedTypes}
           priceMin={filter.priceMin}
           priceMax={filter.priceMax}

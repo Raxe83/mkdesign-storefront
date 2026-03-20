@@ -9,6 +9,7 @@ import type { JudgemeReview } from "@/app/services/judgeme";
 
 interface ProductReviewsProps {
   productId: string;
+  productHandle?: string;
   short?: boolean;
 }
 
@@ -27,6 +28,12 @@ function Lightbox({
 
   const prev = useCallback(() => setCurrent((i) => (i - 1 + images.length) % images.length), [images.length]);
   const next = useCallback(() => setCurrent((i) => (i + 1) % images.length), [images.length]);
+
+  // Scroll sperren solange Lightbox offen
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -282,9 +289,10 @@ function WriteReviewForm({ numericProductId, onSuccess }: { numericProductId: nu
 
 const PER_PAGE = 5;
 
-export function ProductReviews({ productId, short = false }: ProductReviewsProps) {
+export function ProductReviews({ productId, productHandle, short = false }: ProductReviewsProps) {
   const [reviews, setReviews] = useState<JudgemeReview[]>([]);
   const [hasNextPage, setHasNextPage] = useState(false);
+  const [totalCount, setTotalCount] = useState<number | null>(null);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -295,11 +303,13 @@ export function ProductReviews({ productId, short = false }: ProductReviewsProps
   const fetchReviews = async (p = 1) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/judgeme/reviews?productId=${numericId}&page=${p}&perPage=${PER_PAGE}`);
+      const handleParam = productHandle ? `&handle=${encodeURIComponent(productHandle)}` : "";
+      const res = await fetch(`/api/judgeme/reviews?productId=${numericId}${handleParam}&page=${p}&perPage=${PER_PAGE}`);
       if (!res.ok) throw new Error();
       const data = await res.json();
       setReviews((prev) => p === 1 ? data.reviews : [...prev, ...data.reviews]);
       setHasNextPage(data.hasNextPage ?? false);
+      if (data.totalCount != null) setTotalCount(data.totalCount);
       setPage(p);
     } catch {
       // silent
@@ -334,7 +344,7 @@ export function ProductReviews({ productId, short = false }: ProductReviewsProps
       <button onClick={() => document.getElementById("reviews-section")?.scrollIntoView({ behavior: "smooth" })} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity duration-150">
         <Stars rating={Math.round(averageRating)} />
         <span className="text-xs text-muted">
-          {averageRating.toFixed(1)} ({reviews.length}{hasNextPage ? "+" : ""} {reviews.length === 1 ? "Bewertung" : "Bewertungen"})
+          {averageRating.toFixed(1)} ({totalCount ?? reviews.length}{totalCount == null && hasNextPage ? "+" : ""} {(totalCount ?? reviews.length) === 1 ? "Bewertung" : "Bewertungen"})
         </span>
       </button>
     );
@@ -359,7 +369,7 @@ export function ProductReviews({ productId, short = false }: ProductReviewsProps
             <div className="flex items-center gap-2 mt-1">
               <Stars rating={Math.round(averageRating)} />
               <span className="text-xs text-muted">
-                {averageRating.toFixed(1)} · {reviews.length}{hasNextPage ? "+" : ""} {reviews.length === 1 ? "Bewertung" : "Bewertungen"}
+                {averageRating.toFixed(1)} · {totalCount ?? reviews.length}{totalCount == null && hasNextPage ? "+" : ""} {(totalCount ?? reviews.length) === 1 ? "Bewertung" : "Bewertungen"}
               </span>
             </div>
           )}
@@ -397,16 +407,7 @@ export function ProductReviews({ productId, short = false }: ProductReviewsProps
             ))}
           </div>
 
-          <div className="relative flex items-center justify-center mt-6">
-            {page > 1 && (
-              <button
-                onClick={() => fetchReviews(1)}
-                disabled={loading}
-                className="absolute left-0 px-4 py-2.5 rounded-sm border border-zinc-300 dark:border-zinc-700 text-sm text-muted hover:border-zinc-500 hover:text-primary dark:hover:border-zinc-500 dark:hover:text-neutral-200 transition-colors duration-200 disabled:opacity-40"
-              >
-                Weniger anzeigen
-              </button>
-            )}
+          <div className="flex flex-col items-center gap-2 mt-6">
             {hasNextPage && (
               <button
                 onClick={() => fetchReviews(page + 1)}
@@ -414,6 +415,15 @@ export function ProductReviews({ productId, short = false }: ProductReviewsProps
                 className="px-6 py-2.5 rounded-sm border border-zinc-300 dark:border-zinc-700 text-sm text-muted hover:border-accent hover:text-accent transition-colors duration-200 disabled:opacity-40"
               >
                 Mehr laden
+              </button>
+            )}
+            {page > 1 && (
+              <button
+                onClick={() => fetchReviews(1)}
+                disabled={loading}
+                className="px-4 py-1.5 text-sm text-muted hover:text-primary dark:hover:text-neutral-200 transition-colors duration-200 disabled:opacity-40"
+              >
+                Weniger anzeigen
               </button>
             )}
           </div>

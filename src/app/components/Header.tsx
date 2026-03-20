@@ -63,7 +63,7 @@ const Header = () => {
   // Close on resize to desktop
   useEffect(() => {
     const handler = () => {
-      if (window.innerWidth >= 1024) setIsMenuOpen(false);
+      if (window.innerWidth >= 768) setIsMenuOpen(false);
     };
     window.addEventListener("resize", handler);
     return () => window.removeEventListener("resize", handler);
@@ -92,7 +92,7 @@ const Header = () => {
             {/* Burger — mobile */}
             <button
               onClick={() => setIsMenuOpen((v) => !v)}
-              className="lg:hidden p-2.5 text-muted hover:text-primary transition-colors duration-200"
+              className="md:hidden p-2.5 text-muted hover:text-primary transition-colors duration-200"
               aria-label={isMenuOpen ? "Menü schließen" : "Menü öffnen"}
               aria-expanded={isMenuOpen}
             >
@@ -100,8 +100,8 @@ const Header = () => {
             </button>
 
             {/* Desktop nav */}
-            <nav className="hidden lg:flex">
-              <ul className="flex items-center gap-8">
+            <nav className="hidden md:flex">
+              <ul className="flex items-center gap-3 lg:gap-7">
                 <NavLink url="/" title="Startseite" />
                 <NavLink url="/pages/products" title="Produkte" />
                 <NavLink url="/pages/categories" title="Kategorien" />
@@ -122,7 +122,7 @@ const Header = () => {
               height={160}
               className={cn(
                 "transition-all duration-300",
-                scrolled ? "w-32" : "w-40",
+                scrolled ? "w-24 lg:w-32" : "w-28 lg:w-40",
               )}
             />
           </Link>
@@ -132,7 +132,7 @@ const Header = () => {
             {/* Cart — mobile: direct link to cart page */}
             <Link
               href="/pages/cart"
-              className="lg:hidden relative p-2.5 text-muted hover:text-primary transition-colors duration-200"
+              className="md:hidden relative p-2.5 text-muted hover:text-primary transition-colors duration-200"
               aria-label="Warenkorb"
             >
               <ShoppingCart size={22} />
@@ -148,7 +148,7 @@ const Header = () => {
               onClick={() => setShowCartPopup((v) => !v)}
               aria-label="Warenkorb"
               aria-expanded={showCartPopup}
-              className="hidden lg:flex relative p-2.5 text-muted hover:text-primary transition-colors duration-200"
+              className="hidden md:flex relative p-2.5 text-muted hover:text-primary transition-colors duration-200"
             >
               <ShoppingCart size={20} />
               {itemCount > 0 && (
@@ -166,7 +166,7 @@ const Header = () => {
       {/* Backdrop — unter dem Header (z-[9998] < z-[9999]) */}
       <div
         className={cn(
-          "fixed inset-x-0 bottom-0 z-[9998] bg-black/50 lg:hidden transition-all duration-300",
+          "fixed inset-x-0 bottom-0 z-[9998] bg-black/50 md:hidden transition-all duration-300",
           scrolled ? "top-14" : "top-20",
           isMenuOpen
             ? "opacity-100 pointer-events-auto"
@@ -182,7 +182,7 @@ const Header = () => {
         aria-modal="true"
         aria-label="Navigation"
         className={cn(
-          "fixed left-0 bottom-0 z-[9998] w-[80vw] max-w-[320px] lg:hidden",
+          "fixed left-0 bottom-0 z-[9998] w-[80vw] max-w-[320px] md:hidden",
           scrolled ? "top-14" : "top-20",
           "bg-cream dark:bg-zinc-900 shadow-2xl",
           "flex flex-col",

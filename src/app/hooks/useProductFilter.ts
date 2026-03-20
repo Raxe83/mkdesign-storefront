@@ -49,7 +49,8 @@ export interface ProductFilterResult {
 
 export function useProductFilter(
   allProducts: Product[],
-  initialTypes?: Set<string>
+  initialTypes?: Set<string>,
+  collectionIds?: Set<string> | null,
 ): ProductFilterResult {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortOption>("best_selling");
@@ -75,7 +76,9 @@ export function useProductFilter(
   }, [allProducts]);
 
   const filtered = useMemo(() => {
-    let list = [...allProducts];
+    let list = collectionIds
+      ? allProducts.filter((p) => collectionIds.has(p.id))
+      : [...allProducts];
 
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -135,7 +138,7 @@ export function useProductFilter(
     }
 
     return list;
-  }, [allProducts, search, sort, onlyAvailable, selectedTypes, priceMin, priceMax]);
+  }, [allProducts, collectionIds, search, sort, onlyAvailable, selectedTypes, priceMin, priceMax]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const paginated = filtered.slice(

@@ -55,7 +55,7 @@ const MAX_PRODUCTS = 8;
 
 const ProductsList = ({
   featuredProducts,
-  sectionLabel = "Featured",
+  sectionLabel = "Produkte",
   title,
 }: ProductsListProps) => {
   const [page, setPage] = useState(0);

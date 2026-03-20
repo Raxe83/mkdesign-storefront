@@ -29,7 +29,7 @@ const NavLink = ({ title, url, icon, customFunction }: NavLinkProps) => {
     <li>
       <button
         onClick={handleClick} // Button statt Link verwenden
-        className={` hover:text-gray-900 uppercase text-gray-500 font-semibold flex flex-row cursor-pointer`}
+        className="hover:text-gray-900 uppercase text-gray-500 font-semibold flex flex-row cursor-pointer text-[10px] lg:text-xs tracking-wide lg:tracking-widest"
       >
         {icon && <span className="mr-2">{icon}</span>}
         {title}

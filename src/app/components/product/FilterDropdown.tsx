@@ -86,7 +86,6 @@ export type FilterDropdownProps = Pick<
   ProductFilterResult,
   | "search"
   | "sort"
-  | "onlyAvailable"
   | "selectedTypes"
   | "priceMin"
   | "priceMax"
@@ -106,7 +105,6 @@ export type FilterDropdownProps = Pick<
 export default function FilterDropdown({
   search,
   sort,
-  onlyAvailable,
   selectedTypes,
   priceMin,
   priceMax,
@@ -182,21 +180,6 @@ export default function FilterDropdown({
 
       {/* Filter row */}
       <div ref={barRef} className="flex flex-wrap gap-2 items-center">
-        {/* ── Verfügbarkeit ── */}
-        <FilterButton
-          label="Verfügbarkeit"
-          active={onlyAvailable}
-          open={open === "availability"}
-          onClick={() => toggle("availability")}
-          dark={dark}
-        >
-          <Panel>
-            <div className="p-1">
-              <RowItem label="Alle Produkte" active={!onlyAvailable} onClick={() => { setOnlyAvailable(false); setOpen(null); }} />
-              <RowItem label="Nur verfügbare" active={onlyAvailable} onClick={() => { setOnlyAvailable(true); setOpen(null); }} />
-            </div>
-          </Panel>
-        </FilterButton>
 
         {/* ── Preis ── */}
         <FilterButton
