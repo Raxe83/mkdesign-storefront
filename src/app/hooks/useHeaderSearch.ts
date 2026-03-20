@@ -154,7 +154,7 @@ export function useHeaderSearch(query: string): {
       },
       body: JSON.stringify({
         query: `query {
-          products(first: 100) {
+          products(first: 250) {
             edges {
               node {
                 id title handle description productType tags
@@ -190,7 +190,6 @@ export function useHeaderSearch(query: string): {
           matches(p.productType, q) ||
           p.tags.some((t) => matches(t, q))
       )
-      .slice(0, 5)
       .map((p) => ({
         type: "product" as const,
         title: p.title,

@@ -112,6 +112,12 @@ const HeaderSearch = ({ isOpen, onClose }: HeaderSearchProps) => {
     }
   }, [isOpen]);
 
+  // Lock body scroll when open
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [isOpen]);
+
   // Close on Escape
   useEffect(() => {
     const handler = (e: globalThis.KeyboardEvent) => {
@@ -161,7 +167,7 @@ const HeaderSearch = ({ isOpen, onClose }: HeaderSearchProps) => {
 
       {/* Modal */}
       <div className="absolute top-[72px] left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-2xl">
-        <div className="bg-cream dark:bg-zinc-900 rounded border border-border shadow-md overflow-hidden">
+        <div className="bg-cream dark:bg-zinc-900 rounded border border-border shadow-md flex flex-col">
           {/* Input row */}
           <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
             <Search size={18} className="shrink-0 text-muted" />
@@ -188,7 +194,7 @@ const HeaderSearch = ({ isOpen, onClose }: HeaderSearchProps) => {
           </div>
 
           {/* Results */}
-          <div className="max-h-[60vh] overflow-y-auto overscroll-contain py-2">
+          <div className="max-h-[55vh] overflow-y-auto overscroll-contain py-2 scrollbar-thin scroll-smooth">
             {showHint ? (
               <p className="px-4 py-3 text-xs text-muted">
                 Suche nach Produkten, Seiten oder Kontaktinformationen…
@@ -204,7 +210,7 @@ const HeaderSearch = ({ isOpen, onClose }: HeaderSearchProps) => {
                 {results.products.length > 0 && (
                   <section>
                     <p className="px-4 pt-2 pb-1 text-[10px] font-medium text-muted uppercase tracking-widest">
-                      Produkte
+                      Produkte <span className="normal-case tracking-normal">({results.products.length})</span>
                     </p>
                     {results.products.map((r, i) => (
                       <ResultRow key={r.href} result={r} active={i === activeIndex} onClose={onClose} />
