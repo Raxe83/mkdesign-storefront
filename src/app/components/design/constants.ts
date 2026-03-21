@@ -20,7 +20,7 @@ export const CANVAS_PRESETS: CanvasPreset[] = [
   { id: "square-380", label: "Quadrat (Schale)",     width: 380, height: 380 },
   { id: "wide-560",   label: "Breit (Tisch/Platte)", width: 560, height: 360 },
   { id: "tall-380",   label: "Hochformat (Säule)",   width: 380, height: 520 },
-] as const;
+];
 
 // Keywords (Kleinbuchstaben) aus dem Produkttitel → Preset-ID
 // Erste Übereinstimmung gewinnt — Reihenfolge beachten.
