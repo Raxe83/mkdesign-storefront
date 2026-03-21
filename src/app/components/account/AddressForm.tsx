@@ -3,7 +3,7 @@ import { SubmitButton } from "../auth/SubmitButton";
 import type { CustomerAddress } from "../../types/shopify";
 
 interface AddressFormProps {
-  action: (prev: unknown, fd: FormData) => Promise<unknown>;
+  action: (payload: FormData) => void;
   defaultValues?: Partial<CustomerAddress>;
   addressId?: string;
   onCancel: () => void;
@@ -20,7 +20,6 @@ export function AddressForm({
   pendingLabel,
 }: AddressFormProps) {
   return (
-    // @ts-expect-error – useActionState action is compatible
     <form action={action} className="space-y-4">
       {addressId && (
         <input type="hidden" name="addressId" value={addressId} />
