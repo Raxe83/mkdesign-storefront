@@ -10,6 +10,8 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { shopDetails } from "./global";
 import { env } from "process";
+import { getSessionToken } from "./lib/session";
+import { getCustomerData } from "./services/shopifyCustomer";
 
 export const metadata: Metadata = {
   title: shopDetails.shopname,
@@ -41,11 +43,23 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Session-Check — schlägt lautlos fehl, Header zeigt dann Login-Icon
+  let customer = null;
+  try {
+    const token = await getSessionToken();
+    if (token) {
+      const { customer: c } = await getCustomerData(token);
+      customer = c ? { firstName: c.firstName, lastName: c.lastName } : null;
+    }
+  } catch {
+    // Session ungültig oder Shopify nicht erreichbar — kein Fehler werfen
+  }
+
   return (
     <html>
       <body className="bg-background font-sans leading-relaxed">
@@ -54,12 +68,10 @@ export default function RootLayout({
             {/* <AgeVerification /> */}
             <ScrollToTop />
             <ImportantMessage />
-            <Header />
+            <Header customer={customer} />
             {/* Main Content */}
-            {/* Center the content and make sure it looks modern and responsive */}
             <div className="pt-16 min-h-screen">{children}</div>
             <Footer />
-            {/* Cookie Consent */}
             <CookieConsent />
           </ToastProvider>
         </CartProvider>

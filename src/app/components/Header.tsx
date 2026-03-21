@@ -24,6 +24,28 @@ import { shopDetails } from "../global";
 import { cn } from "../utils/utils";
 import Image from "next/image";
 
+// ─── Typen ────────────────────────────────────────────────────────────────────
+
+interface HeaderCustomer {
+  firstName: string | null;
+  lastName: string | null;
+}
+
+// ─── Avatar (Initialen-Kreis) ─────────────────────────────────────────────────
+
+function CustomerAvatar({ firstName, lastName }: HeaderCustomer) {
+  const initials = [firstName?.[0], lastName?.[0]]
+    .filter(Boolean)
+    .join("")
+    .toUpperCase() || "?";
+
+  return (
+    <div className="w-7 h-7 rounded-full bg-rust text-white text-[11px] font-semibold flex items-center justify-center leading-none shrink-0 ring-2 ring-rust/20">
+      {initials}
+    </div>
+  );
+}
+
 // ─── Nav items config ──────────────────────────────────────────────────────────
 
 const useNavItems = () => {
@@ -49,7 +71,7 @@ const useNavItems = () => {
 
 // ─── Header ───────────────────────────────────────────────────────────────────
 
-const Header = () => {
+const Header = ({ customer = null }: { customer?: HeaderCustomer | null }) => {
   const { itemCount, showCartPopup, setShowCartPopup } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -168,14 +190,17 @@ const Header = () => {
             >
               <Search size={20} />
             </button>
-            <button
-              onClick={() => setShowCartPopup((v) => !v)}
-              aria-label="Warenkorb"
-              aria-expanded={showCartPopup}
-              className="hidden md:flex relative p-2.5 text-muted hover:text-primary transition-colors duration-200"
+            {/* User — desktop */}
+            <Link
+              href={customer ? "/pages/account" : "/pages/login"}
+              aria-label={customer ? "Mein Konto" : "Anmelden"}
+              className="hidden md:flex items-center justify-center relative p-2 text-muted hover:text-primary transition-colors duration-200"
             >
-              <User size={20} />
-            </button>
+              {customer
+                ? <CustomerAvatar firstName={customer.firstName} lastName={customer.lastName} />
+                : <User size={20} />
+              }
+            </Link>
             <button
               onClick={() => setShowCartPopup((v) => !v)}
               aria-label="Warenkorb"
@@ -294,12 +319,27 @@ const Header = () => {
               </Link>
             </li>
             <li>
-              <button
-                className="w-full flex items-center gap-3.5 px-4 py-4 rounded-sm text-base font-medium text-charcoal dark:text-primary hover:bg-sand/30 dark:hover:bg-zinc-800 transition-colors duration-150"
+              <Link
+                href={customer ? "/pages/account" : "/pages/login"}
+                onClick={() => setIsMenuOpen(false)}
+                className="flex items-center gap-3.5 px-4 py-4 rounded-sm text-base font-medium text-charcoal dark:text-primary hover:bg-sand/30 dark:hover:bg-zinc-800 transition-colors duration-150"
               >
-                <span className="shrink-0 text-muted"><User size={20} /></span>
-                Anmelden
-              </button>
+                <span className="shrink-0">
+                  {customer
+                    ? <CustomerAvatar firstName={customer.firstName} lastName={customer.lastName} />
+                    : <span className="text-muted"><User size={20} /></span>
+                  }
+                </span>
+                {customer
+                  ? [customer.firstName, customer.lastName].filter(Boolean).join(" ") || "Mein Konto"
+                  : "Anmelden"
+                }
+                {customer && (
+                  <span className="ml-auto text-[10px] font-medium text-rust uppercase tracking-wide">
+                    Konto
+                  </span>
+                )}
+              </Link>
             </li>
           </ul>
 

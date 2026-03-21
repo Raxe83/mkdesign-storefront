@@ -105,3 +105,79 @@ export interface Cart {
   }
 }
 
+// ─── Customer ─────────────────────────────────────────────────────────────────
+
+export interface CustomerAccessToken {
+  accessToken: string
+  expiresAt: string
+}
+
+export interface CustomerAddress {
+  id: string
+  firstName: string | null
+  lastName: string | null
+  address1: string | null
+  address2: string | null
+  city: string | null
+  province: string | null
+  zip: string | null
+  country: string | null
+  phone: string | null
+}
+
+export interface Customer {
+  id: string
+  firstName: string | null
+  lastName: string | null
+  email: string
+  phone: string | null
+  defaultAddress: CustomerAddress | null
+  addresses: {
+    edges: Array<{ node: CustomerAddress }>
+  }
+}
+
+export interface CustomerUserError {
+  field: string[] | null
+  message: string
+  code: string
+}
+
+export interface RecoverPasswordResult {
+  /** true = E-Mail wurde verschickt (oder Adresse existiert nicht — Shopify gibt kein Unterschied zurück) */
+  success: boolean
+  errors: CustomerUserError[]
+}
+
+// ─── Orders ───────────────────────────────────────────────────────────────────
+
+export type OrderFulfillmentStatus =
+  | "FULFILLED" | "IN_PROGRESS" | "ON_HOLD" | "OPEN"
+  | "PARTIALLY_FULFILLED" | "PENDING_FULFILLMENT"
+  | "RESTOCKED" | "SCHEDULED" | "UNFULFILLED"
+
+export type OrderFinancialStatus =
+  | "AUTHORIZED" | "EXPIRED" | "PAID" | "PARTIALLY_PAID"
+  | "PARTIALLY_REFUNDED" | "PENDING" | "REFUNDED" | "VOIDED"
+
+export interface OrderLineItem {
+  title: string
+  quantity: number
+  variant: {
+    price: Money
+    image: Image | null
+  } | null
+}
+
+export interface Order {
+  id: string
+  orderNumber: number
+  processedAt: string
+  fulfillmentStatus: OrderFulfillmentStatus
+  financialStatus: OrderFinancialStatus
+  totalPrice: Money
+  lineItems: {
+    edges: Array<{ node: OrderLineItem }>
+  }
+}
+

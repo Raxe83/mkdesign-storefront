@@ -16,5 +16,7 @@ export function ShapeIcon({ fc }: { fc: FabricConf }) {
     return <svg viewBox={vb}><line x1={-55} y1={0} x2={55} y2={0} {...s} /></svg>;
   if (fc.k === "poly")
     return <svg viewBox={vb}><polygon points={fc.pts.map((p) => `${p.x},${p.y}`).join(" ")} {...s} /></svg>;
+  if (fc.k === "svg")
+    return <img src={`data:image/svg+xml,${encodeURIComponent(fc.markup)}`} className="w-full h-full object-contain" alt="" />;
   return <svg viewBox={vb}><path d={(fc as any).d} {...s} /></svg>;
 }

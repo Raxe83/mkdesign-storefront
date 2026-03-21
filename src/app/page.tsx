@@ -62,7 +62,7 @@ const HomePage = () => {
   return (
     <div>
       <Hero
-        title={"Jedes Stück ein Unikat"}
+        title={"Jede Tonne ein Unikat"}
         description={
           "Personalisierte Produkte in Handarbeit gefertigt – von Feuertonnen über Schmuck bis hin zu Schieferuhren. Direkt aus Bleckede zu Euch."
         }
