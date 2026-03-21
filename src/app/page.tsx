@@ -124,7 +124,7 @@ const HomePage = () => {
           src: require("./img/feuertonne_blank.png").default,
           alt: "",
         }}
-        secondaryCta={{
+        cta={{
           label: "Design selbst gestalten",
           href: "/pages/design",
         }}
