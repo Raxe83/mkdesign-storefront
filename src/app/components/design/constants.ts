@@ -15,11 +15,17 @@ export interface CanvasPreset {
   height: number;
 }
 
+// ┌─────────────────────────────────────────────────────────────────────────┐
+// │  DEV-CONFIG: Canvas-Dimensionen pro Preset                             │
+// │  Hier die width/height anpassen um die Zeichenfläche zu vergrößern /   │
+// │  verkleinern. Die Werte gelten für das native Fabric.js-Canvas;        │
+// │  die Anzeigegröße skaliert automatisch auf den verfügbaren Platz.      │
+// └─────────────────────────────────────────────────────────────────────────┘
 export const CANVAS_PRESETS: CanvasPreset[] = [
-  { id: "square-500", label: "Quadrat (Standard)",   width: 500, height: 500 },
-  { id: "square-380", label: "Quadrat (Schale)",     width: 380, height: 380 },
-  { id: "wide-560",   label: "Breit (Tisch/Platte)", width: 560, height: 360 },
-  { id: "tall-380",   label: "Hochformat (Säule)",   width: 380, height: 520 },
+  { id: "square-500", label: "Quadrat (Standard)",   width: 700, height: 700 },
+  { id: "square-380", label: "Quadrat (Schale)",     width: 560, height: 560 },
+  { id: "wide-560",   label: "Breit (Tisch/Platte)", width: 760, height: 480 },
+  { id: "tall-380",   label: "Hochformat (Säule)",   width: 520, height: 720 },
 ];
 
 // Keywords (Kleinbuchstaben) aus dem Produkttitel → Preset-ID

@@ -9,15 +9,15 @@ import { UploadStep } from "./UploadStep";
 import { SaveResultPanel } from "./SaveResultPanel";
 
 type Props = {
-  products:         ProductOption[];
-  productsLoading:  boolean;
-  selectedProduct:  ProductOption | null;
-  objectCount:      number;
-  uploadState:      UploadState;
-  onSelectProduct:  (p: ProductOption) => void;
-  onSave:           () => void;
-  onResetUpload:    () => void;
-  onAddToCart:      () => Promise<void>;
+  products:              ProductOption[];
+  productsLoading:       boolean;
+  selectedProduct:       ProductOption | null;
+  objectCount:           number;
+  uploadState:           UploadState;
+  onSelectProduct:       (p: ProductOption) => void;
+  onSave:                () => void;
+  onResetUpload:         () => void;
+  onAddToCart:           () => Promise<void>;
 };
 
 export function ProductPanel({

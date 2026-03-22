@@ -28,7 +28,7 @@ export function useDesignCanvas(
   const [fontSize,         setFontSize]         = useState(36);
   const [fontFamily,       setFontFamily]       = useState<string>(FONT_OPTIONS[0].value);
   const [strokeWidth,      setStrokeWidth]      = useState(2);
-  const [strokeColor,      setStrokeColor]      = useState("#1c1917");
+  const [strokeColor,      setStrokeColor]      = useState("#ffffff");
   const [fillColor,        setFillColor]        = useState<string>("transparent");
   const [opacity,          setOpacity]          = useState(100);
   const [textAlign,        setTextAlign]        = useState<"left" | "center" | "right">("left");
@@ -88,8 +88,6 @@ export function useDesignCanvas(
       fabricRef.current = canvas;
 
       const syncCount = () => setObjectCount(canvas.getObjects().length);
-      canvas.on("object:added",   syncCount);
-      canvas.on("object:removed", syncCount);
 
       const syncSelection = () => {
         const obj = canvas.getActiveObject();
@@ -122,31 +120,28 @@ export function useDesignCanvas(
     };
   }, []);
 
-  /* ── Background swap ──────────────────────────────────────────── */
+  /* ── Background: transparent so SVG behind canvas shows through ── */
   useEffect(() => {
-    if (!canvasReady || !fabricRef.current || !selectedProduct) return;
-    const canvas = fabricRef.current;
-    const { width, height } = canvasPreset;
-    (async () => {
-      if (selectedProduct.backgroundUrl) {
-        try {
-          const { FabricImage } = await import("fabric");
-          const img = await FabricImage.fromURL(selectedProduct.backgroundUrl, { crossOrigin: "anonymous" });
-          img.scaleToWidth(width);
-          img.scaleToHeight(height);
-          canvas.backgroundImage = img;
-          canvas.backgroundColor = undefined;
-        } catch {
-          canvas.backgroundImage = null;
-          canvas.backgroundColor = CANVAS_BG;
-        }
-      } else {
-        canvas.backgroundImage = null;
-        canvas.backgroundColor = CANVAS_BG;
-      }
-      canvas.requestRenderAll();
-    })();
-  }, [selectedProduct, canvasPreset, canvasReady]);
+    if (!canvasReady || !fabricRef.current) return;
+    fabricRef.current.backgroundColor = "transparent";
+    fabricRef.current.requestRenderAll();
+  }, [canvasReady]);
+
+  /* ── Deselect when clicking outside the canvas element ───────── */
+  useEffect(() => {
+    if (!canvasReady) return;
+    const onDocMouseDown = (e: MouseEvent) => {
+      const fabric = fabricRef.current;
+      if (!fabric) return;
+      // fabric.wrapperEl wraps both the lower (render) and upper (interaction) canvas
+      const wrapper = (fabric as any).wrapperEl as HTMLElement | undefined;
+      if (!wrapper || wrapper.contains(e.target as Node)) return;
+      fabric.discardActiveObject();
+      fabric.requestRenderAll();
+    };
+    document.addEventListener("mousedown", onDocMouseDown);
+    return () => document.removeEventListener("mousedown", onDocMouseDown);
+  }, [canvasReady]);
 
   /* ── Apply callbacks ──────────────────────────────────────────── */
   const applyFontSize = useCallback((size: number) => {
@@ -261,7 +256,7 @@ export function useDesignCanvas(
     const cy = canvasPresetRef.current.height / 2;
     const t = new IText("Dein Text", {
       left: cx, top: cy, originX: "center", originY: "center",
-      fontSize: 36, fontFamily: FONT_OPTIONS[0].value, fill: "#1c1917",
+      fontSize: 36, fontFamily: FONT_OPTIONS[0].value, fill: "#ffffff",
     });
     fabricRef.current.add(t);
     fabricRef.current.setActiveObject(t);
@@ -274,7 +269,7 @@ export function useDesignCanvas(
     const cy = canvasPresetRef.current.height / 2;
     const base = {
       left: cx, top: cy, originX: "center", originY: "center",
-      fill: "transparent", stroke: "#1c1917", strokeWidth: 2,
+      fill: "transparent", stroke: "#ffffff", strokeWidth: 2,
     } as const;
     const { Rect, Circle: FC, Ellipse, Triangle: FT, Line, Polygon, Path } = await import("fabric");
     let obj: any;
@@ -358,6 +353,7 @@ export function useDesignCanvas(
     canvasScale,
     canvasWidth:  canvasPreset.width,
     canvasHeight: canvasPreset.height,
+    wrapperWidth,
     imageUploading,
     uploadState,
     // selection state

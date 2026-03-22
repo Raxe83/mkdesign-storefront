@@ -2,6 +2,13 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Type } from "lucide-react";
+import {
+  BarrelFull,
+  BarrelNoLegs,
+  BarrelSchale,
+  BarrelSchaleXL,
+  BarrelStehtisch,
+} from "./illustrations/FireBarrels";
 
 type Phase = "blank" | "typing" | "hold" | "erasing";
 
@@ -28,167 +35,6 @@ function CursorSVG() {
         strokeWidth="1.5"
         strokeLinejoin="round"
       />
-    </svg>
-  );
-}
-
-// ─── Feuertonne SVG-Illustration ─────────────────────────────────────────────
-
-function FireBarrel() {
-  return (
-    <svg
-      viewBox="0 0 300 400"
-      width="100%"
-      height="100%"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-      className="absolute inset-0"
-    >
-      <defs>
-        <radialGradient id="pvBg" cx="50%" cy="35%" r="75%">
-          <stop offset="0%" stopColor="#292524" />
-          <stop offset="100%" stopColor="#0c0a09" />
-        </radialGradient>
-        <linearGradient id="pvBarrel" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#161412" />
-          <stop offset="28%" stopColor="#3c3836" />
-          <stop offset="60%" stopColor="#252220" />
-          <stop offset="82%" stopColor="#38342f" />
-          <stop offset="100%" stopColor="#161412" />
-        </linearGradient>
-        <linearGradient id="pvRing" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#292522" />
-          <stop offset="40%" stopColor="#6b6460" />
-          <stop offset="100%" stopColor="#292522" />
-        </linearGradient>
-        <radialGradient id="pvFlame" cx="50%" cy="100%" r="90%">
-          <stop offset="0%" stopColor="#f97316" stopOpacity="0.55" />
-          <stop offset="50%" stopColor="#ea580c" stopOpacity="0.18" />
-          <stop offset="100%" stopColor="#f97316" stopOpacity="0" />
-        </radialGradient>
-        <radialGradient id="pvTopGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#fb923c" stopOpacity="0.35" />
-          <stop offset="100%" stopColor="#fb923c" stopOpacity="0" />
-        </radialGradient>
-        <filter id="pvShadow" x="-20%" y="-10%" width="140%" height="130%">
-          <feDropShadow
-            dx="0"
-            dy="6"
-            stdDeviation="10"
-            floodColor="#000"
-            floodOpacity="0.6"
-          />
-        </filter>
-      </defs>
-
-      {/* Background */}
-      <rect width="300" height="400" fill="url(#pvBg)" />
-
-      {/* Floor shadow */}
-      <ellipse cx="150" cy="358" rx="75" ry="6" fill="#000" opacity="0.4" />
-
-      {/* ─── Legs ─────────────────────────────────────────────── */}
-      {/* Left leg */}
-      <path
-        d="M 108,316 L 103,346 Q 102,350 107,350 L 113,350 Q 118,349 117,345 L 112,316 Z"
-        fill="#3a3532"
-      />
-      {/* Right leg */}
-      <path
-        d="M 192,316 L 188,345 Q 187,349 193,350 L 199,350 Q 204,349 203,345 L 200,316 Z"
-        fill="#3a3532"
-      />
-      {/* Center leg (slightly recessed) */}
-      <path
-        d="M 147,316 L 145,345 Q 144,349 149,350 L 155,350 Q 160,349 158,345 L 156,316 Z"
-        fill="#302d2a"
-      />
-
-      {/* ─── Barrel bottom cap ───────────────────────────────── */}
-      <ellipse
-        cx="150"
-        cy="316"
-        rx="82"
-        ry="15"
-        fill="#1a1815"
-        stroke="#3c3836"
-        strokeWidth="1.5"
-      />
-
-      {/* ─── Barrel body ─────────────────────────────────────── */}
-      <path
-        d="M 70,88 C 55,180 53,248 68,316 L 232,316 C 247,248 245,180 230,88 Z"
-        fill="url(#pvBarrel)"
-        filter="url(#pvShadow)"
-      />
-
-      {/* Subtle vertical light streak (reflection) */}
-      <path
-        d="M 118,95 C 115,180 114,248 116,310 Q 120,315 124,310 C 122,248 121,180 122,95 Z"
-        fill="white"
-        opacity="0.025"
-      />
-
-      {/* ─── Punch-hole decorations (lower section) ──────────── */}
-      {/*
-      <g fill="#0c0a09" stroke="#2c2926" strokeWidth="0.6">
-        <circle cx="98"  cy="270" r="4.5" /><circle cx="115" cy="270" r="4.5" />
-        <circle cx="132" cy="270" r="4.5" /><circle cx="150" cy="270" r="4.5" />
-        <circle cx="168" cy="270" r="4.5" /><circle cx="185" cy="270" r="4.5" />
-        <circle cx="202" cy="270" r="4.5" />
-        <circle cx="106" cy="287" r="4.5" /><circle cx="123" cy="287" r="4.5" />
-        <circle cx="141" cy="287" r="4.5" /><circle cx="159" cy="287" r="4.5" />
-        <circle cx="177" cy="287" r="4.5" /><circle cx="194" cy="287" r="4.5" />
-        <circle cx="98"  cy="304" r="4.5" /><circle cx="115" cy="304" r="4.5" />
-        <circle cx="132" cy="304" r="4.5" /><circle cx="150" cy="304" r="4.5" />
-        <circle cx="168" cy="304" r="4.5" /><circle cx="185" cy="304" r="4.5" />
-        <circle cx="202" cy="304" r="4.5" />
-      </g>
-      <g fill="#f97316" opacity="0.12">
-        <circle cx="98"  cy="270" r="3.5" /><circle cx="115" cy="270" r="3.5" />
-        <circle cx="132" cy="270" r="3.5" /><circle cx="150" cy="270" r="3.5" />
-        <circle cx="168" cy="270" r="3.5" /><circle cx="185" cy="270" r="3.5" />
-        <circle cx="202" cy="270" r="3.5" />
-        <circle cx="106" cy="287" r="3.5" /><circle cx="123" cy="287" r="3.5" />
-        <circle cx="141" cy="287" r="3.5" /><circle cx="159" cy="287" r="3.5" />
-        <circle cx="177" cy="287" r="3.5" /><circle cx="194" cy="287" r="3.5" />
-      </g>
-      */}
-
-      {/* ─── Horizontal metal rings ───────────────────────────── */}
-      {/* Ring 1 */}
-      <path
-        d="M 68,156 C 56,159 56,163 68,166 L 232,166 C 244,163 244,159 232,156 Z"
-        fill="url(#pvRing)"
-        stroke="#57534e"
-        strokeWidth="0.3"
-      />
-      {/* Ring 2 */}
-      <path
-        d="M 63,268 C 51,271 51,275 63,278 L 237,278 C 249,275 249,271 237,268 Z"
-        fill="url(#pvRing)"
-        stroke="#57534e"
-        strokeWidth="0.3"
-      />
-
-      {/* ─── Top rim ─────────────────────────────────────────── */}
-      <ellipse
-        cx="150"
-        cy="88"
-        rx="82"
-        ry="16"
-        fill="#222020"
-        stroke="#57534e"
-        strokeWidth="1.8"
-      />
-      {/* Inner top dark */}
-      <ellipse cx="150" cy="88" rx="70" ry="13" fill="#0f0d0c" />
-      {/* Flame glow inside */}
-      <ellipse cx="150" cy="88" rx="70" ry="13" fill="url(#pvFlame)" />
-
-      {/* Ambient glow above barrel */}
-      <ellipse cx="150" cy="68" rx="60" ry="36" fill="url(#pvTopGlow)" />
-      <ellipse cx="150" cy="50" rx="40" ry="24" fill="#f97316" opacity="0.05" />
     </svg>
   );
 }
@@ -245,16 +91,16 @@ export function PersonalizationVisual(_props: PersonalizationVisualProps) {
   return (
     <div className="relative w-full aspect-[3/4] rounded-sm overflow-hidden select-none bg-[#0c0a09]">
       {/* ── Feuertonne Illustration ── */}
-      <FireBarrel />
+      <BarrelFull />
 
       {/* ── Gravur-Zone (gestrichelter Rahmen auf dem Barrel) ── */}
       <div
         className="absolute rounded-sm border-2 border-dashed border-rust/80 pointer-events-none"
         style={{
           left: "24%",
-          top: "43%",
+          top: "42%",
           width: "52%",
-          height: "21%",
+          height: "17%",
           animation: "pv-zone-pulse 2.8s ease-in-out infinite",
         }}
       />
