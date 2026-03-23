@@ -19,6 +19,51 @@ export interface Metaobject {
   fields: MetaobjectField[];
 }
 
+// ─── Produkt-Zusatzoptionen (custom.zusatzoptionen) ───────────────────────────
+
+/**
+ * Rohe Felder wie sie aus dem Metaobjekt-Reference kommen.
+ * Wird intern von `parseZusatzoptionen` verarbeitet.
+ */
+export interface VarianteOption {
+  id: string;
+  title: string;
+  price: { amount: string; currencyCode: string };
+}
+
+export interface ZusatzoptionenRaw {
+  id: string;
+  fields: Array<{
+    key: string;
+    value: string | null;
+    references?: {
+      nodes: Array<{
+        id?: string;
+        title?: string;
+        price?: { amount: string; currencyCode: string };
+      }>;
+    } | null;
+  }>;
+}
+
+/**
+ * Fertig normalisierte Struktur für die UI.
+ * `farbauswahl` ist bereits ein echtes String-Array (aus dem JSON-String geparst).
+ * Felder die im Metaobjekt nicht gesetzt sind, sind `null` bzw. `[]`.
+ */
+export interface ProductZusatzoptionen {
+  /** Dynamische Textfeld-Labels, z.B. ["Name Braut", "Gravurtext"] */
+  textfelder: string[];
+  /** Varianten — Mehrfachauswahl mit Preis */
+  varianten: VarianteOption[];
+  /** Checkbox-Optionen — Mehrfachauswahl, z.B. ["Mit Gravur", "Mit Geschenkbox"] */
+  optionen: string[];
+  /** Radio-Optionen — Einzelauswahl, z.B. ["Matt", "Glänzend"] */
+  entscheide: string[];
+  /** Auswählbare Farben, z.B. ["Schwarz", "Silber", "Gold"] */
+  farben: string[];
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface Money {
@@ -60,6 +105,8 @@ export interface Product {
       node: ProductVariant
     }>
   }
+  /** Gesetzt wenn das Produkt ein `custom.layout_konfiguration`-Metafeld hat. */
+  zusatzoptionen?: ProductZusatzoptionen | null
 }
 
 export interface Collection {

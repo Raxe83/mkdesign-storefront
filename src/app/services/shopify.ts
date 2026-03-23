@@ -1,5 +1,5 @@
 import { ShopifyCollection } from "../components/CollectionsList";
-import type { Cart, Product } from "../types/shopify";
+import type { Cart, Product, ProductZusatzoptionen, ZusatzoptionenRaw } from "../types/shopify";
 
 const SHOPIFY_DOMAIN = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN;
 const SHOPIFY_STOREFRONT_TOKEN =
@@ -224,7 +224,55 @@ export const fetchBlogPost = async (locale?: string) => {
   }
 };
 
-// Produkt nach Handle abrufen mit optionaler Sprachunterstützung
+// ─── Hilfsfunktion: parst die rohen Metaobjekt-Felder ────────────────────────
+
+/**
+ * Wandelt das rohe Metaobjekt-Reference-Objekt in die typsichere
+ * `ProductZusatzoptionen`-Struktur um.
+ *
+ * - `feld_1_label` / `feld_2_label` → einfache Strings
+ * - `farbauswahl` → JSON-Array-String wird zu `string[]` geparst
+ *   (Shopify speichert List-Felder als `'["Schwarz","Silber"]'`)
+ */
+function parseList(raw: string | null): string[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed.filter((v) => typeof v === "string");
+  } catch {
+    // Fallback: kommagetrennt
+    return raw.split(",").map((s) => s.trim()).filter(Boolean);
+  }
+  return [];
+}
+
+function parseZusatzoptionen(raw: ZusatzoptionenRaw): ProductZusatzoptionen {
+  const get = (key: string) => raw.fields.find((f) => f.key === key) ?? null;
+
+  const varianteNodes = get("variante")?.references?.nodes ?? [];
+  const varianten = varianteNodes
+    .filter((n): n is { id: string; title: string; price: { amount: string; currencyCode: string } } =>
+      Boolean(n.id && n.title && n.price),
+    )
+    .map((n) => ({ id: n.id, title: n.title, price: n.price }));
+
+  return {
+    textfelder: parseList(get("textfeld")?.value ?? null),
+    varianten,
+    optionen:   parseList(get("optionen")?.value ?? null),
+    entscheide: parseList(get("entscheide")?.value ?? null),
+    farben:     parseList(get("farben")?.value ?? null),
+  };
+}
+
+// ─── Produkt nach Handle abrufen ──────────────────────────────────────────────
+
+/**
+ * Lädt ein einzelnes Produkt anhand seines Handles.
+ * Enthält das Produkt ein `custom.layout_konfiguration`-Metafeld (Referenz auf
+ * ein `custom.zusatzoptionen`-Metaobjekt), wird es automatisch geparst und
+ * als `zusatzoptionen` auf dem Produkt zurückgegeben.
+ */
 export async function getProductByHandle(
   handle: string,
   locale?: string,
@@ -270,18 +318,59 @@ export async function getProductByHandle(
             currencyCode
           }
         }
+        metafield(namespace: "custom", key: "layout_konfiguration") {
+          reference {
+            ... on Metaobject {
+              id
+              fields {
+                key
+                value
+                references(first: 30) {
+                  nodes {
+                    ... on ProductVariant {
+                      id
+                      title
+                      price {
+                        amount
+                        currencyCode
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   `;
 
+  // Erweiterter Response-Typ: das Metafeld ist nicht im Product-Interface enthalten,
+  // weil es nur hier abgefragt wird und dann normalisiert wird.
+  type ProductWithMeta = Product & {
+    metafield?: {
+      reference?: ZusatzoptionenRaw | null;
+    } | null;
+  };
+
   try {
-    const response = await shopifyFetch<{ productByHandle: Product | null }>({
+    const response = await shopifyFetch<{ productByHandle: ProductWithMeta | null }>({
       query,
       variables: { handle },
-      locale, // Übergebe locale nur, wenn es angegeben wurde
+      locale,
     });
 
-    return response.productByHandle;
+    const product = response.productByHandle;
+    if (!product) return null;
+
+    // Metaobjekt-Referenz parsen und normalisiert anhängen
+    console.log("[getProductByHandle] raw metafield:", JSON.stringify(product.metafield));
+    const rawRef = product.metafield?.reference ?? null;
+    const zusatzoptionen = rawRef ? parseZusatzoptionen(rawRef) : null;
+
+    // metafield-Feld aus dem Rückgabe-Objekt entfernen (ist kein Teil des Product-Interface)
+    const { metafield: _drop, ...cleanProduct } = product;
+    return { ...cleanProduct, zusatzoptionen };
   } catch (error) {
     console.error("Error in getProductByHandle:", error);
     throw error;
@@ -514,6 +603,7 @@ export const addToCart = async (
   quantity: number,
   customAttributes?: { key: string; value: string }[],
   locale?: string,
+  additionalLines?: Array<{ variantId: string; quantity: number }>,
 ): Promise<Cart> => {
   const query = `
     mutation cartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
@@ -558,6 +648,10 @@ export const addToCart = async (
         quantity,
         attributes: customAttributes || [],
       },
+      ...(additionalLines ?? []).map((l) => ({
+        merchandiseId: l.variantId,
+        quantity: l.quantity,
+      })),
     ],
   };
 

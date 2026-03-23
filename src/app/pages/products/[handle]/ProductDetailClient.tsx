@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   ArrowLeft,
   Minus,
@@ -15,7 +15,7 @@ import type { HeroCard } from "@/app/components/product/product-category";
 import { formatPrice } from "../../../utils/formatPrice";
 import AddToCartButton from "../../../components/ui/AddToCartButton";
 import { shipment } from "../../../types/products";
-import ColorChooser from "../../../components/product/ColorChooser";
+import { ProductExtras, type ProductExtrasValues } from "@/app/components/product/ProductExtras";
 import { ProductReviews } from "@/app/components/product/product-reviews";
 import { ProductHeroCards } from "@/app/components/product/ProductHeroCards";
 import { RelatedProducts } from "@/app/components/product/RelatedProducts";
@@ -79,7 +79,30 @@ export default function ProductDetailClient({
   const initialImage = product.featuredImage?.url ?? images[0]?.url ?? "";
 
   const [quantity, setQuantity] = useState(1);
-  const [selectedColor, setSelectedColor] = useState("Schwarz");
+  const [extrasValues, setExtrasValues] = useState<ProductExtrasValues>({
+    textfelder: [],
+    varianten: [],
+    optionen: [],
+    entscheid: "",
+    farbe: "",
+  });
+
+  const displayPrice = useMemo(() => {
+    const selected = extrasValues.varianten;
+    if (selected.length === 0) return { amount: price, currencyCode };
+    const total = selected.reduce((sum, v) => sum + parseFloat(v.price.amount), 0);
+    return { amount: total.toFixed(2), currencyCode: selected[0].price.currencyCode };
+  }, [extrasValues.varianten, price, currencyCode]);
+
+  const extrasValid = useMemo(() => {
+    const cfg = product.zusatzoptionen;
+    if (!cfg) return true;
+    const textsOk    = cfg.textfelder.every((_, i) => extrasValues.textfelder[i]?.trim());
+    const variantenOk = cfg.varianten.length === 0 || extrasValues.varianten.length > 0;
+    const optionenOk  = cfg.optionen.length === 0   || extrasValues.optionen.length > 0;
+    const entscheidOk = cfg.entscheide.length === 0  || extrasValues.entscheid.trim() !== "";
+    return textsOk && variantenOk && optionenOk && entscheidOk;
+  }, [product.zusatzoptionen, extrasValues]);
 
   return (
     <div className="pb-8 -mt-8">
@@ -107,7 +130,7 @@ export default function ProductDetailClient({
           </h1>
 
           <p className="text-2xl font-medium text-primary dark:text-neutral-100">
-            {formatPrice(price, currencyCode)}
+            {formatPrice(displayPrice.amount, displayPrice.currencyCode)}
           </p>
 
           <ProductReviews
@@ -126,13 +149,13 @@ export default function ProductDetailClient({
             }}
           />
 
-          {/* PERSONALISIERUNG */}
-          {/* <div>
-            <p className="text-xs uppercase tracking-widest text-muted dark:text-neutral-400 mb-2">
-              Farbe{selectedColor ? ` — ${selectedColor}` : ""}
-            </p>
-            <ColorChooser setSelectedColor={setSelectedColor} selectedColor={selectedColor} />
-          </div> */}
+          {/* ── Dynamische Zusatzoptionen (aus Shopify Metaobjekt) ── */}
+          {product.zusatzoptionen && (
+            <ProductExtras
+              config={product.zusatzoptionen}
+              onChange={setExtrasValues}
+            />
+          )}
 
           <div>
             <p className="text-xs uppercase tracking-widest text-muted dark:text-neutral-400 mb-2">
@@ -165,8 +188,24 @@ export default function ProductDetailClient({
               variantId={firstVariant.id}
               available={isAvailable}
               title={product.title}
-              color={selectedColor}
+              color={extrasValues.farbe}
               quantity={quantity}
+              formValid={extrasValid}
+              metaVariants={extrasValues.varianten}
+              customAttributes={[
+                ...(product.zusatzoptionen?.textfelder ?? [])
+                  .map((label, i) => ({ key: label, value: extrasValues.textfelder[i] ?? "" }))
+                  .filter((a) => a.value.trim() !== ""),
+                ...(extrasValues.varianten.length > 0
+                  ? [{ key: "Variante", value: extrasValues.varianten.map((v) => v.title).join(", ") }]
+                  : []),
+                ...(extrasValues.optionen.length > 0
+                  ? [{ key: "Optionen", value: extrasValues.optionen.join(", ") }]
+                  : []),
+                ...(extrasValues.entscheid
+                  ? [{ key: "Auswahl", value: extrasValues.entscheid }]
+                  : []),
+              ]}
               icon
             />
           ) : (

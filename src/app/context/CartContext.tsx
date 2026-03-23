@@ -22,10 +22,8 @@ interface CartContextType {
   addItem: (
     variantId: string,
     quantity: number,
-    customAttributes?: {
-      key: string;
-      value: string;
-    }[]
+    customAttributes?: { key: string; value: string }[],
+    additionalLines?: Array<{ variantId: string; quantity: number }>,
   ) => Promise<void>;
   updateItem: (lineId: string, quantity: number) => Promise<void>;
   updateItemQuantityFunction: (
@@ -108,7 +106,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const addItem = async (
     variantId: string,
     quantity: number,
-    customAttributes?: { key: string; value: string }[]
+    customAttributes?: { key: string; value: string }[],
+    additionalLines?: Array<{ variantId: string; quantity: number }>,
   ): Promise<void> => {
     try {
       setIsLoading(true);
@@ -121,7 +120,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         activeCart = newCart;
       }
 
-      await addToCart(activeCart.id, variantId, quantity, customAttributes);
+      await addToCart(activeCart.id, variantId, quantity, customAttributes, undefined, additionalLines);
 
       // WICHTIG: Cart noch einmal abrufen
       const refreshedCart = await getCart(activeCart.id, shopifyLocale);
