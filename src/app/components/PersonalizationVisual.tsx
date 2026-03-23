@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Type } from "lucide-react";
+import type { ComponentType } from "react";
 import {
   BarrelFull,
   BarrelNoLegs,
@@ -9,6 +10,16 @@ import {
   BarrelSchaleXL,
   BarrelStehtisch,
 } from "./illustrations/FireBarrels";
+
+export type BarrelVariant = "full" | "schale" | "schaleXL" | "stehtisch" | "noLegs";
+
+const BARREL_MAP: Record<BarrelVariant, ComponentType<{ showBackground?: boolean }>> = {
+  full:      BarrelFull,
+  schale:    BarrelSchale,
+  schaleXL:  BarrelSchaleXL,
+  stehtisch: BarrelStehtisch,
+  noLegs:    BarrelNoLegs,
+};
 
 type Phase = "blank" | "typing" | "hold" | "erasing";
 
@@ -44,9 +55,11 @@ function CursorSVG() {
 interface PersonalizationVisualProps {
   src?: string;
   alt?: string;
+  variant?: BarrelVariant;
 }
 
-export function PersonalizationVisual(_props: PersonalizationVisualProps) {
+export function PersonalizationVisual({ variant = "full" }: PersonalizationVisualProps) {
+  const BarrelComponent = BARREL_MAP[variant];
   const [displayText, setDisplayText] = useState("");
   const [phase, setPhase] = useState<Phase>("blank");
   const phraseIdx = useRef(0);
@@ -91,7 +104,7 @@ export function PersonalizationVisual(_props: PersonalizationVisualProps) {
   return (
     <div className="relative w-full aspect-[3/4] rounded-sm overflow-hidden select-none bg-[#0c0a09]">
       {/* ── Feuertonne Illustration ── */}
-      <BarrelFull />
+      <BarrelComponent />
 
       {/* ── Gravur-Zone (gestrichelter Rahmen auf dem Barrel) ── */}
       <div

@@ -17,6 +17,9 @@ import GiftFinder from "./components/Giftfinder ";
 import Skeleton from "./components/ui/Skeleton";
 import Firehighlight from "./components/Firehighlight";
 import { Personalization } from "./components/Personalization";
+import type { BarrelVariant } from "./components/PersonalizationVisual";
+
+const BARREL_VARIANTS: BarrelVariant[] = ["full", "schale", "schaleXL", "stehtisch"];
 import { Reviews } from "./components/Reviews";
 
 const HomePage = () => {
@@ -27,6 +30,11 @@ const HomePage = () => {
     total: number;
     average: number;
   } | null>(null);
+  const [barrelVariant, setBarrelVariant] = useState<BarrelVariant>("full");
+
+  useEffect(() => {
+    setBarrelVariant(BARREL_VARIANTS[Math.floor(Math.random() * BARREL_VARIANTS.length)]);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -128,6 +136,7 @@ const HomePage = () => {
           label: "Design selbst gestalten",
           href: "/pages/design",
         }}
+        variant={barrelVariant}
       />
       <Reviews reviewStats={reviewStats} />
       <JoinUs />

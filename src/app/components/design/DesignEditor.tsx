@@ -15,6 +15,7 @@ import {
   Triangle,
   Type,
 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { cn } from "@/app/utils/utils";
 import { useCart } from "@/app/context/CartContext";
 import { getProducts } from "@/app/services/shopify";
@@ -105,6 +106,7 @@ function getBarrelEntry(title: string): BarrelEntry {
 
 export default function DesignEditor() {
   const { addItem } = useCart();
+  const searchParams = useSearchParams();
 
   /* ── Products ─────────────────────────────────────────────────── */
   const [products, setProducts] = useState<ProductOption[]>([]);
@@ -131,7 +133,11 @@ export default function DesignEditor() {
           };
         });
         setProducts(mapped);
-        if (mapped.length > 0) setSelectedProduct(mapped[0]);
+        const targetId = searchParams.get("product");
+        const preselected = targetId
+          ? mapped.find((p) => p.id === targetId) ?? null
+          : null;
+        setSelectedProduct(preselected ?? mapped[0] ?? null);
       } catch (err) {
         console.error("Produkte konnten nicht geladen werden:", err);
       } finally {

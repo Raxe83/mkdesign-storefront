@@ -33,8 +33,8 @@ const ACCENTS = [
   { bg: "bg-zinc-900",  num: "text-white/[0.04]", imgOverlay: "bg-gradient-to-r from-zinc-900/30 to-transparent" },
   { bg: "bg-rust",      num: "text-white/[0.06]", imgOverlay: "bg-gradient-to-l from-rust/25 to-transparent" },
   { bg: "bg-teal-800",  num: "text-white/[0.05]", imgOverlay: "bg-gradient-to-r from-teal-900/30 to-transparent" },
-  { bg: "bg-stone-700", num: "text-white/[0.05]", imgOverlay: "bg-gradient-to-l from-stone-700/25 to-transparent" },
-  { bg: "bg-amber-900", num: "text-white/[0.05]", imgOverlay: "bg-gradient-to-r from-amber-900/30 to-transparent" },
+  // { bg: "bg-stone-700", num: "text-white/[0.05]", imgOverlay: "bg-gradient-to-l from-stone-700/25 to-transparent" },
+  // { bg: "bg-amber-900", num: "text-white/[0.05]", imgOverlay: "bg-gradient-to-r from-amber-900/30 to-transparent" },
 ];
 
 // ─── Props ────────────────────────────────────────────────────────────────────

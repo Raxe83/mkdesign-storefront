@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Minus, Plus, Truck, RotateCcw } from "lucide-react";
+import {
+  ArrowLeft,
+  Minus,
+  Plus,
+  Truck,
+  RotateCcw,
+  Palette,
+} from "lucide-react";
 import Link from "next/link";
 import type { Product } from "../../../types/shopify";
 import type { HeroCard } from "@/app/components/product/product-category";
@@ -12,43 +19,86 @@ import ColorChooser from "../../../components/product/ColorChooser";
 import { ProductReviews } from "@/app/components/product/product-reviews";
 import { ProductHeroCards } from "@/app/components/product/ProductHeroCards";
 import { RelatedProducts } from "@/app/components/product/RelatedProducts";
+import { Personalization } from "@/app/components/Personalization";
+import type { BarrelVariant } from "@/app/components/PersonalizationVisual";
 import ImageGallery from "./ImageGallery";
+import Button from "@/app/components/ui/Button";
+
+/** Maps product tags + title to the matching barrel illustration variant. */
+function variantFromProduct(tags: string[], title: string): BarrelVariant {
+  // Combine tags and title into one searchable string (lowercase, kebab normalised)
+  const haystack = [...tags, title]
+    .map((s) => s.toLowerCase().replace(/-/g, " "))
+    .join(" ");
+
+  // Order matters: check more specific terms first
+  if (haystack.includes("schale xl") || haystack.includes("xl schale"))
+    return "schaleXL";
+  if (
+    haystack.includes("schale") ||
+    haystack.includes("feuerschale") ||
+    haystack.includes("bowl")
+  )
+    return "schale";
+  if (
+    haystack.includes("stehtisch") ||
+    haystack.includes("tisch") ||
+    haystack.includes("table") ||
+    haystack.includes("platte")
+  )
+    return "stehtisch";
+  if (haystack.includes("feuertonne") || haystack.includes("no leg"))
+    return "noLegs";
+  return "full";
+}
 
 interface Props {
-  product:             Product;
-  heroCards:           HeroCard[];
-  relatedProducts:     Product[];
-  relatedLabel:        string;
-  extraContentSlot?:   React.ReactNode;
+  product: Product;
+  heroCards: HeroCard[];
+  relatedProducts: Product[];
+  relatedLabel: string;
+  extraContentSlot?: React.ReactNode;
 }
 
 export default function ProductDetailClient({
-  product, heroCards, relatedProducts, relatedLabel, extraContentSlot,
+  product,
+  heroCards,
+  relatedProducts,
+  relatedLabel,
+  extraContentSlot,
 }: Props) {
-  const images       = product.images.edges.map((e) => e.node);
+  const barrelVariant = variantFromProduct(product.tags, product.title);
+  const images = product.images.edges.map((e) => e.node);
   const firstVariant = product.variants.edges[0]?.node;
-  const price        = firstVariant?.price.amount    ?? product.priceRange.minVariantPrice.amount;
-  const currencyCode = firstVariant?.price.currencyCode ?? product.priceRange.minVariantPrice.currencyCode;
-  const isAvailable  = firstVariant?.availableForSale ?? false;
+  const price =
+    firstVariant?.price.amount ?? product.priceRange.minVariantPrice.amount;
+  const currencyCode =
+    firstVariant?.price.currencyCode ??
+    product.priceRange.minVariantPrice.currencyCode;
+  const isAvailable = firstVariant?.availableForSale ?? false;
   const initialImage = product.featuredImage?.url ?? images[0]?.url ?? "";
 
-  const [quantity,      setQuantity]      = useState(1);
+  const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState("Schwarz");
 
   return (
     <div className="pb-8 -mt-8">
-
       {/* Back */}
-      <Link href="/pages/products"
-        className="inline-flex items-center gap-1.5 text-muted hover:text-primary transition-colors duration-200 mb-10 text-sm">
+      <Link
+        href="/pages/products"
+        className="inline-flex items-center gap-1.5 text-muted hover:text-primary transition-colors duration-200 mb-10 text-sm"
+      >
         <ArrowLeft size={14} />
         Zurück zu den Produkten
       </Link>
 
       {/* ── Two-column layout ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-20 items-start">
-
-        <ImageGallery images={images} productTitle={product.title} initialImage={initialImage} />
+        <ImageGallery
+          images={images}
+          productTitle={product.title}
+          initialImage={initialImage}
+        />
 
         {/* Product info */}
         <div className="flex flex-col gap-6">
@@ -60,16 +110,23 @@ export default function ProductDetailClient({
             {formatPrice(price, currencyCode)}
           </p>
 
-          <ProductReviews productId={product.id} productHandle={product.handle} short />
+          <ProductReviews
+            productId={product.id}
+            productHandle={product.handle}
+            short
+          />
 
           <hr className="border-zinc-200/60 dark:border-zinc-800" />
 
           <div
             className="prose prose-sm prose-zinc dark:prose-invert max-w-none text-muted leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: product.descriptionHtml || `<p>${product.description}</p>` }}
+            dangerouslySetInnerHTML={{
+              __html:
+                product.descriptionHtml || `<p>${product.description}</p>`,
+            }}
           />
 
-{/* PERSONALISIERUNG */}
+          {/* PERSONALISIERUNG */}
           {/* <div>
             <p className="text-xs uppercase tracking-widest text-muted dark:text-neutral-400 mb-2">
               Farbe{selectedColor ? ` — ${selectedColor}` : ""}
@@ -78,38 +135,66 @@ export default function ProductDetailClient({
           </div> */}
 
           <div>
-            <p className="text-xs uppercase tracking-widest text-muted dark:text-neutral-400 mb-2">Menge</p>
+            <p className="text-xs uppercase tracking-widest text-muted dark:text-neutral-400 mb-2">
+              Menge
+            </p>
             <div className="inline-flex items-center border border-zinc-200 dark:border-zinc-700 rounded">
-              <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} aria-label="Menge verringern"
+              <button
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                aria-label="Menge verringern"
                 disabled={quantity <= 1}
-                className="p-2.5 text-muted hover:text-primary dark:hover:text-neutral-100 transition-colors duration-150 disabled:opacity-30">
+                className="p-2.5 text-muted hover:text-primary dark:hover:text-neutral-100 transition-colors duration-150 disabled:opacity-30"
+              >
                 <Minus size={14} />
               </button>
               <span className="w-10 text-center text-sm font-medium text-primary dark:text-neutral-100 select-none">
                 {quantity}
               </span>
-              <button onClick={() => setQuantity((q) => q + 1)} aria-label="Menge erhöhen"
-                className="p-2.5 text-muted hover:text-primary dark:hover:text-neutral-100 transition-colors duration-150">
+              <button
+                onClick={() => setQuantity((q) => q + 1)}
+                aria-label="Menge erhöhen"
+                className="p-2.5 text-muted hover:text-primary dark:hover:text-neutral-100 transition-colors duration-150"
+              >
                 <Plus size={14} />
               </button>
             </div>
           </div>
 
           {isAvailable ? (
-            <AddToCartButton variantId={firstVariant.id} available={isAvailable}
-              title={product.title} color={selectedColor} quantity={quantity} icon />
+            <AddToCartButton
+              variantId={firstVariant.id}
+              available={isAvailable}
+              title={product.title}
+              color={selectedColor}
+              quantity={quantity}
+              icon
+            />
           ) : (
-            <p className="text-sm font-medium text-red-500 dark:text-red-400">Nicht verfügbar</p>
+            <p className="text-sm font-medium text-red-500 dark:text-red-400">
+              Nicht verfügbar
+            </p>
           )}
+          <Button variant={"outline"}>
+            <Link href={`/pages/design?product=${encodeURIComponent(product.id)}`} className="flex flow-row items-center">
+              <Palette size={15} className="shrink-0" />
+              <span className="ml-2">Eigenes Design</span>
+            </Link>
+          </Button>
 
           <div className="space-y-2.5 pt-4 border-t border-zinc-200/60 dark:border-zinc-800">
             <div className="flex items-center gap-2.5 text-sm text-muted dark:text-neutral-400">
               <Truck size={15} className="shrink-0" />
-              <span>Standardversand: {shipment.standard.days} Werktage — {formatPrice(shipment.standard.price.toFixed(2), currencyCode)}</span>
+              <span>
+                Standardversand: {shipment.standard.days} Werktage —{" "}
+                {formatPrice(shipment.standard.price.toFixed(2), currencyCode)}
+              </span>
             </div>
             <div className="flex items-center gap-2.5 text-sm text-muted dark:text-neutral-400">
               <Truck size={15} className="shrink-0 text-accent" />
-              <span>Expressversand: {shipment.premium.days} Werktage — {formatPrice(shipment.premium.price.toFixed(2), currencyCode)}</span>
+              <span>
+                Expressversand: {shipment.premium.days} Werktage —{" "}
+                {formatPrice(shipment.premium.price.toFixed(2), currencyCode)}
+              </span>
             </div>
             <div className="flex items-center gap-2.5 text-sm text-muted dark:text-neutral-400">
               <RotateCcw size={15} className="shrink-0" />
@@ -126,6 +211,39 @@ export default function ProductDetailClient({
       {/* <div className="mt-16">
         <ProductHeroCards product={product} cards={heroCards} />
       </div> */}
+
+      {/* ── Design Editor CTA ── */}
+      <div className="mt-16 -mx-6 md:-mx-10 lg:-mx-16">
+        <Personalization
+          sectionLabel="Design Editor"
+          title="Motiv selbst<br/><em>gestalten</em>"
+          description="Nutzt unseren kostenlosen Design Editor, um Euer eigenes Motiv direkt am Bildschirm zu erstellen — Text, Formen oder eigene Bilder."
+          steps={[
+            {
+              step: 1,
+              title: "Produkt auswählen",
+              description: "Wählt das passende Produkt direkt im Editor aus.",
+            },
+            {
+              step: 2,
+              title: "Motiv erstellen",
+              description:
+                "Text, Formen oder eigene Bilder – alles per Drag & Drop.",
+            },
+            {
+              step: 3,
+              title: "Design speichern & bestellen",
+              description:
+                "Design speichern, in den Warenkorb legen und fertig.",
+            },
+          ]}
+          cta={{ label: "Zum Design Editor", href: "/pages/design" }}
+          image={{ src: "", alt: "" }}
+          pullQuote={"„Dein Unikat, dein Design\u201C"}
+          disableBackground
+          variant={barrelVariant}
+        />
+      </div>
 
       {/* ── Ähnliche Produkte ── */}
       {relatedProducts.length > 0 && (

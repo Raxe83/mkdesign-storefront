@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { cn } from "../utils/utils";
 import { PersonalizationVisual } from "./PersonalizationVisual";
+import type { BarrelVariant } from "./PersonalizationVisual";
 
 export interface PersonalizationStep {
   step: number;
@@ -20,6 +21,8 @@ export interface PersonalizationProps {
   image: { src: string; alt: string };
   pullQuote?: string;
   className?: string;
+  disableBackground?: boolean;
+  variant?: BarrelVariant;
 }
 
 const DEFAULT_STEPS: PersonalizationStep[] = [
@@ -50,9 +53,11 @@ export function Personalization({
   image,
   pullQuote = "„Kein Produkt wie das andere",
   className,
+  disableBackground = false,
+  variant,
 }: PersonalizationProps) {
   return (
-    <div className={cn("w-full bg-cream dark:bg-zinc-950", className)}>
+    <div className={cn("w-full dark:bg-zinc-950", disableBackground ? "" : "bg-cream", className)}>
       <div className="max-w-screen-xl mx-auto px-6 md:px-10 lg:px-16 py-16 lg:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* ── Left: Text + Steps ── */}
@@ -110,7 +115,7 @@ export function Personalization({
 
           {/* ── Right: Animiertes Design-Visual ── */}
           <div className="relative">
-            <PersonalizationVisual src={image.src} alt={image.alt} />
+            <PersonalizationVisual src={image.src} alt={image.alt} variant={variant} />
             {pullQuote && (
               <div className="absolute -bottom-4 -right-4 lg:-right-6 bg-rust text-white px-5 py-3 rounded-sm max-w-[200px] z-10">
                 <p className="font-display italic text-sm leading-snug">{pullQuote}</p>
