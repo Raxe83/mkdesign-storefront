@@ -98,11 +98,10 @@ export default function ProductDetailClient({
   const extrasValid = useMemo(() => {
     const cfg = product.zusatzoptionen;
     if (!cfg) return true;
-    const textsOk          = cfg.textfelder.every((_, i) => extrasValues.textfelder[i]?.trim());
-    const zusatzprodukteOk = cfg.zusatzprodukte.length === 0 || extrasValues.zusatzprodukte.length > 0;
-    const optionenOk       = cfg.optionen.length === 0 || extrasValues.optionen.length > 0;
-    const entscheidOk      = cfg.entscheide.length === 0 || extrasValues.entscheid.trim() !== "";
-    return textsOk && zusatzprodukteOk && optionenOk && entscheidOk;
+    const textsOk     = cfg.textfelder.every((_, i) => extrasValues.textfelder[i]?.trim());
+    const optionenOk  = cfg.optionen.length === 0 || extrasValues.optionen.length > 0;
+    const entscheidOk = cfg.entscheide.length === 0 || extrasValues.entscheid.trim() !== "";
+    return textsOk && optionenOk && entscheidOk;
   }, [product.zusatzoptionen, extrasValues]);
 
   return (
@@ -198,7 +197,7 @@ export default function ProductDetailClient({
                   .map((label, i) => ({ key: label, value: extrasValues.textfelder[i] ?? "" }))
                   .filter((a) => a.value.trim() !== ""),
                 ...(extrasValues.zusatzprodukte.length > 0
-                  ? [{ key: "Zusatzprodukte", value: extrasValues.zusatzprodukte.map((v) => v.title).join(", ") }]
+                  ? [{ key: "_zusatzprodukte", value: extrasValues.zusatzprodukte.map((v) => v.title).join(", ") }]
                   : []),
                 ...(extrasValues.optionen.length > 0
                   ? [{ key: "Optionen", value: extrasValues.optionen.join(", ") }]

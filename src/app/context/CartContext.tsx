@@ -23,7 +23,7 @@ interface CartContextType {
     variantId: string,
     quantity: number,
     customAttributes?: { key: string; value: string }[],
-    additionalLines?: Array<{ variantId: string; quantity: number }>,
+    additionalLines?: Array<{ variantId: string; quantity: number; customAttributes?: { key: string; value: string }[] }>,
   ) => Promise<void>;
   updateItem: (lineId: string, quantity: number) => Promise<void>;
   updateItemQuantityFunction: (
@@ -107,7 +107,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     variantId: string,
     quantity: number,
     customAttributes?: { key: string; value: string }[],
-    additionalLines?: Array<{ variantId: string; quantity: number }>,
+    additionalLines?: Array<{ variantId: string; quantity: number; customAttributes?: { key: string; value: string }[] }>,
   ): Promise<void> => {
     try {
       setIsLoading(true);

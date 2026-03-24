@@ -38,8 +38,11 @@ const CartPage = () => {
   useEffect(() => setMounted(true), []);
 
   const isEmpty = !cart || cart.lines.edges.length === 0;
+  // Nur Hauptprodukte zählen (keine Zusatzprodukte mit _linkedTo)
   const itemCount =
-    cart?.lines.edges.reduce((s, { node }) => s + node.quantity, 0) ?? 0;
+    cart?.lines.edges
+      .filter(({ node }) => !node.attributes?.some(a => a.key === "_linkedTo"))
+      .reduce((s, { node }) => s + node.quantity, 0) ?? 0;
 
   if (!mounted)
     return (
@@ -115,159 +118,184 @@ const CartPage = () => {
               </div>
 
               {/* Items */}
-              <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                {isLoading
-                  ? Array.from({ length: 2 }).map((_, i) => (
-                      <CartItemSkeleton key={i} />
-                    ))
-                  : cart?.lines?.edges?.map(({ node }, index) => {
-                      const lineTotal = (
-                        parseFloat(node.merchandise.price?.amount ?? "0") *
-                        node.quantity
-                      ).toString();
+              {(() => {
+                const allEdges = cart?.lines?.edges ?? [];
 
-                      return (
-                        <div
-                          key={node.id}
-                          className="p-5 sm:p-6 flex items-start gap-4 opacity-0 animate-gift-in"
-                          style={{
-                            animationDelay: `${index * 60}ms`,
-                            animationFillMode: "forwards",
-                          }}
-                        >
-                          {/* Thumbnail */}
-                          {(() => {
-                            const isCustomDesign = (node.attributes ?? []).some(a => a.key === "_design_json");
-                            const previewUrl = (node.attributes ?? []).find(a => a.key === "Design-Vorschau")?.value;
-                            return isCustomDesign && previewUrl ? (
-                              <div className="h-20 w-20 shrink-0 rounded-sm border border-rust/30 overflow-hidden bg-stone-50 dark:bg-zinc-800">
-                                <img
-                                  src={previewUrl}
-                                  alt="Dein Design"
-                                  className="h-full w-full object-contain p-1"
-                                />
-                              </div>
-                            ) : (
-                              <Link
-                                href={`/pages/products/${node.merchandise.product.handle}`}
-                                className="h-20 w-20 shrink-0 rounded-sm border border-zinc-200 dark:border-zinc-700 overflow-hidden bg-zinc-50 dark:bg-zinc-800 hover:opacity-80 transition-opacity duration-200"
-                              >
-                                {node.merchandise.product.featuredImage ? (
-                                  <img
-                                    src={node.merchandise.product.featuredImage.url}
-                                    alt={
-                                      node.merchandise.product.featuredImage
-                                        .altText || node.merchandise.product.title
-                                    }
-                                    className="h-full w-full object-cover"
-                                  />
+                // Zusatzprodukt-Lines: haben _linkedTo Attribut
+                const linkedIds = new Set(
+                  allEdges
+                    .filter(({ node }) => node.attributes?.some(a => a.key === "_linkedTo"))
+                    .map(({ node }) => node.id)
+                );
+
+                // Map: mainVariantId → zugehörige Zusatzprodukt-Nodes
+                const linkedByVariantId = new Map<string, typeof allEdges[number]["node"][]>();
+                allEdges.forEach(({ node }) => {
+                  const linkedTo = node.attributes?.find(a => a.key === "_linkedTo")?.value;
+                  if (linkedTo) {
+                    linkedByVariantId.set(linkedTo, [...(linkedByVariantId.get(linkedTo) ?? []), node]);
+                  }
+                });
+
+                // Nur Hauptprodukte (keine Zusatzprodukte)
+                const mainEdges = allEdges.filter(({ node }) => !linkedIds.has(node.id));
+
+                return (
+                  <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                    {isLoading
+                      ? Array.from({ length: 2 }).map((_, i) => <CartItemSkeleton key={i} />)
+                      : mainEdges.map(({ node }, index) => {
+                          const lineTotal = (
+                            parseFloat(node.merchandise.price?.amount ?? "0") * node.quantity
+                          ).toString();
+                          const linkedItems = linkedByVariantId.get(node.merchandise.id) ?? [];
+
+                          const handleRemove = async () => {
+                            await removeItem(node.id);
+                            for (const child of linkedItems) await removeItem(child.id);
+                          };
+
+                          return (
+                            <div
+                              key={node.id}
+                              className="p-5 sm:p-6 flex items-start gap-4 opacity-0 animate-gift-in"
+                              style={{ animationDelay: `${index * 60}ms`, animationFillMode: "forwards" }}
+                            >
+                              {/* Thumbnail */}
+                              {(() => {
+                                const isCustomDesign = (node.attributes ?? []).some(a => a.key === "_design_json");
+                                const previewUrl = (node.attributes ?? []).find(a => a.key === "Design-Vorschau")?.value;
+                                return isCustomDesign && previewUrl ? (
+                                  <div className="h-20 w-20 shrink-0 rounded-sm border border-rust/30 overflow-hidden bg-stone-50 dark:bg-zinc-800">
+                                    <img src={previewUrl} alt="Dein Design" className="h-full w-full object-contain p-1" />
+                                  </div>
                                 ) : (
-                                  <div className="flex h-full w-full items-center justify-center">
-                                    <ShoppingBag size={18} className="text-muted" />
+                                  <Link
+                                    href={`/pages/products/${node.merchandise.product.handle}`}
+                                    className="h-20 w-20 shrink-0 rounded-sm border border-zinc-200 dark:border-zinc-700 overflow-hidden bg-zinc-50 dark:bg-zinc-800 hover:opacity-80 transition-opacity duration-200"
+                                  >
+                                    {node.merchandise.product.featuredImage ? (
+                                      <img
+                                        src={node.merchandise.product.featuredImage.url}
+                                        alt={node.merchandise.product.featuredImage.altText || node.merchandise.product.title}
+                                        className="h-full w-full object-cover"
+                                      />
+                                    ) : (
+                                      <div className="flex h-full w-full items-center justify-center">
+                                        <ShoppingBag size={18} className="text-muted" />
+                                      </div>
+                                    )}
+                                  </Link>
+                                );
+                              })()}
+
+                              {/* Info */}
+                              <div className="flex-1 min-w-0">
+                                <Link href={`/pages/products/${node.merchandise.product.handle}`}>
+                                  <h3 className="font-display font-medium text-primary text-sm leading-snug hover:text-accent transition-colors duration-150 line-clamp-2">
+                                    {node.merchandise.product.title}
+                                  </h3>
+                                </Link>
+
+                                {node.merchandise.title !== "Default Title" && (
+                                  <p className="mt-0.5 text-xs text-muted">{node.merchandise.title}</p>
+                                )}
+
+                                {(() => {
+                                  const isCustomDesign = (node.attributes ?? []).some(a => a.key === "_design_json");
+                                  if (isCustomDesign) return <p className="mt-1 text-xs text-rust font-medium">Individuelles Design</p>;
+                                  const visible = (node.attributes ?? []).filter(a => !a.key.startsWith("_"));
+                                  return visible.length > 0 ? (
+                                    <div className="mt-1 space-y-0.5">
+                                      {visible.map((attr) => (
+                                        <p key={attr.key} className="text-xs text-muted">{attr.key}: {attr.value}</p>
+                                      ))}
+                                    </div>
+                                  ) : null;
+                                })()}
+
+                                {/* ── Zusatzprodukte als Sub-Items ── */}
+                                {linkedItems.length > 0 && (
+                                  <div className="mt-2.5 pt-2.5 border-t border-zinc-100 dark:border-zinc-800 space-y-1.5">
+                                    <p className="text-[10px] uppercase tracking-widest text-muted dark:text-neutral-500">Zusatzprodukte</p>
+                                    {linkedItems.map((child) => (
+                                      <div key={child.id} className="flex items-center gap-2">
+                                        {child.merchandise.product.featuredImage && (
+                                          <img
+                                            src={child.merchandise.product.featuredImage.url}
+                                            alt={child.merchandise.product.featuredImage.altText ?? child.merchandise.product.title}
+                                            className="w-6 h-6 rounded object-cover border border-zinc-200 dark:border-zinc-700 shrink-0"
+                                          />
+                                        )}
+                                        <span className="flex-1 text-xs text-muted dark:text-neutral-400 truncate">
+                                          {child.merchandise.product.title}
+                                        </span>
+                                        <span className="text-xs text-muted tabular-nums shrink-0">
+                                          +{formatPrice(child.merchandise.price?.amount ?? "0", child.merchandise.price?.currencyCode ?? "EUR")}
+                                        </span>
+                                        <button
+                                          onClick={() => removeItem(child.id)}
+                                          className="text-muted hover:text-rust transition-colors duration-150 shrink-0"
+                                          aria-label="Entfernen"
+                                        >
+                                          <Trash2 size={11} />
+                                        </button>
+                                      </div>
+                                    ))}
                                   </div>
                                 )}
-                              </Link>
-                            );
-                          })()}
 
-                          {/* Info */}
-                          <div className="flex-1 min-w-0">
-                            <Link
-                              href={`/pages/products/${node.merchandise.product.handle}`}
-                            >
-                              <h3 className="font-display font-medium text-primary text-sm leading-snug hover:text-accent transition-colors duration-150 line-clamp-2">
-                                {node.merchandise.product.title}
-                              </h3>
-                            </Link>
-
-                            {node.merchandise.title !== "Default Title" && (
-                              <p className="mt-0.5 text-xs text-muted">
-                                {node.merchandise.title}
-                              </p>
-                            )}
-
-                            {(() => {
-                              const isCustomDesign = (node.attributes ?? []).some(a => a.key === "_design_json");
-                              if (isCustomDesign) {
-                                return (
-                                  <p className="mt-1 text-xs text-rust font-medium">Individuelles Design</p>
-                                );
-                              }
-                              const visible = (node.attributes ?? []).filter(a => !a.key.startsWith("_"));
-                              return visible.length > 0 ? (
-                                <div className="mt-1 space-y-0.5">
-                                  {visible.map((attr) => (
-                                    <p key={attr.key} className="text-xs text-muted">
-                                      {attr.key}: {attr.value}
-                                    </p>
-                                  ))}
+                                {/* Quantity stepper */}
+                                <div className="mt-3 flex items-center gap-3">
+                                  <div className="flex items-center border border-zinc-200 dark:border-zinc-700 rounded-sm overflow-hidden">
+                                    <button
+                                      onClick={async () => {
+                                        const newQty = node.quantity - 1;
+                                        await updateItemQuantityFunction(node.id, newQty);
+                                        for (const child of linkedItems) await updateItemQuantityFunction(child.id, newQty);
+                                      }}
+                                      disabled={node.quantity <= 1}
+                                      className="h-7 w-7 flex items-center justify-center text-muted hover:text-primary hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors duration-150 disabled:opacity-30 disabled:cursor-not-allowed text-base leading-none"
+                                      aria-label="Weniger"
+                                    >−</button>
+                                    <span className="h-7 w-8 flex items-center justify-center text-xs font-medium text-primary tabular-nums border-x border-zinc-200 dark:border-zinc-700 select-none">
+                                      {node.quantity}
+                                    </span>
+                                    <button
+                                      onClick={async () => {
+                                        const newQty = node.quantity + 1;
+                                        await updateItemQuantityFunction(node.id, newQty);
+                                        for (const child of linkedItems) await updateItemQuantityFunction(child.id, newQty);
+                                      }}
+                                      className="h-7 w-7 flex items-center justify-center text-muted hover:text-primary hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors duration-150 text-base leading-none"
+                                      aria-label="Mehr"
+                                    >+</button>
+                                  </div>
+                                  <button
+                                    onClick={handleRemove}
+                                    className="flex items-center gap-1 text-xs text-muted hover:text-rust transition-colors duration-150"
+                                  >
+                                    <Trash2 size={13} />
+                                    Löschen
+                                  </button>
                                 </div>
-                              ) : null;
-                            })()}
-
-                            {/* Quantity stepper */}
-                            <div className="mt-3 flex items-center gap-3">
-                              <div className="flex items-center border border-zinc-200 dark:border-zinc-700 rounded-sm overflow-hidden">
-                                <button
-                                  onClick={() =>
-                                    updateItemQuantityFunction(
-                                      node.id,
-                                      node.quantity - 1,
-                                    )
-                                  }
-                                  disabled={node.quantity <= 1}
-                                  className="h-7 w-7 flex items-center justify-center text-muted hover:text-primary hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors duration-150 disabled:opacity-30 disabled:cursor-not-allowed text-base leading-none"
-                                  aria-label="Weniger"
-                                >
-                                  −
-                                </button>
-                                <span className="h-7 w-8 flex items-center justify-center text-xs font-medium text-primary tabular-nums border-x border-zinc-200 dark:border-zinc-700 select-none">
-                                  {node.quantity}
-                                </span>
-                                <button
-                                  onClick={() =>
-                                    updateItemQuantityFunction(
-                                      node.id,
-                                      node.quantity + 1,
-                                    )
-                                  }
-                                  className="h-7 w-7 flex items-center justify-center text-muted hover:text-primary hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors duration-150 text-base leading-none"
-                                  aria-label="Mehr"
-                                >
-                                  +
-                                </button>
                               </div>
 
-                              <button
-                                onClick={() => removeItem(node.id)}
-                                className="flex items-center gap-1 text-xs text-muted hover:text-rust transition-colors duration-150"
-                              >
-                                <Trash2 size={13} />
-                                Löschen
-                              </button>
+                              {/* Price */}
+                              <div className="shrink-0 text-right">
+                                <p className="text-sm font-medium text-primary tabular-nums">
+                                  {formatPrice(lineTotal, node.merchandise.price?.currencyCode ?? "EUR")}
+                                </p>
+                                <p className="text-[11px] text-muted mt-0.5 tabular-nums">
+                                  {formatPrice(node.merchandise.price?.amount ?? "0", node.merchandise.price?.currencyCode ?? "EUR")} / Stk.
+                                </p>
+                              </div>
                             </div>
-                          </div>
-
-                          {/* Price */}
-                          <div className="shrink-0 text-right">
-                            <p className="text-sm font-medium text-primary tabular-nums">
-                              {formatPrice(
-                                lineTotal,
-                                node.merchandise.price?.currencyCode ?? "EUR",
-                              )}
-                            </p>
-                            <p className="text-[11px] text-muted mt-0.5 tabular-nums">
-                              {formatPrice(
-                                node.merchandise.price?.amount ?? "0",
-                                node.merchandise.price?.currencyCode ?? "EUR",
-                              )}{" "}
-                              / Stk.
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })}
-              </div>
+                          );
+                        })}
+                  </div>
+                );
+              })()}
 
               {/* Footer */}
               {!isLoading && (

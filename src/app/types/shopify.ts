@@ -36,20 +36,43 @@ export interface ZusatzproduktOption {
   defaultVariantId: string;
 }
 
+/** Roher Node aus einem `references`-Feld — kann Product oder ProductVariant sein */
+export type ZusatzoptionNode =
+  | {
+      /** product_reference: vollständiges Produkt */
+      id?: string;
+      title?: string;
+      handle?: string;
+      featuredImage?: { url: string; altText: string | null } | null;
+      priceRange?: { minVariantPrice: { amount: string; currencyCode: string } };
+      variants?: { edges: Array<{ node: { id: string } }> };
+      price?: never;
+      product?: never;
+    }
+  | {
+      /** variant_reference: Variante mit parent-Produkt */
+      id?: string;
+      price?: { amount: string; currencyCode: string };
+      product?: {
+        id: string;
+        title: string;
+        handle: string;
+        featuredImage?: { url: string; altText: string | null } | null;
+        priceRange?: { minVariantPrice: { amount: string; currencyCode: string } };
+      };
+      title?: never;
+      handle?: never;
+      priceRange?: never;
+      variants?: never;
+    };
+
 export interface ZusatzoptionenRaw {
   id: string;
   fields: Array<{
     key: string;
     value: string | null;
     references?: {
-      nodes: Array<{
-        id?: string;
-        title?: string;
-        handle?: string;
-        featuredImage?: { url: string; altText: string | null } | null;
-        priceRange?: { minVariantPrice: { amount: string; currencyCode: string } };
-        variants?: { edges: Array<{ node: { id: string } }> };
-      }>;
+      nodes: Array<ZusatzoptionNode>;
     } | null;
   }>;
 }

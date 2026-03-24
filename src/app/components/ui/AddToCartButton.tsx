@@ -46,7 +46,11 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
       if (customAttributes) {
         attributes.push(...customAttributes.filter((a) => a.value.trim() !== ""));
       }
-      const additionalLines = metaZusatzprodukte?.map((v) => ({ variantId: v.defaultVariantId, quantity }));
+      const additionalLines = metaZusatzprodukte?.map((v) => ({
+        variantId: v.defaultVariantId,
+        quantity,
+        customAttributes: [{ key: "_linkedTo", value: variantId }],
+      }));
       await addItem(
         variantId,
         quantity,

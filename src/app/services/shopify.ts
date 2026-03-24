@@ -249,17 +249,34 @@ function parseList(raw: string | null): string[] {
 function parseZusatzoptionen(raw: ZusatzoptionenRaw): ProductZusatzoptionen {
   const get = (key: string) => raw.fields.find((f) => f.key === key) ?? null;
 
-  const zusatzprodukteNodes = get("variante")?.references?.nodes ?? [];
+  const zusatzprodukteNodes = get("zusatzprodukte")?.references?.nodes ?? [];
   const zusatzprodukte: ZusatzproduktOption[] = zusatzprodukteNodes
-    .filter((n) => Boolean(n.id && n.title && n.handle && n.priceRange && n.variants?.edges?.length))
-    .map((n) => ({
-      id: n.id!,
-      title: n.title!,
-      handle: n.handle!,
-      featuredImage: n.featuredImage ?? null,
-      price: n.priceRange!.minVariantPrice,
-      defaultVariantId: n.variants!.edges[0].node.id,
-    }));
+    .map((n): ZusatzproduktOption | null => {
+      // product_reference: Node hat title/handle/priceRange/variants direkt
+      if (n.id && n.title && n.handle && n.priceRange && n.variants?.edges?.length) {
+        return {
+          id: n.id,
+          title: n.title,
+          handle: n.handle,
+          featuredImage: n.featuredImage ?? null,
+          price: n.priceRange.minVariantPrice,
+          defaultVariantId: n.variants.edges[0].node.id,
+        };
+      }
+      // variant_reference: Node hat price + product-Sub-Objekt
+      if (n.id && n.price && n.product?.id && n.product?.title && n.product?.handle) {
+        return {
+          id: n.product.id,
+          title: n.product.title,
+          handle: n.product.handle,
+          featuredImage: n.product.featuredImage ?? null,
+          price: n.product.priceRange?.minVariantPrice ?? n.price,
+          defaultVariantId: n.id,
+        };
+      }
+      return null;
+    })
+    .filter((n): n is ZusatzproduktOption => n !== null);
 
   return {
     textfelder: parseList(get("textfeld")?.value ?? null),
@@ -350,6 +367,28 @@ export async function getProductByHandle(
                         edges {
                           node {
                             id
+                          }
+                        }
+                      }
+                    }
+                    ... on ProductVariant {
+                      id
+                      price {
+                        amount
+                        currencyCode
+                      }
+                      product {
+                        id
+                        title
+                        handle
+                        featuredImage {
+                          url
+                          altText
+                        }
+                        priceRange {
+                          minVariantPrice {
+                            amount
+                            currencyCode
                           }
                         }
                       }
@@ -622,7 +661,7 @@ export const addToCart = async (
   quantity: number,
   customAttributes?: { key: string; value: string }[],
   locale?: string,
-  additionalLines?: Array<{ variantId: string; quantity: number }>,
+  additionalLines?: Array<{ variantId: string; quantity: number; customAttributes?: { key: string; value: string }[] }>,
 ): Promise<Cart> => {
   const query = `
     mutation cartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
@@ -670,6 +709,7 @@ export const addToCart = async (
       ...(additionalLines ?? []).map((l) => ({
         merchandiseId: l.variantId,
         quantity: l.quantity,
+        attributes: l.customAttributes ?? [],
       })),
     ],
   };
