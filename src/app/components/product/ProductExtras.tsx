@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { ProductZusatzoptionen, VarianteOption } from "@/app/types/shopify";
+import Image from "next/image";
+import type { ProductZusatzoptionen, ZusatzproduktOption } from "@/app/types/shopify";
 import { formatPrice } from "@/app/utils/formatPrice";
 
 export interface ProductExtrasValues {
   textfelder: string[];
-  varianten: VarianteOption[];
+  zusatzprodukte: ZusatzproduktOption[];
   optionen: string[];
   entscheid: string;
   farbe: string;
@@ -39,18 +40,18 @@ export function ProductExtras({ config, onChange }: Props) {
   const [textfelder, setTextfelder] = useState<string[]>(
     () => config.textfelder.map(() => ""),
   );
-  const [varianten, setVarianten] = useState<VarianteOption[]>([]);
+  const [zusatzprodukte, setZusatzprodukte] = useState<ZusatzproduktOption[]>([]);
   const [optionen, setOptionen] = useState<string[]>([]);
   const [entscheid, setEntscheid] = useState("");
   const [farbe, setFarbe] = useState(config.farben[0] ?? "");
 
   useEffect(() => {
-    onChange({ textfelder, varianten, optionen, entscheid, farbe });
-  }, [textfelder, varianten, optionen, entscheid, farbe, onChange]);
+    onChange({ textfelder, zusatzprodukte, optionen, entscheid, farbe });
+  }, [textfelder, zusatzprodukte, optionen, entscheid, farbe, onChange]);
 
   const hasFields =
     config.textfelder.length > 0 ||
-    config.varianten.length > 0 ||
+    config.zusatzprodukte.length > 0 ||
     config.optionen.length > 0 ||
     config.entscheide.length > 0 ||
     config.farben.length > 0;
@@ -60,8 +61,8 @@ export function ProductExtras({ config, onChange }: Props) {
   const updateText = (i: number, value: string) =>
     setTextfelder((prev) => { const next = [...prev]; next[i] = value; return next; });
 
-  const toggleVariante = (opt: VarianteOption, checked: boolean) =>
-    setVarianten((prev) =>
+  const toggleZusatzprodukt = (opt: ZusatzproduktOption, checked: boolean) =>
+    setZusatzprodukte((prev) =>
       checked ? [...prev, opt] : prev.filter((v) => v.id !== opt.id),
     );
 
@@ -90,21 +91,30 @@ export function ProductExtras({ config, onChange }: Props) {
         );
       })}
 
-      {/* ── Varianten (Mehrfachauswahl) ── */}
-      {config.varianten.length > 0 && (
+      {/* ── Zusatzprodukte (Mehrfachauswahl als Produktkarten) ── */}
+      {config.zusatzprodukte.length > 0 && (
         <div>
-          <p className={LABEL_CLS}>Variante</p>
-          <div className="flex flex-col gap-2.5">
-            {config.varianten.map((opt) => {
-              const checked = varianten.some((v) => v.id === opt.id);
+          <p className={LABEL_CLS}>Zusatzprodukte</p>
+          <div className="flex flex-col gap-2">
+            {config.zusatzprodukte.map((opt) => {
+              const checked = zusatzprodukte.some((v) => v.id === opt.id);
               return (
-                <label key={opt.id} className="flex items-center gap-3 cursor-pointer group">
+                <label
+                  key={opt.id}
+                  className={[
+                    "flex items-center gap-3 cursor-pointer rounded border p-3 transition-colors duration-150",
+                    checked
+                      ? "border-primary dark:border-neutral-400 bg-zinc-50 dark:bg-zinc-800/60"
+                      : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500",
+                  ].join(" ")}
+                >
+                  {/* Checkbox */}
                   <span className={[
                     "flex-shrink-0 w-4 h-4 rounded border transition-colors duration-150",
                     "flex items-center justify-center",
                     checked
                       ? "bg-primary border-primary dark:bg-neutral-100 dark:border-neutral-100"
-                      : "border-zinc-300 dark:border-zinc-600 group-hover:border-zinc-500 dark:group-hover:border-zinc-400",
+                      : "border-zinc-300 dark:border-zinc-600",
                   ].join(" ")}>
                     {checked && (
                       <svg width="9" height="7" viewBox="0 0 9 7" fill="none" aria-hidden>
@@ -115,9 +125,30 @@ export function ProductExtras({ config, onChange }: Props) {
                   </span>
                   <input type="checkbox" className="sr-only"
                     checked={checked}
-                    onChange={(e) => toggleVariante(opt, e.target.checked)} />
-                  <span className="flex-1 text-sm text-primary dark:text-neutral-200">{opt.title}</span>
-                  <span className="text-sm text-muted dark:text-neutral-400">
+                    onChange={(e) => toggleZusatzprodukt(opt, e.target.checked)} />
+
+                  {/* Produktbild */}
+                  {opt.featuredImage ? (
+                    <div className="flex-shrink-0 w-10 h-10 rounded overflow-hidden border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800">
+                      <Image
+                        src={opt.featuredImage.url}
+                        alt={opt.featuredImage.altText ?? opt.title}
+                        width={40}
+                        height={40}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex-shrink-0 w-10 h-10 rounded border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800" />
+                  )}
+
+                  {/* Titel */}
+                  <span className="flex-1 text-sm text-primary dark:text-neutral-200 leading-snug">
+                    {opt.title}
+                  </span>
+
+                  {/* Preis */}
+                  <span className="flex-shrink-0 text-sm font-medium text-primary dark:text-neutral-200">
                     {formatPrice(opt.price.amount, opt.price.currencyCode)}
                   </span>
                 </label>

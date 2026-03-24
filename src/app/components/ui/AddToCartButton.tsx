@@ -5,7 +5,7 @@ import { useState } from "react";
 import { ShoppingCart } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import { useToast } from "../../context/ToastContext";
-import type { VarianteOption } from "../../types/shopify";
+import type { ZusatzproduktOption } from "../../types/shopify";
 
 interface AddToCartButtonProps {
   variantId: string;
@@ -16,8 +16,8 @@ interface AddToCartButtonProps {
   quantity?: number;
   /** Zusätzliche Line-Item-Attribute (z.B. aus Metaobjekt-Feldern). Leere Werte werden ignoriert. */
   customAttributes?: { key: string; value: string }[];
-  /** Ausgewählte Metaobjekt-Varianten — werden als eigene Cart-Lines addiert */
-  metaVariants?: VarianteOption[];
+  /** Ausgewählte Zusatzprodukte — werden als eigene Cart-Lines addiert */
+  metaZusatzprodukte?: ZusatzproduktOption[];
   /** false → Button disabled + Hinweis, dass Pflichtfelder fehlen */
   formValid?: boolean;
 }
@@ -30,7 +30,7 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
   icon,
   quantity = 1,
   customAttributes,
-  metaVariants,
+  metaZusatzprodukte,
   formValid = true,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -46,7 +46,7 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
       if (customAttributes) {
         attributes.push(...customAttributes.filter((a) => a.value.trim() !== ""));
       }
-      const additionalLines = metaVariants?.map((v) => ({ variantId: v.id, quantity }));
+      const additionalLines = metaZusatzprodukte?.map((v) => ({ variantId: v.defaultVariantId, quantity }));
       await addItem(
         variantId,
         quantity,

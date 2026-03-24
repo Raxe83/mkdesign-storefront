@@ -1,5 +1,5 @@
 import { ShopifyCollection } from "../components/CollectionsList";
-import type { Cart, Product, ProductZusatzoptionen, ZusatzoptionenRaw } from "../types/shopify";
+import type { Cart, Product, ProductZusatzoptionen, ZusatzproduktOption, ZusatzoptionenRaw } from "../types/shopify";
 
 const SHOPIFY_DOMAIN = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN;
 const SHOPIFY_STOREFRONT_TOKEN =
@@ -249,16 +249,21 @@ function parseList(raw: string | null): string[] {
 function parseZusatzoptionen(raw: ZusatzoptionenRaw): ProductZusatzoptionen {
   const get = (key: string) => raw.fields.find((f) => f.key === key) ?? null;
 
-  const varianteNodes = get("variante")?.references?.nodes ?? [];
-  const varianten = varianteNodes
-    .filter((n): n is { id: string; title: string; price: { amount: string; currencyCode: string } } =>
-      Boolean(n.id && n.title && n.price),
-    )
-    .map((n) => ({ id: n.id, title: n.title, price: n.price }));
+  const zusatzprodukteNodes = get("variante")?.references?.nodes ?? [];
+  const zusatzprodukte: ZusatzproduktOption[] = zusatzprodukteNodes
+    .filter((n) => Boolean(n.id && n.title && n.handle && n.priceRange && n.variants?.edges?.length))
+    .map((n) => ({
+      id: n.id!,
+      title: n.title!,
+      handle: n.handle!,
+      featuredImage: n.featuredImage ?? null,
+      price: n.priceRange!.minVariantPrice,
+      defaultVariantId: n.variants!.edges[0].node.id,
+    }));
 
   return {
     textfelder: parseList(get("textfeld")?.value ?? null),
-    varianten,
+    zusatzprodukte,
     optionen:   parseList(get("optionen")?.value ?? null),
     entscheide: parseList(get("entscheide")?.value ?? null),
     farben:     parseList(get("farben")?.value ?? null),
@@ -327,12 +332,26 @@ export async function getProductByHandle(
                 value
                 references(first: 30) {
                   nodes {
-                    ... on ProductVariant {
+                    ... on Product {
                       id
                       title
-                      price {
-                        amount
-                        currencyCode
+                      handle
+                      featuredImage {
+                        url
+                        altText
+                      }
+                      priceRange {
+                        minVariantPrice {
+                          amount
+                          currencyCode
+                        }
+                      }
+                      variants(first: 1) {
+                        edges {
+                          node {
+                            id
+                          }
+                        }
                       }
                     }
                   }

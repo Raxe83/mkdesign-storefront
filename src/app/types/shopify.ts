@@ -22,13 +22,18 @@ export interface Metaobject {
 // ─── Produkt-Zusatzoptionen (custom.zusatzoptionen) ───────────────────────────
 
 /**
- * Rohe Felder wie sie aus dem Metaobjekt-Reference kommen.
- * Wird intern von `parseZusatzoptionen` verarbeitet.
+ * Ein vollständiges Zusatzprodukt, das einem Hauptprodukt zugeordnet ist.
+ * Wird aus Product-Referenzen im Metaobjekt geparst.
  */
-export interface VarianteOption {
+export interface ZusatzproduktOption {
+  /** Product GID */
   id: string;
   title: string;
+  handle: string;
+  featuredImage: { url: string; altText: string | null } | null;
   price: { amount: string; currencyCode: string };
+  /** Erster Variant-GID — wird zum Hinzufügen zum Warenkorb verwendet */
+  defaultVariantId: string;
 }
 
 export interface ZusatzoptionenRaw {
@@ -40,7 +45,10 @@ export interface ZusatzoptionenRaw {
       nodes: Array<{
         id?: string;
         title?: string;
-        price?: { amount: string; currencyCode: string };
+        handle?: string;
+        featuredImage?: { url: string; altText: string | null } | null;
+        priceRange?: { minVariantPrice: { amount: string; currencyCode: string } };
+        variants?: { edges: Array<{ node: { id: string } }> };
       }>;
     } | null;
   }>;
@@ -54,8 +62,8 @@ export interface ZusatzoptionenRaw {
 export interface ProductZusatzoptionen {
   /** Dynamische Textfeld-Labels, z.B. ["Name Braut", "Gravurtext"] */
   textfelder: string[];
-  /** Varianten — Mehrfachauswahl mit Preis */
-  varianten: VarianteOption[];
+  /** Zusatzprodukte — auswählbare Produkte die zum Hauptprodukt dazugehören */
+  zusatzprodukte: ZusatzproduktOption[];
   /** Checkbox-Optionen — Mehrfachauswahl, z.B. ["Mit Gravur", "Mit Geschenkbox"] */
   optionen: string[];
   /** Radio-Optionen — Einzelauswahl, z.B. ["Matt", "Glänzend"] */

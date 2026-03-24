@@ -81,27 +81,28 @@ export default function ProductDetailClient({
   const [quantity, setQuantity] = useState(1);
   const [extrasValues, setExtrasValues] = useState<ProductExtrasValues>({
     textfelder: [],
-    varianten: [],
+    zusatzprodukte: [],
     optionen: [],
     entscheid: "",
     farbe: "",
   });
 
   const displayPrice = useMemo(() => {
-    const selected = extrasValues.varianten;
+    const selected = extrasValues.zusatzprodukte;
     if (selected.length === 0) return { amount: price, currencyCode };
-    const total = selected.reduce((sum, v) => sum + parseFloat(v.price.amount), 0);
-    return { amount: total.toFixed(2), currencyCode: selected[0].price.currencyCode };
-  }, [extrasValues.varianten, price, currencyCode]);
+    const basePrice = parseFloat(price);
+    const addonsTotal = selected.reduce((sum, v) => sum + parseFloat(v.price.amount), 0);
+    return { amount: (basePrice + addonsTotal).toFixed(2), currencyCode: selected[0].price.currencyCode };
+  }, [extrasValues.zusatzprodukte, price, currencyCode]);
 
   const extrasValid = useMemo(() => {
     const cfg = product.zusatzoptionen;
     if (!cfg) return true;
-    const textsOk    = cfg.textfelder.every((_, i) => extrasValues.textfelder[i]?.trim());
-    const variantenOk = cfg.varianten.length === 0 || extrasValues.varianten.length > 0;
-    const optionenOk  = cfg.optionen.length === 0   || extrasValues.optionen.length > 0;
-    const entscheidOk = cfg.entscheide.length === 0  || extrasValues.entscheid.trim() !== "";
-    return textsOk && variantenOk && optionenOk && entscheidOk;
+    const textsOk          = cfg.textfelder.every((_, i) => extrasValues.textfelder[i]?.trim());
+    const zusatzprodukteOk = cfg.zusatzprodukte.length === 0 || extrasValues.zusatzprodukte.length > 0;
+    const optionenOk       = cfg.optionen.length === 0 || extrasValues.optionen.length > 0;
+    const entscheidOk      = cfg.entscheide.length === 0 || extrasValues.entscheid.trim() !== "";
+    return textsOk && zusatzprodukteOk && optionenOk && entscheidOk;
   }, [product.zusatzoptionen, extrasValues]);
 
   return (
@@ -191,13 +192,13 @@ export default function ProductDetailClient({
               color={extrasValues.farbe}
               quantity={quantity}
               formValid={extrasValid}
-              metaVariants={extrasValues.varianten}
+              metaZusatzprodukte={extrasValues.zusatzprodukte}
               customAttributes={[
                 ...(product.zusatzoptionen?.textfelder ?? [])
                   .map((label, i) => ({ key: label, value: extrasValues.textfelder[i] ?? "" }))
                   .filter((a) => a.value.trim() !== ""),
-                ...(extrasValues.varianten.length > 0
-                  ? [{ key: "Variante", value: extrasValues.varianten.map((v) => v.title).join(", ") }]
+                ...(extrasValues.zusatzprodukte.length > 0
+                  ? [{ key: "Zusatzprodukte", value: extrasValues.zusatzprodukte.map((v) => v.title).join(", ") }]
                   : []),
                 ...(extrasValues.optionen.length > 0
                   ? [{ key: "Optionen", value: extrasValues.optionen.join(", ") }]
