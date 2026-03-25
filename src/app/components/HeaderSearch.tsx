@@ -6,6 +6,7 @@ import {
   useState,
   useCallback,
   KeyboardEvent,
+  type ReactNode,
 } from "react";
 import {
   Search,
@@ -28,6 +29,37 @@ interface HeaderSearchProps {
   onClose: () => void;
 }
 
+// ─── Highlight matching text in bold ─────────────────────────────────────────
+
+function HighlightText({ text, query }: { text: string; query: string }) {
+  const q = query.trim();
+  if (!q) return <>{text}</>;
+
+  const qLower = q.toLowerCase();
+  const nodes: ReactNode[] = [];
+  let remaining = text;
+  let key = 0;
+
+  while (remaining.length > 0) {
+    const idx = remaining.toLowerCase().indexOf(qLower);
+    if (idx === -1) {
+      nodes.push(remaining);
+      break;
+    }
+    if (idx > 0) nodes.push(remaining.slice(0, idx));
+    nodes.push(
+      <strong key={key++} className="font-semibold text-charcoal dark:text-neutral-100">
+        {remaining.slice(idx, idx + q.length)}
+      </strong>
+    );
+    remaining = remaining.slice(idx + q.length);
+  }
+
+  return <>{nodes}</>;
+}
+
+// ─── Result icon ──────────────────────────────────────────────────────────────
+
 function ResultIcon({ result }: { result: SearchResult }) {
   if (result.type === "product") return <Package size={16} className="shrink-0 text-accent" />;
   if (result.href.startsWith("mailto:")) return <Mail size={16} className="shrink-0 text-muted" />;
@@ -36,13 +68,17 @@ function ResultIcon({ result }: { result: SearchResult }) {
   return <FileText size={16} className="shrink-0 text-muted" />;
 }
 
+// ─── Result row ───────────────────────────────────────────────────────────────
+
 function ResultRow({
   result,
   active,
+  query,
   onClose,
 }: {
   result: SearchResult;
   active: boolean;
+  query: string;
   onClose: () => void;
 }) {
   const isExternal = result.href.startsWith("mailto:") || result.href.startsWith("tel:");
@@ -74,10 +110,17 @@ function ResultRow({
 
       <div className="flex-1 min-w-0">
         <p className={cn("text-sm font-medium truncate", active ? "text-accent" : "text-primary")}>
-          {result.title}
+          <HighlightText text={result.title} query={query} />
         </p>
         {result.subtitle && (
-          <p className="text-xs text-muted truncate mt-0.5">{result.subtitle}</p>
+          <p className="text-xs text-muted truncate mt-0.5">
+            <HighlightText text={result.subtitle} query={query} />
+          </p>
+        )}
+        {result.matchSnippet && (
+          <p className="text-xs text-muted/80 truncate mt-0.5 italic">
+            <HighlightText text={result.matchSnippet} query={query} />
+          </p>
         )}
       </div>
 
@@ -91,6 +134,8 @@ function ResultRow({
     </Tag>
   );
 }
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 const HeaderSearch = ({ isOpen, onClose }: HeaderSearchProps) => {
   const [query, setQuery] = useState("");
@@ -212,7 +257,13 @@ const HeaderSearch = ({ isOpen, onClose }: HeaderSearchProps) => {
                       Produkte <span className="normal-case tracking-normal">({results.products.length})</span>
                     </p>
                     {results.products.map((r, i) => (
-                      <ResultRow key={r.href} result={r} active={i === activeIndex} onClose={onClose} />
+                      <ResultRow
+                        key={r.href}
+                        result={r}
+                        active={i === activeIndex}
+                        query={query}
+                        onClose={onClose}
+                      />
                     ))}
                   </section>
                 )}
@@ -226,6 +277,7 @@ const HeaderSearch = ({ isOpen, onClose }: HeaderSearchProps) => {
                         key={r.href}
                         result={r}
                         active={results.products.length + i === activeIndex}
+                        query={query}
                         onClose={onClose}
                       />
                     ))}

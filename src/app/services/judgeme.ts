@@ -222,15 +222,11 @@ async function _fetchAllStoreReviews(): Promise<{ reviews: JudgemeReview[]; tota
     (r) => r.published === true && r.hidden === false && r.curated === "ok",
   );
 
-  // 2. Deduplicate: first by id, then by content fingerprint (same author + body)
+  // 2. Deduplicate by id only — content fingerprinting incorrectly removes legitimate reviews
   const seenIds = new Set<number>();
-  const seenContent = new Set<string>();
   const unique = published.filter((r) => {
     if (seenIds.has(r.id)) return false;
     seenIds.add(r.id);
-    const fingerprint = `${r.reviewer.name.toLowerCase().trim()}|${r.body.trim().substring(0, 100)}`;
-    if (seenContent.has(fingerprint)) return false;
-    seenContent.add(fingerprint);
     return true;
   });
 

@@ -11,6 +11,8 @@ export interface SearchResult {
   type: SearchResultType;
   title: string;
   subtitle?: string;
+  /** Short excerpt showing where the match was found (description / tags), when not in title */
+  matchSnippet?: string;
   href: string;
   imageUrl?: string | null;
 }
@@ -124,6 +126,15 @@ function matches(text: string, q: string): boolean {
   return text.toLowerCase().includes(q.toLowerCase());
 }
 
+/** Extracts a short excerpt around the first match, with ellipsis on truncated ends. */
+function extractSnippet(text: string, query: string, radius = 70): string {
+  const idx = text.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return text.slice(0, radius * 2);
+  const start = Math.max(0, idx - radius);
+  const end = Math.min(text.length, idx + query.length + radius);
+  return (start > 0 ? "…" : "") + text.slice(start, end) + (end < text.length ? "…" : "");
+}
+
 export interface SearchGroups {
   products: SearchResult[];
   info: SearchResult[];
@@ -145,37 +156,56 @@ export function useHeaderSearch(query: string): {
     const token = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN;
     if (!domain || !token) { setProductsLoaded(true); return; }
 
-    fetch(`https://${domain}/api/2024-10/graphql.json`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Shopify-Storefront-Access-Token": token,
-        "Accept-Language": "de",
-      },
-      body: JSON.stringify({
-        query: `query {
-          products(first: 250) {
-            edges {
-              node {
-                id title handle description productType tags
-                priceRange { minVariantPrice { amount currencyCode } }
-                featuredImage { url altText }
-                variants(first: 1) { edges { node { availableForSale } } }
-              }
+    const GQL_QUERY = `
+      query FetchProducts($cursor: String) {
+        products(first: 250, after: $cursor) {
+          pageInfo { hasNextPage endCursor }
+          edges {
+            node {
+              id title handle description productType tags
+              priceRange { minVariantPrice { amount currencyCode } }
+              featuredImage { url altText }
+              variants(first: 1) { edges { node { availableForSale } } }
             }
           }
-        }`,
-      }),
-    })
-      .then((r) => r.json())
-      .then((json) => {
-        const nodes = json?.data?.products?.edges?.map(
-          (e: { node: Product }) => e.node
-        ) ?? [];
-        setAllProducts(nodes);
-      })
-      .catch(() => {})
-      .finally(() => setProductsLoaded(true));
+        }
+      }
+    `;
+
+    (async () => {
+      const all: Product[] = [];
+      let cursor: string | null = null;
+      let hasNextPage = true;
+
+      try {
+        while (hasNextPage) {
+          const res = await fetch(`https://${domain}/api/2024-10/graphql.json`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Shopify-Storefront-Access-Token": token,
+              "Accept-Language": "de",
+            },
+            body: JSON.stringify({ query: GQL_QUERY, variables: { cursor } }),
+          });
+
+          const json = await res.json();
+          const productsData = json?.data?.products;
+          const batch: Product[] = productsData?.edges?.map(
+            (e: { node: Product }) => e.node
+          ) ?? [];
+
+          all.push(...batch);
+          hasNextPage = productsData?.pageInfo?.hasNextPage ?? false;
+          cursor = productsData?.pageInfo?.endCursor ?? null;
+        }
+      } catch {
+        // silently ignore network errors
+      }
+
+      setAllProducts(all);
+      setProductsLoaded(true);
+    })();
   }, []);
 
   const results = useMemo((): SearchGroups => {
@@ -190,13 +220,31 @@ export function useHeaderSearch(query: string): {
           matches(p.productType, q) ||
           p.tags.some((t) => matches(t, q))
       )
-      .map((p) => ({
-        type: "product" as const,
-        title: p.title,
-        subtitle: `${parseFloat(p.priceRange.minVariantPrice.amount).toFixed(2).replace(".", ",")} ${p.priceRange.minVariantPrice.currencyCode}`,
-        href: `/pages/products/${p.handle}`,
-        imageUrl: p.featuredImage?.url ?? null,
-      }));
+      .map((p) => {
+        const inTitle = matches(p.title, q);
+
+        // Build a snippet only when the match is not visible in the title
+        let matchSnippet: string | undefined;
+        if (!inTitle) {
+          if (matches(p.description, q)) {
+            matchSnippet = extractSnippet(p.description, q);
+          } else {
+            const matchingTags = p.tags.filter((t) => matches(t, q));
+            if (matchingTags.length > 0) {
+              matchSnippet = matchingTags.slice(0, 4).join(" · ");
+            }
+          }
+        }
+
+        return {
+          type: "product" as const,
+          title: p.title,
+          subtitle: `${parseFloat(p.priceRange.minVariantPrice.amount).toFixed(2).replace(".", ",")} ${p.priceRange.minVariantPrice.currencyCode}`,
+          matchSnippet,
+          href: `/pages/products/${p.handle}`,
+          imageUrl: p.featuredImage?.url ?? null,
+        };
+      });
 
     const qLow = q.toLowerCase();
     const priority = new Set<string>();
