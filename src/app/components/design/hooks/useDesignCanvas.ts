@@ -136,6 +136,8 @@ export function useDesignCanvas(
       // fabric.wrapperEl wraps both the lower (render) and upper (interaction) canvas
       const wrapper = (fabric as any).wrapperEl as HTMLElement | undefined;
       if (!wrapper || wrapper.contains(e.target as Node)) return;
+      // Don't deselect when clicking inside an editor panel (properties, tools, sidebar)
+      if ((e.target as Element).closest?.("[data-no-deselect]")) return;
       fabric.discardActiveObject();
       fabric.requestRenderAll();
     };

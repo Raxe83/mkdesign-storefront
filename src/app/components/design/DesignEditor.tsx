@@ -1,20 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  Circle,
-  Diamond,
-  Download,
-  Hand,
-  Hexagon,
-  Loader2,
-  Minus,
-  Monitor,
-  Square,
-  Star,
-  Triangle,
-  Type,
-} from "lucide-react";
+import { Download, Hand, Loader2, Monitor } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { cn } from "@/app/utils/utils";
 import { useCart } from "@/app/context/CartContext";
@@ -196,89 +183,6 @@ export default function DesignEditor() {
     ]);
   }, [addItem, selectedProduct?.variantId, canvas.uploadState]);
 
-  /* ── Mobile shape actions ─────────────────────────────────────── */
-  const mobileShapes = [
-    {
-      icon: <Square size={16} />,
-      label: "Rect",
-      action: () => canvas.addShapeFromCatalog({ k: "rect", w: 140, h: 90 }),
-    },
-    {
-      icon: <Circle size={16} />,
-      label: "Kreis",
-      action: () => canvas.addShapeFromCatalog({ k: "circle", r: 55 }),
-    },
-    {
-      icon: <Triangle size={16} />,
-      label: "Dreieck",
-      action: () =>
-        canvas.addShapeFromCatalog({ k: "triangle", w: 130, h: 110 }),
-    },
-    {
-      icon: <Minus size={16} />,
-      label: "Linie",
-      action: () => canvas.addShapeFromCatalog({ k: "line" }),
-    },
-    {
-      icon: <Star size={16} />,
-      label: "Stern",
-      action: () =>
-        canvas.addShapeFromCatalog({
-          k: "poly",
-          pts: [
-            { x: 0, y: -62 },
-            { x: 14, y: -22 },
-            { x: 59, y: -19 },
-            { x: 23, y: 9 },
-            { x: 36, y: 54 },
-            { x: 0, y: 31 },
-            { x: -36, y: 54 },
-            { x: -23, y: 9 },
-            { x: -59, y: -19 },
-            { x: -14, y: -22 },
-          ],
-        }),
-    },
-    {
-      icon: <Hexagon size={16} />,
-      label: "Sechseck",
-      action: () =>
-        canvas.addShapeFromCatalog({
-          k: "poly",
-          pts: [
-            { x: 60, y: 0 },
-            { x: 30, y: 52 },
-            { x: -30, y: 52 },
-            { x: -60, y: 0 },
-            { x: -30, y: -52 },
-            { x: 30, y: -52 },
-          ],
-        }),
-    },
-    {
-      icon: <Diamond size={16} />,
-      label: "Raute",
-      action: () =>
-        canvas.addShapeFromCatalog({
-          k: "poly",
-          pts: [
-            { x: 0, y: -68 },
-            { x: 54, y: 0 },
-            { x: 0, y: 68 },
-            { x: -54, y: 0 },
-          ],
-        }),
-    },
-    {
-      icon: <Type size={16} />,
-      label: "Text",
-      action: () => {
-        canvas.addText();
-        setActiveTab("text");
-      },
-    },
-  ];
-
   /* ── Tab labels ───────────────────────────────────────────────── */
   const TAB_LABELS: Record<SidebarTab, string> = {
     shapes: "Formen",
@@ -405,26 +309,21 @@ export default function DesignEditor() {
         ]}
       />
 
-      {/* ══ Mobile — Editor nicht verfügbar ══ */}
-      <div className="md:hidden flex flex-col items-center justify-center py-20 text-center gap-5">
-        <div className="w-16 h-16 rounded-sm bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-          <Monitor size={28} className="text-muted" />
-        </div>
+      {/* ══ Desktop-Hinweis für sehr kleine Screens ══ */}
+      <div className="md:hidden mt-4 mb-2 flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-800/50 rounded-sm">
+        <Monitor size={17} className="shrink-0 mt-0.5 text-amber-700 dark:text-amber-400" />
         <div>
-          <p className="text-sm font-medium text-primary mb-1">
-            Editor nur auf Desktop verfügbar
-          </p>
-          <p className="text-xs text-muted max-w-xs">
-            Der Design-Editor benötigt einen größeren Bildschirm. Bitte öffne
-            diese Seite auf einem Tablet oder Computer.
+          <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Desktop empfohlen</p>
+          <p className="text-xs text-amber-700/80 dark:text-amber-400/80 mt-0.5">
+            Der Design Editor ist für größere Bildschirme optimiert. Für das beste Erlebnis empfehlen wir einen Desktop oder Laptop.
           </p>
         </div>
       </div>
 
-      {/* ══ Desktop-Editor ══ */}
-      <div className="hidden md:block">
+      {/* ══ Editor ══ */}
+      <div>
         {/* ── Properties bar ── */}
-        <div className="mt-4">
+        <div className="mt-4" data-no-deselect>
           <PropertiesPanel
             hasActiveObject={canvas.hasActiveObject}
             isTextSelected={canvas.isTextSelected}
@@ -447,9 +346,9 @@ export default function DesignEditor() {
           />
         </div>
 
-        <div className="flex flex-col xl:flex-row gap-6 items-start mt-4">
-          {/* ══ Left: Tool panel (desktop only) ══ */}
-          <div className="hidden xl:flex flex-col gap-4 w-56 shrink-0 relative z-10">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-start mt-4">
+          {/* ══ Left: Tool panel ══ */}
+          <div className="hidden lg:flex flex-col gap-4 w-52 shrink-0 relative z-10" data-no-deselect>
             <div className="flex flex-col rounded border border-stone-200/60 dark:border-zinc-700/60 bg-surface dark:bg-zinc-900 shadow-sm overflow-hidden">
               {/* Tab bar */}
               <div className="flex border-b border-stone-200/60 dark:border-zinc-700/60">
@@ -507,7 +406,7 @@ export default function DesignEditor() {
           </div>
 
           {/* ══ Middle: Canvas ══ */}
-          <div className="w-full xl:flex-1 flex flex-col gap-4">
+          <div className="w-full lg:flex-1 flex flex-col gap-4">
             {/* Outer wrapper: clips overflow, drives wrapperWidth via ResizeObserver */}
             <div
               ref={canvas.wrapperRef}
@@ -663,12 +562,12 @@ export default function DesignEditor() {
               </div>
             )}
 
-            {/* Mobile toolbar (md..xl only — above xl the left panel takes over) */}
-            <div className="xl:hidden">
+            {/* Mobile toolbar (below lg — above lg the left panel takes over) */}
+            <div className="lg:hidden" data-no-deselect>
               <MobileToolbar
-                shapes={mobileShapes}
                 imageUploading={canvas.imageUploading}
                 hasSelection={canvas.objectCount > 0}
+                onAddText={() => { canvas.addText(); setActiveTab("text"); }}
                 onUploadImage={() => canvas.fileInputRef.current?.click()}
                 onDelete={canvas.deleteSelected}
                 onDownload={canvas.downloadPNG}
@@ -677,7 +576,7 @@ export default function DesignEditor() {
           </div>
 
           {/* ══ Right: Product + Save ══ */}
-          <aside className="w-full xl:w-72 flex flex-col gap-4 relative z-10">
+          <aside className="w-full lg:w-60 xl:w-72 flex flex-col gap-4 relative z-10" data-no-deselect>
             <ProductPanel
               products={products}
               productsLoading={productsLoading}
