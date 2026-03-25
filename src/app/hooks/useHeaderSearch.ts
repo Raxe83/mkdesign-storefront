@@ -179,7 +179,7 @@ export function useHeaderSearch(query: string): {
 
       try {
         while (hasNextPage) {
-          const res = await fetch(`https://${domain}/api/2024-10/graphql.json`, {
+          const res: Response = await fetch(`https://${domain}/api/2024-10/graphql.json`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

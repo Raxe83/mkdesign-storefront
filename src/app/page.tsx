@@ -13,7 +13,7 @@ import ProductsList from "./components/product/ProductsList";
 import JoinUs from "./components/JoinUs";
 import { shopDetails } from "./global";
 import HeroHighlight from "./components/HeroHighlight";
-import GiftFinder from "./components/Giftfinder ";
+import GiftFinder from "./components/Giftfinder";
 import Skeleton from "./components/ui/Skeleton";
 import Firehighlight from "./components/Firehighlight";
 import { Personalization } from "./components/Personalization";
