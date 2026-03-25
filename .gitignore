@@ -18,7 +18,10 @@
 /out/
 
 # AI Assistant Rules
-Claude.md
+claude.md
+
+# Obsidian
+.obsidian
 
 # production
 /build
