@@ -156,9 +156,13 @@ export async function getProducts(
   while (hasNextPage) {
     const limit = first ? Math.min(BATCH, first - all.length) : BATCH;
 
+    const queryParts: string[] = [];
+    if (tag) queryParts.push(`tag:${tag}`);
+    if (tag !== "CustomDesign") queryParts.push(`-tag:CustomDesign`);
+
     const response: ProductsResponse = await shopifyFetch<ProductsResponse>({
       query: PRODUCTS_QUERY,
-      variables: { first: limit, after: cursor ?? undefined, query: tag ? `tag:${tag}` : undefined },
+      variables: { first: limit, after: cursor ?? undefined, query: queryParts.join(" AND ") || undefined },
       locale,
     });
 
@@ -581,7 +585,7 @@ export async function getProductsByCollection(
 
     const edges: Array<{ node: Product }> = response.collection.products.edges;
     const pageInfo: { hasNextPage: boolean; endCursor: string } = response.collection.products.pageInfo;
-    all.push(...edges.map((e: { node: Product }) => e.node));
+    all.push(...edges.map((e: { node: Product }) => e.node).filter((p) => !p.tags.includes("CustomDesign")));
 
     hasNextPage =
       pageInfo.hasNextPage && (first === undefined || all.length < first);

@@ -158,7 +158,7 @@ export function useHeaderSearch(query: string): {
 
     const GQL_QUERY = `
       query FetchProducts($cursor: String) {
-        products(first: 250, after: $cursor) {
+        products(first: 250, after: $cursor, query: "-tag:CustomDesign") {
           pageInfo { hasNextPage endCursor }
           edges {
             node {
