@@ -27,7 +27,7 @@ export function ProductPanel({
 }: Props) {
   const isUploading = uploadState.status === "uploading";
   const showResult  = uploadState.status === "success";
-  const uploadLabel = isUploading && (uploadState as any).step === "json" ? "JSON lädt…" : "Vorschau lädt…";
+  const uploadLabel = uploadState.status === "uploading" && uploadState.step === "json" ? "JSON lädt…" : "Vorschau lädt…";
 
   return (
     <>
@@ -87,10 +87,10 @@ export function ProductPanel({
           <div className="flex flex-col gap-3">
             <p className="text-[10px] font-medium text-muted uppercase tracking-[0.1em]">Design fertig?</p>
 
-            {isUploading && (
+            {uploadState.status === "uploading" && (
               <div className="flex flex-col gap-1.5">
-                <UploadStep label="Vorschau-PNG" done={(uploadState as any).step === "json"} active={(uploadState as any).step === "preview"} />
-                <UploadStep label="Canvas-JSON"  done={false}                                active={(uploadState as any).step === "json"} />
+                <UploadStep label="Vorschau-PNG" done={uploadState.step === "json"} active={uploadState.step === "preview"} />
+                <UploadStep label="Canvas-JSON"  done={false}                        active={uploadState.step === "json"} />
               </div>
             )}
 
@@ -110,7 +110,7 @@ export function ProductPanel({
             </button>
 
             {uploadState.status === "error" && (
-              <p className="text-xs text-red-500 text-center">{(uploadState as any).message}</p>
+              <p className="text-xs text-red-500 text-center">{uploadState.message}</p>
             )}
             {objectCount === 0 && !isUploading && (
               <p className="text-xs text-muted text-center">Füge zuerst ein Element hinzu.</p>

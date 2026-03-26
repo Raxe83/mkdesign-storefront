@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AlertCircle, Download, Loader2, ZoomIn } from "lucide-react";
 import { cn } from "@/app/utils/utils";
+import type { StaticCanvas } from "fabric";
 
 /* ------------------------------------------------------------------ */
 /*  Constants                                                           */
@@ -35,7 +36,7 @@ type ViewerState =
 export default function DesignViewer() {
   const searchParams  = useSearchParams();
   const canvasElRef   = useRef<HTMLCanvasElement>(null);
-  const fabricRef     = useRef<any>(null);
+  const fabricRef     = useRef<StaticCanvas | null>(null);
   const wrapperRef    = useRef<HTMLDivElement>(null);
 
   const [viewerState, setViewerState] = useState<ViewerState>({ status: "idle" });
@@ -64,7 +65,7 @@ export default function DesignViewer() {
       return;
     }
 
-    let canvas: any;
+    let canvas: StaticCanvas | undefined;
     (async () => {
       setViewerState({ status: "loading" });
       try {

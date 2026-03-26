@@ -1,5 +1,5 @@
 import { ShopifyCollection } from "../components/CollectionsList";
-import type { Cart, Product, ProductZusatzoptionen, ZusatzproduktOption, ZusatzoptionenRaw } from "../types/shopify";
+import type { Cart, Product, ProductZusatzoptionen, ZusatzoptionenRaw, ZusatzproduktOption } from "../types/shopify";
 
 const SHOPIFY_DOMAIN = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN;
 const SHOPIFY_STOREFRONT_TOKEN =
@@ -426,7 +426,6 @@ export async function getProductByHandle(
     if (!product) return null;
 
     // Metaobjekt-Referenz parsen und normalisiert anhängen
-    console.log("[getProductByHandle] raw metafield:", JSON.stringify(product.metafield));
     const rawRef = product.metafield?.reference ?? null;
     const zusatzoptionen = rawRef ? parseZusatzoptionen(rawRef) : null;
 

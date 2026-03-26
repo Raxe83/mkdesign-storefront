@@ -4,13 +4,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { uploadDesign, uploadCanvasImage, type UploadState } from "@/app/lib/designApi";
 import { CANVAS_BG, DEFAULT_CANVAS_PRESET, FONT_OPTIONS, type CanvasPreset } from "../constants";
 import type { FabricConf, ProductOption } from "../types";
+import type { Canvas, FabricObject, IText } from "fabric";
 
 export function useDesignCanvas(
   selectedProduct: ProductOption | null,
   canvasPreset: CanvasPreset = DEFAULT_CANVAS_PRESET,
 ) {
   const canvasElRef      = useRef<HTMLCanvasElement>(null);
-  const fabricRef        = useRef<any>(null);
+  const fabricRef        = useRef<Canvas | null>(null);
   const fileInputRef     = useRef<HTMLInputElement>(null);
   const wrapperRef       = useRef<HTMLDivElement>(null);
   const canvasPresetRef  = useRef<CanvasPreset>(canvasPreset);
@@ -63,14 +64,14 @@ export function useDesignCanvas(
   /* ── Init canvas ──────────────────────────────────────────────── */
   useEffect(() => {
     if (!canvasElRef.current) return;
-    let canvas: any;
+    let canvas: Canvas | undefined;
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== "Delete" && e.key !== "Backspace") return;
       const tag = (document.activeElement as HTMLElement)?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || (document.activeElement as HTMLElement)?.isContentEditable) return;
       if (!fabricRef.current) return;
-      fabricRef.current.getActiveObjects().forEach((o: any) => fabricRef.current!.remove(o));
+      fabricRef.current.getActiveObjects().forEach((o: FabricObject) => fabricRef.current!.remove(o));
       fabricRef.current.discardActiveObject();
       fabricRef.current.requestRenderAll();
       e.preventDefault();
@@ -87,24 +88,25 @@ export function useDesignCanvas(
       });
       fabricRef.current = canvas;
 
-      const syncCount = () => setObjectCount(canvas.getObjects().length);
+      const syncCount = () => setObjectCount(canvas!.getObjects().length);
 
       const syncSelection = () => {
-        const obj = canvas.getActiveObject();
+        const obj = canvas!.getActiveObject();
         if (!obj) return;
         setHasActiveObject(true);
         setActiveObjectType(obj.type ?? "");
         if (obj.type === "i-text" || obj.type === "text") {
-          setFontSize((obj as any).fontSize ?? 36);
-          setFontFamily((obj as any).fontFamily ?? FONT_OPTIONS[0].value);
-          setTextAlign((obj as any).textAlign ?? "left");
-          setIsBold((obj as any).fontWeight === "bold");
-          setIsItalic((obj as any).fontStyle === "italic");
+          const textObj = obj as IText;
+          setFontSize(textObj.fontSize ?? 36);
+          setFontFamily(textObj.fontFamily ?? FONT_OPTIONS[0].value);
+          setTextAlign((textObj.textAlign as "left" | "center" | "right") ?? "left");
+          setIsBold(textObj.fontWeight === "bold");
+          setIsItalic(textObj.fontStyle === "italic");
         }
-        setStrokeWidth((obj as any).strokeWidth ?? 2);
-        setStrokeColor(typeof (obj as any).stroke === "string" && (obj as any).stroke ? (obj as any).stroke : "#1c1917");
-        setFillColor(typeof (obj as any).fill === "string" ? (obj as any).fill : "transparent");
-        setOpacity(Math.round(((obj as any).opacity ?? 1) * 100));
+        setStrokeWidth(obj.strokeWidth ?? 2);
+        setStrokeColor(typeof obj.stroke === "string" && obj.stroke ? obj.stroke : "#1c1917");
+        setFillColor(typeof obj.fill === "string" ? obj.fill : "transparent");
+        setOpacity(Math.round((obj.opacity ?? 1) * 100));
       };
       canvas.on("selection:created", syncSelection);
       canvas.on("selection:updated", syncSelection);
@@ -134,7 +136,7 @@ export function useDesignCanvas(
       const fabric = fabricRef.current;
       if (!fabric) return;
       // fabric.wrapperEl wraps both the lower (render) and upper (interaction) canvas
-      const wrapper = (fabric as any).wrapperEl as HTMLElement | undefined;
+      const wrapper = (fabric as { wrapperEl?: HTMLElement }).wrapperEl;
       if (!wrapper || wrapper.contains(e.target as Node)) return;
       // Don't deselect when clicking inside an editor panel (properties, tools, sidebar)
       if ((e.target as Element).closest?.("[data-no-deselect]")) return;
@@ -238,7 +240,7 @@ export function useDesignCanvas(
 
   const deleteSelected = useCallback(() => {
     if (!fabricRef.current) return;
-    fabricRef.current.getActiveObjects().forEach((o: any) => fabricRef.current!.remove(o));
+    fabricRef.current.getActiveObjects().forEach((o: FabricObject) => fabricRef.current!.remove(o));
     fabricRef.current.discardActiveObject();
     fabricRef.current.requestRenderAll();
   }, []);
@@ -274,7 +276,7 @@ export function useDesignCanvas(
       fill: "transparent", stroke: "#ffffff", strokeWidth: 2,
     } as const;
     const { Rect, Circle: FC, Ellipse, Triangle: FT, Line, Polygon, Path } = await import("fabric");
-    let obj: any;
+    let obj: FabricObject | undefined;
     switch (fc.k) {
       case "rect":     obj = new Rect({ ...base, width: fc.w, height: fc.h, rx: fc.rx ?? 0 }); break;
       case "circle":   obj = new FC({ ...base, radius: fc.r }); break;
