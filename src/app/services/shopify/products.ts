@@ -147,6 +147,7 @@ export async function getProducts(
         query: queryParts.join(" AND ") || undefined,
       },
       locale,
+      revalidate: 3600,
     });
 
     const edges = response.products.edges;
@@ -276,6 +277,7 @@ export async function getProductByHandle(
     query,
     variables: { handle },
     locale,
+    revalidate: 3600,
   });
 
   const product = response.productByHandle;

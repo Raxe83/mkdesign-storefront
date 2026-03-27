@@ -50,6 +50,7 @@ export async function getCollections(
     query,
     variables: { first },
     locale,
+    revalidate: 3600,
   });
 
   return response.collections.edges.map((edge) => edge.node);
@@ -136,6 +137,7 @@ export async function getProductsByCollection(
       query,
       variables: { handle: collectionHandle, first: limit, after: cursor ?? undefined },
       locale,
+      revalidate: 3600,
     });
 
     if (!res.collection) return [];

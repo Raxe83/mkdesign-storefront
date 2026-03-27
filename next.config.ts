@@ -32,10 +32,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  webpack(config, { isServer }) {
-    if (!isServer) {
-      // Setze den Source-Map-Typ auf 'source-map' anstelle von 'eval-source-map'
-      config.devtool = 'source-map';
+  webpack(config, { isServer, dev }) {
+    if (!isServer && !dev) {
+      config.devtool = false;
     }
     return config;
   },
