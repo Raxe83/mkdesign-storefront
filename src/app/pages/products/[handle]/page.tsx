@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import type { Product } from "../../../types/shopify";
 import { getProductByHandle, getExtraInfoByType, getProducts } from "../../../services/shopify";
 import { detectCategory, findMetaType, RELATED_CONFIG, type ProductCategory } from "@/app/components/product/product-category";
@@ -44,6 +45,28 @@ function ExtraContentSkeleton() {
       </div>
     </div>
   );
+}
+
+// ─── Metadata ─────────────────────────────────────────────────────────────────
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { handle } = await params;
+  const product = await getProductByHandle(handle, "de");
+  if (!product) return {};
+
+  const image = product.featuredImage;
+
+  return {
+    title: product.title,
+    description: product.description || undefined,
+    openGraph: {
+      title: product.title,
+      description: product.description || undefined,
+      ...(image && {
+        images: [{ url: image.url, alt: image.altText ?? product.title }],
+      }),
+    },
+  };
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
