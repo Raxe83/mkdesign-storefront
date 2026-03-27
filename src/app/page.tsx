@@ -1,70 +1,41 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { Collection, Product } from "./types/shopify";
 import { getCollections, getFeaturedProducts } from "./services/shopify";
+import { getAllReviewsCached } from "./services/judgeme";
 import Hero from "./components/Hero";
-import InfoCardSection from "./components/Information/InfoCardSection";
-import CollectionsList, {
-  ShopifyCollection,
-} from "./components/CollectionsList";
-import InfoSection from "./components/Information/InfoSection";
+import CollectionsList from "./components/CollectionsList";
 import ProductsList from "./components/product/ProductsList";
 import JoinUs from "./components/JoinUs";
-import { shopDetails } from "./global";
 import HeroHighlight from "./components/HeroHighlight";
 import GiftFinder from "./components/Giftfinder";
-import Skeleton from "./components/ui/Skeleton";
 import Firehighlight from "./components/Firehighlight";
 import { Personalization } from "./components/Personalization";
 import type { BarrelVariant } from "./components/PersonalizationVisual";
-
-const BARREL_VARIANTS: BarrelVariant[] = ["full", "schale", "schaleXL", "stehtisch"];
 import { Reviews } from "./components/Reviews";
 
-const HomePage = () => {
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
-  const [collections, setCollections] = useState<ShopifyCollection[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [reviewStats, setReviewStats] = useState<{
-    total: number;
-    average: number;
-  } | null>(null);
-  const [barrelVariant, setBarrelVariant] = useState<BarrelVariant>("full");
+export const revalidate = 3600;
 
-  useEffect(() => {
-    setBarrelVariant(BARREL_VARIANTS[Math.floor(Math.random() * BARREL_VARIANTS.length)]);
-  }, []);
+const BARREL_VARIANTS: BarrelVariant[] = ["full", "schale", "schaleXL", "stehtisch"];
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
+export default async function HomePage() {
+  const [featuredProducts, collections, reviewData] = await Promise.all([
+    getFeaturedProducts(8, "de"),
+    getCollections(6, "de"),
+    getAllReviewsCached().catch(() => null),
+  ]);
 
-        const [products, fetchedCollections] = await Promise.all([
-          getFeaturedProducts(8, "de"),
-          getCollections(6, "de"),
-        ]);
-        setFeaturedProducts(products);
-        setCollections(fetchedCollections);
-      } catch (err) {
-      } finally {
-        setIsLoading(false);
+  const reviewStats = reviewData && reviewData.reviews.length > 0
+    ? {
+        total: reviewData.total,
+        average:
+          Math.round(
+            (reviewData.reviews.reduce((s, r) => s + r.rating, 0) /
+              reviewData.reviews.length) *
+              10,
+          ) / 10,
       }
-    };
+    : null;
 
-    const fetchStats = async () => {
-      try {
-        const res = await fetch("/api/judgeme/stats");
-        if (res.ok) setReviewStats(await res.json());
-      } catch {
-        // silently keep null → fallback values shown
-      }
-    };
-
-    fetchData();
-    fetchStats();
-  }, []);
+  const barrelVariant =
+    BARREL_VARIANTS[Math.floor(Math.random() * BARREL_VARIANTS.length)];
 
   return (
     <div>
@@ -104,20 +75,12 @@ const HomePage = () => {
       />
       <HeroHighlight reviewStats={reviewStats} />
 
-      {isLoading ? (
-        <Skeleton.CollectionsGrid />
-      ) : (
-        <CollectionsList collections={collections} />
-      )}
+      <CollectionsList collections={collections} />
 
-      {isLoading ? (
-        <Skeleton.ProductsGrid />
-      ) : (
-        <ProductsList
-          featuredProducts={featuredProducts}
-          title="Beliebt bei Kunden"
-        />
-      )}
+      <ProductsList
+        featuredProducts={featuredProducts}
+        title="Beliebt bei Kunden"
+      />
 
       <Firehighlight
         image={{
@@ -141,6 +104,4 @@ const HomePage = () => {
       <JoinUs />
     </div>
   );
-};
-
-export default HomePage;
+}

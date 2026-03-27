@@ -1,23 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Download, Hand, Loader2, Monitor } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Hand, Loader2, Monitor } from "lucide-react";
 import { cn } from "@/app/utils/utils";
 import { useCart } from "@/app/context/CartContext";
-import { getProducts } from "@/app/services/shopify";
 import PageHeader from "@/app/components/PageHeader";
 import { getPresetForTitle } from "./constants";
-import {
-  BarrelFull,
-  BarrelNoLegs,
-  BarrelSchale,
-  BarrelSchaleXL,
-  BarrelStehtisch,
-} from "@/app/components/illustrations/FireBarrels";
-import type { ComponentType } from "react";
+import { getBarrelEntry, type BarrelFit } from "./barrel";
 import { useDesignCanvas } from "./hooks/useDesignCanvas";
-import type { ProductOption, SidebarTab } from "./types";
+import { useEditorProducts } from "./hooks/useEditorProducts";
+import { useEditorZoomPan } from "./hooks/useEditorZoomPan";
+import type { SidebarTab } from "./types";
+import { CanvasControls } from "./panels/CanvasControls";
 import { ImagePanel } from "./panels/ImagePanel";
 import { MobileToolbar } from "./panels/MobileToolbar";
 import { PropertiesPanel } from "./panels/PropertiesPanel";
@@ -29,286 +23,90 @@ import type { FitState } from "./panels/DevPanel";
 
 const IS_DEV = process.env.NODE_ENV === "development";
 
-interface BarrelFit {
-  /** Canvas display width as fraction of SVG display width. */
-  widthFrac: number;
-  /** SVG display height / SVG display width (viewBox aspect ratio). */
-  svgAspect: number;
-  /** Canvas top edge as fraction of SVG display height (where to place the engraving zone). */
-  topFrac: number;
-  /** Native Fabric.js canvas height in pixels. */
-  canvasH: number;
-}
-
-interface BarrelEntry {
-  keywords: string[];
-  Component: ComponentType<{
-    showBackground?: boolean;
-    showFloorShadow?: boolean;
-  }>;
-  fit: BarrelFit;
-}
-
-// Barrel geometry reference (viewBox 0 0 300 400):
-//   Body path x: 58–242 at ring zone → bodyWidth ≈ 184/300 = 0.61
-//   Top rim lid bottom: y ≈ 74  →  topFrac = 74/400 + gap ≈ 0.24
-//
-// DEV: Adjust widthFrac / topFrac to align canvas with the engraving zone of each variant.
-const BARREL_ENTRIES: BarrelEntry[] = [
-  {
-    keywords: ["stehtisch", "tisch", "table", "platte"],
-    Component: BarrelStehtisch,
-    fit: {
-      widthFrac: 0.53,
-      svgAspect: 410 / 300,
-      topFrac: 0.20,
-      canvasH: 1240,
-    },
-  },
-  {
-    keywords: ["schale xl", "xl schale"],
-    Component: BarrelSchaleXL,
-    fit: { widthFrac: 0.53, svgAspect: 262 / 300, topFrac: 0.13, canvasH: 560 },
-  },
-  {
-    keywords: ["schale", "feuerschale", "bowl"],
-    Component: BarrelSchale,
-    fit: { widthFrac: 0.38, svgAspect: 120 / 300, topFrac: 0.19, canvasH: 250 },
-  },
-];
-
-const BARREL_DEFAULT: BarrelEntry = {
-  keywords: [],
-  Component: BarrelNoLegs,
-  fit: { widthFrac: 0.53, svgAspect: 410 / 300, topFrac: 0.24, canvasH: 1150 },
+const TAB_LABELS: Record<SidebarTab, string> = {
+  shapes: "Formen",
+  text: "Text",
+  image: "Bild",
 };
-
-function getBarrelEntry(title: string): BarrelEntry {
-  const lower = title.toLowerCase();
-  for (const entry of BARREL_ENTRIES) {
-    if (entry.keywords.some((kw) => lower.includes(kw))) return entry;
-  }
-  return BARREL_DEFAULT;
-}
 
 export default function DesignEditor() {
   const { addItem } = useCart();
-  const searchParams = useSearchParams();
 
-  /* ── Products ─────────────────────────────────────────────────── */
-  const [products, setProducts] = useState<ProductOption[]>([]);
-  const [productsLoading, setProductsLoading] = useState(true);
-  const [selectedProduct, setSelectedProduct] = useState<ProductOption | null>(
-    null,
-  );
+  /* ── Products ──────────────────────────────────────────────────── */
+  const { products, productsLoading, selectedProduct, setSelectedProduct } =
+    useEditorProducts();
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const raw = await getProducts(50, undefined, "CustomDesign");
-        const mapped: ProductOption[] = raw.map((p) => {
-          const variant = p.variants.edges[0]?.node ?? null;
-          return {
-            id: p.id,
-            label: p.title,
-            backgroundUrl: p.featuredImage?.url ?? null,
-            variantId: variant?.id ?? null,
-            price: variant
-              ? `${parseFloat(variant.price.amount).toFixed(2)} ${variant.price.currencyCode}`
-              : "",
-            canvasPresetId: getPresetForTitle(p.title).id,
-          };
-        });
-        setProducts(mapped);
-        const targetId = searchParams.get("product");
-        const preselected = targetId
-          ? mapped.find((p) => p.id === targetId) ?? null
-          : null;
-        setSelectedProduct(preselected ?? mapped[0] ?? null);
-      } catch (err) {
-      } finally {
-        setProductsLoading(false);
-      }
-    })();
-  }, []);
-
-  /* ── Canvas preset (derived from selected product) ────────────── */
+  /* ── Canvas preset ─────────────────────────────────────────────── */
   const canvasPreset = useMemo(
     () => getPresetForTitle(selectedProduct?.label ?? ""),
     [selectedProduct],
   );
 
-  /* ── Barrel entry + fit state (must be before canvas hook) ───────── */
+  /* ── Barrel entry + fit state ──────────────────────────────────── */
   const { Component: BarrelIllustration, fit: defaultFit } = getBarrelEntry(
     selectedProduct?.label ?? "",
   );
   const [fitOverride, setFitOverride] = useState<FitState>(defaultFit);
-  useEffect(() => {
-    setFitOverride(defaultFit);
-  }, [selectedProduct?.id]);
+  useEffect(() => { setFitOverride(defaultFit); }, [selectedProduct?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const fit = IS_DEV ? fitOverride : defaultFit;
 
-  /* ── Custom canvas width; height comes from fit.canvasH ───────── */
+  /* ── Canvas width override ─────────────────────────────────────── */
   const [customWidth, setCustomWidth] = useState(canvasPreset.width);
-  useEffect(() => {
-    setCustomWidth(canvasPreset.width);
-  }, [canvasPreset.id]);
+  useEffect(() => { setCustomWidth(canvasPreset.width); }, [canvasPreset.id]);
 
   const overridePreset = useMemo(
     () => ({ ...canvasPreset, width: customWidth, height: fit.canvasH }),
     [canvasPreset, customWidth, fit.canvasH],
   );
 
-  /* ── Canvas hook ──────────────────────────────────────────────── */
+  /* ── Canvas ─────────────────────────────────────────────────────── */
   const canvas = useDesignCanvas(selectedProduct, overridePreset);
 
-  /* ── Sidebar UI state ─────────────────────────────────────────── */
+  /* ── Barrel layout geometry ────────────────────────────────────── */
+  const svgW      = canvas.wrapperWidth || canvas.canvasWidth;
+  const svgH      = svgW * fit.svgAspect;
+  const dispW     = fit.widthFrac * svgW;
+  const dispH     = dispW * (canvas.canvasHeight / canvas.canvasWidth);
+  const dispScale = dispW / canvas.canvasWidth;
+  const canvasTop  = fit.topFrac * svgH;
+  const canvasLeft = (svgW - dispW) / 2;
+
+  /* ── Zoom / pan ─────────────────────────────────────────────────── */
+  const zoom = useEditorZoomPan(
+    canvas.wrapperRef,
+    svgW,
+    svgH,
+    selectedProduct?.id,
+  );
+
+  /* ── Sidebar state ─────────────────────────────────────────────── */
   const [activeTab, setActiveTab] = useState<SidebarTab>("shapes");
-  const [shapeCat, setShapeCat] = useState("Alle");
+  const [shapeCat,  setShapeCat]  = useState("Alle");
   const [shapePage, setShapePage] = useState(0);
 
-  /* ── Cart action ──────────────────────────────────────────────── */
+  /* ── Cart action ───────────────────────────────────────────────── */
   const handleAddToCart = useCallback(async () => {
-    if (!selectedProduct?.variantId || canvas.uploadState.status !== "success")
-      return;
+    if (!selectedProduct?.variantId || canvas.uploadState.status !== "success") return;
     const { result } = canvas.uploadState as Extract<
       typeof canvas.uploadState,
       { status: "success" }
     >;
     await addItem(selectedProduct.variantId, 1, [
       { key: "Design-Vorschau", value: result.previewUrl },
-      { key: "_design_id", value: result.designId },
-      { key: "_design_json", value: result.jsonUrl },
+      { key: "_design_id",      value: result.designId },
+      { key: "_design_json",    value: result.jsonUrl },
     ]);
   }, [addItem, selectedProduct?.variantId, canvas.uploadState]);
-
-  /* ── Tab labels ───────────────────────────────────────────────── */
-  const TAB_LABELS: Record<SidebarTab, string> = {
-    shapes: "Formen",
-    text: "Text",
-    image: "Bild",
-  };
-
-  /* ── Barrel layout geometry ───────────────────────────────────── */
-  const svgW = canvas.wrapperWidth || canvas.canvasWidth;
-  const svgH = svgW * fit.svgAspect;
-  const dispW = fit.widthFrac * svgW;
-  const dispH = dispW * (canvas.canvasHeight / canvas.canvasWidth);
-  const dispScale = dispW / canvas.canvasWidth;
-  const canvasTop = fit.topFrac * svgH;
-  const canvasLeft = (svgW - dispW) / 2;
-
-  /* ── CSS zoom/pan state (SVG + canvas transform together) ──────── */
-  const [cssZoom, setCssZoom] = useState(1);
-  const [cssTx, setCssTx] = useState(0);
-  const [cssTy, setCssTy] = useState(0);
-  const [panMode, setPanMode] = useState(false);
-  // Refs so event handlers always read fresh values (no stale closures)
-  const cssZoomRef = useRef(1);
-  const cssTxRef = useRef(0);
-  const cssTyRef = useRef(0);
-  const panModeRef = useRef(false);
-  cssZoomRef.current = cssZoom;
-  cssTxRef.current = cssTx;
-  cssTyRef.current = cssTy;
-  panModeRef.current = panMode;
-
-  // Reset zoom + pan mode when product changes
-  useEffect(() => {
-    setCssZoom(1);
-    setCssTx(0);
-    setCssTy(0);
-    setPanMode(false);
-  }, [selectedProduct?.id]);
-
-  // Wheel → zoom to cursor (non-passive so preventDefault works)
-  useEffect(() => {
-    const wrapper = canvas.wrapperRef.current;
-    if (!wrapper) return;
-    const onWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      const rect = wrapper.getBoundingClientRect();
-      const px = e.clientX - rect.left;
-      const py = e.clientY - rect.top;
-      const zoom = cssZoomRef.current;
-      const focalX = (px - cssTxRef.current) / zoom;
-      const focalY = (py - cssTyRef.current) / zoom;
-      const factor = 0.999 ** e.deltaY;
-      const nz = Math.max(0.25, Math.min(8, zoom * factor));
-      const nx = px - focalX * nz;
-      const ny = py - focalY * nz;
-      cssZoomRef.current = nz;
-      cssTxRef.current = nx;
-      cssTyRef.current = ny;
-      setCssZoom(nz);
-      setCssTx(nx);
-      setCssTy(ny);
-    };
-    wrapper.addEventListener("wheel", onWheel, { passive: false });
-    return () => wrapper.removeEventListener("wheel", onWheel);
-  }, [canvas.wrapperRef]);
-
-  // Middle-mouse pan indicator state
-  const [midPanning, setMidPanning] = useState(false);
-
-  // Alt + drag OR panMode drag OR middle-mouse drag → pan
-  useEffect(() => {
-    const wrapper = canvas.wrapperRef.current;
-    if (!wrapper) return;
-    let panning = false,
-      lx = 0,
-      ly = 0;
-    const onDown = (e: MouseEvent) => {
-      const isMid = e.button === 1;
-      if (!e.altKey && !panModeRef.current && !isMid) return;
-      if (isMid) e.preventDefault(); // suppress browser autoscroll cursor
-      panning = true;
-      lx = e.clientX;
-      ly = e.clientY;
-      wrapper.style.cursor = "grabbing";
-      if (isMid) setMidPanning(true);
-      e.preventDefault();
-      e.stopPropagation();
-    };
-    const onMove = (e: MouseEvent) => {
-      if (!panning) return;
-      const nx = cssTxRef.current + e.clientX - lx;
-      const ny = cssTyRef.current + e.clientY - ly;
-      lx = e.clientX;
-      ly = e.clientY;
-      cssTxRef.current = nx;
-      cssTyRef.current = ny;
-      setCssTx(nx);
-      setCssTy(ny);
-    };
-    const onUp = (e: MouseEvent) => {
-      if (!panning) return;
-      panning = false;
-      if (e.button === 1) setMidPanning(false);
-      wrapper.style.cursor = panModeRef.current ? "grab" : "";
-    };
-    wrapper.addEventListener("mousedown", onDown, { capture: true });
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-    return () => {
-      wrapper.removeEventListener("mousedown", onDown, { capture: true });
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-    };
-  }, [canvas.wrapperRef]);
 
   return (
     <div className="pb-24">
       <PageHeader
         title="Gestalte dein Unikat"
         eyebrow="Design Editor"
-        breadcrumbs={[
-          { label: "Start", href: "/" },
-          { label: "Design Editor" },
-        ]}
+        breadcrumbs={[{ label: "Start", href: "/" }, { label: "Design Editor" }]}
       />
 
-      {/* ══ Desktop-Hinweis für sehr kleine Screens ══ */}
+      {/* Desktop hint for small screens */}
       <div className="md:hidden mt-4 mb-2 flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-800/50 rounded-sm">
         <Monitor size={17} className="shrink-0 mt-0.5 text-amber-700 dark:text-amber-400" />
         <div>
@@ -319,9 +117,8 @@ export default function DesignEditor() {
         </div>
       </div>
 
-      {/* ══ Editor ══ */}
       <div>
-        {/* ── Properties bar ── */}
+        {/* Properties bar */}
         <div className="mt-4" data-no-deselect>
           <PropertiesPanel
             hasActiveObject={canvas.hasActiveObject}
@@ -346,10 +143,9 @@ export default function DesignEditor() {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-start mt-4">
-          {/* ══ Left: Tool panel ══ */}
+          {/* Left: Tool panel */}
           <div className="hidden lg:flex flex-col gap-4 w-52 shrink-0 relative z-10" data-no-deselect>
             <div className="flex flex-col rounded border border-stone-200/60 dark:border-zinc-700/60 bg-surface dark:bg-zinc-900 shadow-sm overflow-hidden">
-              {/* Tab bar */}
               <div className="flex border-b border-stone-200/60 dark:border-zinc-700/60">
                 {(["shapes", "text", "image"] as SidebarTab[]).map((tab) => (
                   <button
@@ -366,17 +162,12 @@ export default function DesignEditor() {
                   </button>
                 ))}
               </div>
-
-              {/* Panel body */}
               <div className="p-3">
                 {activeTab === "shapes" && (
                   <ShapesPanel
                     shapeCat={shapeCat}
                     shapePage={shapePage}
-                    onCategoryChange={(cat) => {
-                      setShapeCat(cat);
-                      setShapePage(0);
-                    }}
+                    onCategoryChange={(cat) => { setShapeCat(cat); setShapePage(0); }}
                     onPageChange={setShapePage}
                     addShapeFromCatalog={canvas.addShapeFromCatalog}
                   />
@@ -386,10 +177,7 @@ export default function DesignEditor() {
                     isTextSelected={canvas.isTextSelected}
                     fontFamily={canvas.fontFamily}
                     fontSize={canvas.fontSize}
-                    onAddText={() => {
-                      canvas.addText();
-                      setActiveTab("text");
-                    }}
+                    onAddText={() => { canvas.addText(); setActiveTab("text"); }}
                     applyFontFamily={canvas.applyFontFamily}
                     applyFontSize={canvas.applyFontSize}
                   />
@@ -404,59 +192,40 @@ export default function DesignEditor() {
             </div>
           </div>
 
-          {/* ══ Middle: Canvas ══ */}
+          {/* Middle: Canvas */}
           <div className="w-full lg:flex-1 flex flex-col gap-4">
-            {/* Outer wrapper: clips overflow, drives wrapperWidth via ResizeObserver */}
             <div
               ref={canvas.wrapperRef}
               className="w-full relative overflow-hidden rounded-sm bg-cream"
               style={{ height: svgH }}
             >
-              {/* Middle-mouse pan indicator */}
-              {midPanning && (
+              {zoom.midPanning && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50">
                   <div className="flex items-center gap-2 bg-black/60 text-white/90 text-xs px-3 py-1.5 rounded-sm backdrop-blur-sm select-none">
-                    <Hand size={13} />
-                    Verschieben
+                    <Hand size={13} /> Verschieben
                   </div>
                 </div>
               )}
-              {/* ── Single CSS-transform container: SVG + canvas move together ── */}
               <div
                 style={{
                   position: "absolute",
                   inset: 0,
-                  transform: `translate(${cssTx}px, ${cssTy}px) scale(${cssZoom})`,
+                  transform: `translate(${zoom.cssTx}px, ${zoom.cssTy}px) scale(${zoom.cssZoom})`,
                   transformOrigin: "0 0",
-                  cursor: panMode ? "grab" : "default",
+                  cursor: zoom.panMode ? "grab" : "default",
                 }}
               >
-                {/* Barrel illustration fills this container */}
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    pointerEvents: "none",
-                  }}
-                >
-                  <BarrelIllustration
-                    showBackground={false}
-                    showFloorShadow={false}
-                  />
+                <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
+                  <BarrelIllustration showBackground={false} showFloorShadow={false} />
                 </div>
-
-                {/* Canvas area: positioned at barrel body, dashed outline scales with SVG */}
                 <div
                   style={{
                     position: "absolute",
-                    width: dispW,
-                    height: dispH,
-                    left: canvasLeft,
-                    top: canvasTop,
+                    width: dispW, height: dispH,
+                    left: canvasLeft, top: canvasTop,
                     zIndex: 1,
                     outline: "1.5px dashed rgba(255,255,255,0.45)",
-                    // In pan mode the canvas should not capture mouse events so dragging works everywhere
-                    pointerEvents: panMode ? "none" : "auto",
+                    pointerEvents: zoom.panMode ? "none" : "auto",
                   }}
                 >
                   {!canvas.canvasReady && (
@@ -485,83 +254,17 @@ export default function DesignEditor() {
             </div>
 
             {canvas.canvasReady && (
-              <div className="flex items-center justify-center gap-2 flex-wrap">
-                {/* Zoom controls */}
-                {/* Pan-mode toggle */}
-                <button
-                  onClick={() => setPanMode((v) => !v)}
-                  title={
-                    panMode
-                      ? "Verschieben deaktivieren"
-                      : "Verschieben aktivieren"
-                  }
-                  className={cn(
-                    "flex items-center gap-1.5 px-2.5 py-1.5 rounded border text-[11px] font-medium transition-colors duration-200 cursor-pointer",
-                    panMode
-                      ? "border-rust bg-rustLight/40 text-rust dark:bg-rustLight/10"
-                      : "border-stone-200/80 dark:border-zinc-700 text-stone dark:text-muted hover:text-primary dark:hover:text-cream hover:bg-stone-50 dark:hover:bg-zinc-800",
-                  )}
-                >
-                  <Hand size={13} />
-                  Verschieben
-                </button>
-
-                {/* Zoom controls */}
-                <div className="flex items-center rounded border border-stone-200/80 dark:border-zinc-700 overflow-hidden">
-                  <button
-                    onClick={() => {
-                      const nz = Math.max(0.25, cssZoom / 1.25);
-                      const cx = svgW / 2,
-                        cy = svgH / 2;
-                      const fx = (cx - cssTx) / cssZoom,
-                        fy = (cy - cssTy) / cssZoom;
-                      setCssZoom(nz);
-                      setCssTx(cx - fx * nz);
-                      setCssTy(cy - fy * nz);
-                    }}
-                    title="Rauszoomen"
-                    className="px-2.5 py-1.5 text-stone dark:text-muted hover:text-primary dark:hover:text-cream hover:bg-stone-50 dark:hover:bg-zinc-800 text-sm leading-none transition-colors duration-200 cursor-pointer"
-                  >
-                    −
-                  </button>
-                  <button
-                    onClick={() => {
-                      setCssZoom(1);
-                      setCssTx(0);
-                      setCssTy(0);
-                    }}
-                    title="Zoom zurücksetzen"
-                    className="px-2 py-1.5 text-[11px] font-medium text-stone dark:text-muted hover:text-primary dark:hover:text-cream hover:bg-stone-50 dark:hover:bg-zinc-800 border-x border-stone-200/80 dark:border-zinc-700 tabular-nums w-11 text-center transition-colors duration-200 cursor-pointer"
-                  >
-                    {Math.round(cssZoom * 100)}%
-                  </button>
-                  <button
-                    onClick={() => {
-                      const nz = Math.min(8, cssZoom * 1.25);
-                      const cx = svgW / 2,
-                        cy = svgH / 2;
-                      const fx = (cx - cssTx) / cssZoom,
-                        fy = (cy - cssTy) / cssZoom;
-                      setCssZoom(nz);
-                      setCssTx(cx - fx * nz);
-                      setCssTy(cy - fy * nz);
-                    }}
-                    title="Reinzoomen"
-                    className="px-2.5 py-1.5 text-stone dark:text-muted hover:text-primary dark:hover:text-cream hover:bg-stone-50 dark:hover:bg-zinc-800 text-sm leading-none transition-colors duration-200 cursor-pointer"
-                  >
-                    +
-                  </button>
-                </div>
-                <button
-                  onClick={canvas.downloadPNG}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-stone-200/80 dark:border-zinc-700 text-stone dark:text-muted hover:text-primary dark:hover:text-cream hover:bg-stone-50 dark:hover:bg-zinc-800 text-[11px] font-medium whitespace-nowrap transition-colors duration-200 cursor-pointer shrink-0"
-                >
-                  <Download size={12} /> PNG herunterladen
-                </button>
-              </div>
+              <CanvasControls
+                cssZoom={zoom.cssZoom}
+                panMode={zoom.panMode}
+                onZoomIn={zoom.zoomIn}
+                onZoomOut={zoom.zoomOut}
+                onZoomReset={zoom.zoomReset}
+                onTogglePan={() => zoom.setPanMode((v) => !v)}
+                onDownload={canvas.downloadPNG}
+              />
             )}
 
-            {/* Mobile toolbar (below lg — above lg the left panel takes over) */}
             <div className="lg:hidden" data-no-deselect>
               <MobileToolbar
                 imageUploading={canvas.imageUploading}
@@ -574,7 +277,7 @@ export default function DesignEditor() {
             </div>
           </div>
 
-          {/* ══ Right: Product + Save ══ */}
+          {/* Right: Product + Save */}
           <aside className="w-full lg:w-60 xl:w-72 flex flex-col gap-4 relative z-10" data-no-deselect>
             <ProductPanel
               products={products}
@@ -582,10 +285,7 @@ export default function DesignEditor() {
               selectedProduct={selectedProduct}
               objectCount={canvas.objectCount}
               uploadState={canvas.uploadState}
-              onSelectProduct={(p) => {
-                setSelectedProduct(p);
-                canvas.resetUploadState();
-              }}
+              onSelectProduct={(p) => { setSelectedProduct(p); canvas.resetUploadState(); }}
               onSave={canvas.saveDesign}
               onResetUpload={canvas.resetUploadState}
               onAddToCart={handleAddToCart}
@@ -595,15 +295,12 @@ export default function DesignEditor() {
                 canvasWidth={customWidth}
                 fit={fitOverride}
                 onCanvasWidthChange={setCustomWidth}
-                onFitChange={(patch) =>
-                  setFitOverride((prev) => ({ ...prev, ...patch }))
-                }
+                onFitChange={(patch) => setFitOverride((prev) => ({ ...prev, ...patch }))}
               />
             )}
           </aside>
         </div>
 
-        {/* Hidden file input */}
         <input
           ref={canvas.fileInputRef}
           type="file"

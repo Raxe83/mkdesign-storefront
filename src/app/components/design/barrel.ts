@@ -1,0 +1,57 @@
+import type { ComponentType } from "react";
+import {
+  BarrelNoLegs,
+  BarrelSchale,
+  BarrelSchaleXL,
+  BarrelStehtisch,
+} from "@/app/components/illustrations/FireBarrels";
+
+export interface BarrelFit {
+  /** Canvas display width as fraction of SVG display width. */
+  widthFrac: number;
+  /** SVG display height / SVG display width (viewBox aspect ratio). */
+  svgAspect: number;
+  /** Canvas top edge as fraction of SVG display height. */
+  topFrac: number;
+  /** Native Fabric.js canvas height in pixels. */
+  canvasH: number;
+}
+
+export interface BarrelEntry {
+  keywords: string[];
+  Component: ComponentType<{ showBackground?: boolean; showFloorShadow?: boolean }>;
+  fit: BarrelFit;
+}
+
+// DEV: Adjust widthFrac / topFrac to align canvas with the engraving zone.
+const BARREL_ENTRIES: BarrelEntry[] = [
+  {
+    keywords: ["stehtisch", "tisch", "table", "platte"],
+    Component: BarrelStehtisch,
+    fit: { widthFrac: 0.53, svgAspect: 410 / 300, topFrac: 0.20, canvasH: 1240 },
+  },
+  {
+    keywords: ["schale xl", "xl schale"],
+    Component: BarrelSchaleXL,
+    fit: { widthFrac: 0.53, svgAspect: 262 / 300, topFrac: 0.13, canvasH: 560 },
+  },
+  {
+    keywords: ["schale", "feuerschale", "bowl"],
+    Component: BarrelSchale,
+    fit: { widthFrac: 0.38, svgAspect: 120 / 300, topFrac: 0.19, canvasH: 250 },
+  },
+];
+
+export const BARREL_DEFAULT: BarrelEntry = {
+  keywords: [],
+  Component: BarrelNoLegs,
+  fit: { widthFrac: 0.53, svgAspect: 410 / 300, topFrac: 0.24, canvasH: 1150 },
+};
+
+export function getBarrelEntry(title: string): BarrelEntry {
+  const lower = title.toLowerCase();
+  for (const entry of BARREL_ENTRIES) {
+    if (entry.keywords.some((kw) => lower.includes(kw))) return entry;
+  }
+  return BARREL_DEFAULT;
+}

@@ -1,232 +1,104 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { uploadDesign, uploadCanvasImage, type UploadState } from "@/app/lib/designApi";
-import { CANVAS_BG, DEFAULT_CANVAS_PRESET, FONT_OPTIONS, type CanvasPreset } from "../constants";
+import { FONT_OPTIONS, type CanvasPreset } from "../constants";
 import type { FabricConf, ProductOption } from "../types";
-import type { Canvas, FabricObject, IText } from "fabric";
+import type { FabricObject } from "fabric";
+import { useCanvasInit } from "./useCanvasInit";
 
 export function useDesignCanvas(
   selectedProduct: ProductOption | null,
-  canvasPreset: CanvasPreset = DEFAULT_CANVAS_PRESET,
+  canvasPreset: CanvasPreset,
 ) {
-  const canvasElRef      = useRef<HTMLCanvasElement>(null);
-  const fabricRef        = useRef<Canvas | null>(null);
-  const fileInputRef     = useRef<HTMLInputElement>(null);
-  const wrapperRef       = useRef<HTMLDivElement>(null);
-  const canvasPresetRef  = useRef<CanvasPreset>(canvasPreset);
+  const init = useCanvasInit(canvasPreset);
+  const { fabricRef, canvasPresetRef } = init;
 
-  // Canvas status
-  const [canvasReady,    setCanvasReady]    = useState(false);
-  const [objectCount,    setObjectCount]    = useState(0);
-  const [wrapperWidth,   setWrapperWidth]   = useState(canvasPreset.width);
   const [imageUploading, setImageUploading] = useState(false);
   const [uploadState,    setUploadState]    = useState<UploadState>({ status: "idle" });
 
-  // Selected object properties
-  const [hasActiveObject,  setHasActiveObject]  = useState(false);
-  const [activeObjectType, setActiveObjectType] = useState("");
-  const [fontSize,         setFontSize]         = useState(36);
-  const [fontFamily,       setFontFamily]       = useState<string>(FONT_OPTIONS[0].value);
-  const [strokeWidth,      setStrokeWidth]      = useState(2);
-  const [strokeColor,      setStrokeColor]      = useState("#ffffff");
-  const [fillColor,        setFillColor]        = useState<string>("transparent");
-  const [opacity,          setOpacity]          = useState(100);
-  const [textAlign,        setTextAlign]        = useState<"left" | "center" | "right">("left");
-  const [isBold,           setIsBold]           = useState(false);
-  const [isItalic,         setIsItalic]         = useState(false);
+  // ─── Apply callbacks ────────────────────────────────────────────────────────
 
-  // Derived scale — reacts to both wrapper size and active preset
-  const canvasScale = Math.min(1, wrapperWidth / canvasPreset.width);
-
-  /* ── Keep preset ref current ──────────────────────────────────── */
-  useEffect(() => {
-    canvasPresetRef.current = canvasPreset;
-  }, [canvasPreset]);
-
-  /* ── Wrapper resize observer ──────────────────────────────────── */
-  useEffect(() => {
-    if (!wrapperRef.current) return;
-    const obs = new ResizeObserver(([entry]) => {
-      setWrapperWidth(entry.contentRect.width);
-    });
-    obs.observe(wrapperRef.current);
-    return () => obs.disconnect();
-  }, []);
-
-  /* ── Canvas resize when preset changes ───────────────────────── */
-  useEffect(() => {
-    if (!canvasReady || !fabricRef.current) return;
-    fabricRef.current.setDimensions({ width: canvasPreset.width, height: canvasPreset.height });
-    fabricRef.current.requestRenderAll();
-  }, [canvasPreset, canvasReady]);
-
-  /* ── Init canvas ──────────────────────────────────────────────── */
-  useEffect(() => {
-    if (!canvasElRef.current) return;
-    let canvas: Canvas | undefined;
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== "Delete" && e.key !== "Backspace") return;
-      const tag = (document.activeElement as HTMLElement)?.tagName;
-      if (tag === "INPUT" || tag === "TEXTAREA" || (document.activeElement as HTMLElement)?.isContentEditable) return;
-      if (!fabricRef.current) return;
-      fabricRef.current.getActiveObjects().forEach((o: FabricObject) => fabricRef.current!.remove(o));
-      fabricRef.current.discardActiveObject();
-      fabricRef.current.requestRenderAll();
-      e.preventDefault();
-    };
-    window.addEventListener("keydown", onKeyDown);
-
-    (async () => {
-      const { Canvas } = await import("fabric");
-      const preset = canvasPresetRef.current;
-      canvas = new Canvas(canvasElRef.current!, {
-        width: preset.width, height: preset.height,
-        backgroundColor: CANVAS_BG,
-        selection: true, preserveObjectStacking: true,
-      });
-      fabricRef.current = canvas;
-
-      const syncCount = () => setObjectCount(canvas!.getObjects().length);
-
-      const syncSelection = () => {
-        const obj = canvas!.getActiveObject();
-        if (!obj) return;
-        setHasActiveObject(true);
-        setActiveObjectType(obj.type ?? "");
-        if (obj.type === "i-text" || obj.type === "text") {
-          const textObj = obj as IText;
-          setFontSize(textObj.fontSize ?? 36);
-          setFontFamily(textObj.fontFamily ?? FONT_OPTIONS[0].value);
-          setTextAlign((textObj.textAlign as "left" | "center" | "right") ?? "left");
-          setIsBold(textObj.fontWeight === "bold");
-          setIsItalic(textObj.fontStyle === "italic");
-        }
-        setStrokeWidth(obj.strokeWidth ?? 2);
-        setStrokeColor(typeof obj.stroke === "string" && obj.stroke ? obj.stroke : "#1c1917");
-        setFillColor(typeof obj.fill === "string" ? obj.fill : "transparent");
-        setOpacity(Math.round((obj.opacity ?? 1) * 100));
-      };
-      canvas.on("selection:created", syncSelection);
-      canvas.on("selection:updated", syncSelection);
-      canvas.on("selection:cleared", () => { setHasActiveObject(false); setActiveObjectType(""); });
-
-      setCanvasReady(true);
-    })();
-
-    return () => {
-      window.removeEventListener("keydown", onKeyDown);
-      canvas?.dispose();
-      fabricRef.current = null;
-    };
-  }, []);
-
-  /* ── Background: transparent so SVG behind canvas shows through ── */
-  useEffect(() => {
-    if (!canvasReady || !fabricRef.current) return;
-    fabricRef.current.backgroundColor = "transparent";
-    fabricRef.current.requestRenderAll();
-  }, [canvasReady]);
-
-  /* ── Deselect when clicking outside the canvas element ───────── */
-  useEffect(() => {
-    if (!canvasReady) return;
-    const onDocMouseDown = (e: MouseEvent) => {
-      const fabric = fabricRef.current;
-      if (!fabric) return;
-      // fabric.wrapperEl wraps both the lower (render) and upper (interaction) canvas
-      const wrapper = (fabric as { wrapperEl?: HTMLElement }).wrapperEl;
-      if (!wrapper || wrapper.contains(e.target as Node)) return;
-      // Don't deselect when clicking inside an editor panel (properties, tools, sidebar)
-      if ((e.target as Element).closest?.("[data-no-deselect]")) return;
-      fabric.discardActiveObject();
-      fabric.requestRenderAll();
-    };
-    document.addEventListener("mousedown", onDocMouseDown);
-    return () => document.removeEventListener("mousedown", onDocMouseDown);
-  }, [canvasReady]);
-
-  /* ── Apply callbacks ──────────────────────────────────────────── */
   const applyFontSize = useCallback((size: number) => {
-    setFontSize(size);
+    init.setFontSize(size);
     const obj = fabricRef.current?.getActiveObject();
     if (obj && (obj.type === "i-text" || obj.type === "text")) {
       obj.set("fontSize", size);
       fabricRef.current?.requestRenderAll();
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const applyFontFamily = useCallback((family: string) => {
-    setFontFamily(family);
+    init.setFontFamily(family);
     const obj = fabricRef.current?.getActiveObject();
     if (obj && (obj.type === "i-text" || obj.type === "text")) {
       obj.set("fontFamily", family);
       fabricRef.current?.requestRenderAll();
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const applyStrokeWidth = useCallback((w: number) => {
-    setStrokeWidth(w);
+    init.setStrokeWidth(w);
     const obj = fabricRef.current?.getActiveObject();
     if (obj) { obj.set("strokeWidth", w); fabricRef.current?.requestRenderAll(); }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const applyOpacity = useCallback((val: number) => {
-    setOpacity(val);
+    init.setOpacity(val);
     const obj = fabricRef.current?.getActiveObject();
     if (obj) { obj.set("opacity", val / 100); fabricRef.current?.requestRenderAll(); }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const applyFillColor = useCallback((color: string) => {
-    setFillColor(color);
+    init.setFillColor(color);
     const obj = fabricRef.current?.getActiveObject();
     if (obj) { obj.set("fill", color); fabricRef.current?.requestRenderAll(); }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const applyStrokeColor = useCallback((color: string) => {
-    setStrokeColor(color);
+    init.setStrokeColor(color);
     const obj = fabricRef.current?.getActiveObject();
     if (obj) { obj.set("stroke", color); fabricRef.current?.requestRenderAll(); }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const applyTextAlign = useCallback((align: "left" | "center" | "right") => {
-    setTextAlign(align);
+    init.setTextAlign(align);
     const obj = fabricRef.current?.getActiveObject();
     if (obj && (obj.type === "i-text" || obj.type === "text")) {
       obj.set("textAlign", align);
       fabricRef.current?.requestRenderAll();
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const applyBold = useCallback((bold: boolean) => {
-    setIsBold(bold);
+    init.setIsBold(bold);
     const obj = fabricRef.current?.getActiveObject();
     if (obj && (obj.type === "i-text" || obj.type === "text")) {
       obj.set("fontWeight", bold ? "bold" : "normal");
       fabricRef.current?.requestRenderAll();
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const applyItalic = useCallback((italic: boolean) => {
-    setIsItalic(italic);
+    init.setIsItalic(italic);
     const obj = fabricRef.current?.getActiveObject();
     if (obj && (obj.type === "i-text" || obj.type === "text")) {
       obj.set("fontStyle", italic ? "italic" : "normal");
       fabricRef.current?.requestRenderAll();
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  /* ── Canvas actions ───────────────────────────────────────────── */
+  // ─── Canvas actions ─────────────────────────────────────────────────────────
+
   const bringForward = useCallback(() => {
     const obj = fabricRef.current?.getActiveObject();
     if (obj) { fabricRef.current?.bringObjectForward(obj); fabricRef.current?.requestRenderAll(); }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const sendBackward = useCallback(() => {
     const obj = fabricRef.current?.getActiveObject();
     if (obj) { fabricRef.current?.sendObjectBackwards(obj); fabricRef.current?.requestRenderAll(); }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const duplicate = useCallback(async () => {
     const obj = fabricRef.current?.getActiveObject();
@@ -236,14 +108,16 @@ export function useDesignCanvas(
     fabricRef.current.add(cloned);
     fabricRef.current.setActiveObject(cloned);
     fabricRef.current.requestRenderAll();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const deleteSelected = useCallback(() => {
     if (!fabricRef.current) return;
-    fabricRef.current.getActiveObjects().forEach((o: FabricObject) => fabricRef.current!.remove(o));
+    fabricRef.current
+      .getActiveObjects()
+      .forEach((o: FabricObject) => fabricRef.current!.remove(o));
     fabricRef.current.discardActiveObject();
     fabricRef.current.requestRenderAll();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const downloadPNG = useCallback(() => {
     if (!fabricRef.current) return;
@@ -251,31 +125,32 @@ export function useDesignCanvas(
     a.href     = fabricRef.current.toDataURL({ format: "png", multiplier: 2 });
     a.download = `design-${selectedProduct?.id ?? "custom"}.png`;
     a.click();
-  }, [selectedProduct]);
+  }, [selectedProduct]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const addText = useCallback(async () => {
     if (!fabricRef.current) return;
     const { IText } = await import("fabric");
     const cx = canvasPresetRef.current.width  / 2;
     const cy = canvasPresetRef.current.height / 2;
-    const t = new IText("Dein Text", {
+    const t  = new IText("Dein Text", {
       left: cx, top: cy, originX: "center", originY: "center",
       fontSize: 36, fontFamily: FONT_OPTIONS[0].value, fill: "#ffffff",
     });
     fabricRef.current.add(t);
     fabricRef.current.setActiveObject(t);
     fabricRef.current.requestRenderAll();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const addShapeFromCatalog = useCallback(async (fc: FabricConf) => {
     if (!fabricRef.current) return;
-    const cx = canvasPresetRef.current.width  / 2;
-    const cy = canvasPresetRef.current.height / 2;
+    const cx   = canvasPresetRef.current.width  / 2;
+    const cy   = canvasPresetRef.current.height / 2;
     const base = {
       left: cx, top: cy, originX: "center", originY: "center",
       fill: "transparent", stroke: "#ffffff", strokeWidth: 2,
     } as const;
-    const { Rect, Circle: FC, Ellipse, Triangle: FT, Line, Polygon, Path } = await import("fabric");
+    const { Rect, Circle: FC, Ellipse, Triangle: FT, Line, Polygon, Path } =
+      await import("fabric");
     let obj: FabricObject | undefined;
     switch (fc.k) {
       case "rect":     obj = new Rect({ ...base, width: fc.w, height: fc.h, rx: fc.rx ?? 0 }); break;
@@ -301,27 +176,31 @@ export function useDesignCanvas(
     fabricRef.current.add(obj);
     fabricRef.current.setActiveObject(obj);
     fabricRef.current.requestRenderAll();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!fabricRef.current || !e.target.files?.[0]) return;
-    const file = e.target.files[0];
-    e.target.value = "";
-    setImageUploading(true);
-    try {
-      const cdnUrl = await uploadCanvasImage(file);
-      const { FabricImage } = await import("fabric");
-      const img = await FabricImage.fromURL(cdnUrl, { crossOrigin: "anonymous" });
-      img.scaleToWidth(200);
-      fabricRef.current.add(img);
-      fabricRef.current.setActiveObject(img);
-      fabricRef.current.requestRenderAll();
-    } finally {
-      setImageUploading(false);
-    }
-  }, []);
+  const handleImageUpload = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (!fabricRef.current || !e.target.files?.[0]) return;
+      const file = e.target.files[0];
+      e.target.value = "";
+      setImageUploading(true);
+      try {
+        const cdnUrl = await uploadCanvasImage(file);
+        const { FabricImage } = await import("fabric");
+        const img = await FabricImage.fromURL(cdnUrl, { crossOrigin: "anonymous" });
+        img.scaleToWidth(200);
+        fabricRef.current.add(img);
+        fabricRef.current.setActiveObject(img);
+        fabricRef.current.requestRenderAll();
+      } finally {
+        setImageUploading(false);
+      }
+    },
+    [], // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
-  /* ── Save & upload ────────────────────────────────────────────── */
+  // ─── Save & upload ──────────────────────────────────────────────────────────
+
   const saveDesign = useCallback(async () => {
     if (!fabricRef.current || !selectedProduct) return;
     setUploadState({ status: "uploading", step: "preview" });
@@ -339,60 +218,43 @@ export function useDesignCanvas(
         message: err instanceof Error ? err.message : "Unbekannter Fehler",
       });
     }
-  }, [selectedProduct]);
+  }, [selectedProduct]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const resetUploadState = useCallback(() => setUploadState({ status: "idle" }), []);
 
-  /* ── Derived ──────────────────────────────────────────────────── */
-  const isTextSelected = hasActiveObject && (activeObjectType === "i-text" || activeObjectType === "text");
-
   return {
-    // refs
-    canvasElRef,
-    fileInputRef,
-    wrapperRef,
-    // status
-    canvasReady,
-    objectCount,
-    canvasScale,
+    // from init
+    canvasElRef:  init.canvasElRef,
+    fileInputRef: init.fileInputRef,
+    wrapperRef:   init.wrapperRef,
+    canvasReady:  init.canvasReady,
+    objectCount:  init.objectCount,
     canvasWidth:  canvasPreset.width,
     canvasHeight: canvasPreset.height,
-    wrapperWidth,
+    wrapperWidth: init.wrapperWidth,
+    canvasScale:  Math.min(1, init.wrapperWidth / canvasPreset.width),
+    // selection state
+    hasActiveObject:  init.hasActiveObject,
+    isTextSelected:   init.isTextSelected,
+    fontSize:         init.fontSize,
+    fontFamily:       init.fontFamily,
+    strokeWidth:      init.strokeWidth,
+    strokeColor:      init.strokeColor,
+    fillColor:        init.fillColor,
+    opacity:          init.opacity,
+    textAlign:        init.textAlign,
+    isBold:           init.isBold,
+    isItalic:         init.isItalic,
+    // upload
     imageUploading,
     uploadState,
-    // selection state
-    hasActiveObject,
-    isTextSelected,
-    fontSize,
-    fontFamily,
-    strokeWidth,
-    strokeColor,
-    fillColor,
-    opacity,
-    textAlign,
-    isBold,
-    isItalic,
     // apply callbacks
-    applyFontSize,
-    applyFontFamily,
-    applyStrokeWidth,
-    applyStrokeColor,
-    applyFillColor,
-    applyOpacity,
-    applyTextAlign,
-    applyBold,
-    applyItalic,
-    // canvas actions
-    bringForward,
-    sendBackward,
-    duplicate,
-    deleteSelected,
-    downloadPNG,
-    addText,
-    addShapeFromCatalog,
-    handleImageUpload,
+    applyFontSize, applyFontFamily, applyStrokeWidth, applyStrokeColor,
+    applyFillColor, applyOpacity, applyTextAlign, applyBold, applyItalic,
+    // actions
+    bringForward, sendBackward, duplicate, deleteSelected,
+    downloadPNG, addText, addShapeFromCatalog, handleImageUpload,
     // save
-    saveDesign,
-    resetUploadState,
+    saveDesign, resetUploadState,
   };
 }
