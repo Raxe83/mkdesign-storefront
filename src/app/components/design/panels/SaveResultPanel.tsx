@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Check, Loader2, ShoppingCart } from "lucide-react";
 import { cn } from "@/app/utils/utils";
 import type { DesignUploadResult } from "@/app/lib/designApi";
@@ -38,9 +39,8 @@ export function SaveResultPanel({ result, variantId, onAddToCart, onReset }: Pro
         </div>
       </div>
 
-      <div className="aspect-square rounded overflow-hidden border border-stone-200/60 dark:border-zinc-700/60 bg-stone-50 dark:bg-zinc-800">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={result.previewUrl} alt="Design-Vorschau" className="w-full h-full object-contain" />
+      <div className="relative aspect-square rounded overflow-hidden border border-stone-200/60 dark:border-zinc-700/60 bg-stone-50 dark:bg-zinc-800">
+        <Image src={result.previewUrl} alt="Design-Vorschau" fill className="object-contain" />
       </div>
 
       {cartState === "added" ? (

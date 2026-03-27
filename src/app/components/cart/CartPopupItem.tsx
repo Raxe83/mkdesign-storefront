@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Minus, Plus, Trash2, X } from "lucide-react";
 import { useCart } from "@/app/context/CartContext";
 import { formatPrice } from "@/app/utils/formatPrice";
@@ -48,16 +49,17 @@ const CartPopupItem = ({ node, linkedItems }: CartPopupItemProps) => {
     <div className="px-4 py-3 flex items-start gap-3">
       {/* Thumbnail */}
       {isCustomDesign && previewUrl ? (
-        <div className="h-12 w-12 shrink-0 overflow-hidden rounded-sm border border-rust/30 bg-stone-50 dark:bg-zinc-800">
-          <img src={previewUrl} alt="Dein Design" className="h-full w-full object-contain p-0.5" />
+        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-sm border border-rust/30 bg-stone-50 dark:bg-zinc-800">
+          <Image src={previewUrl} alt="Dein Design" fill className="object-contain p-0.5" />
         </div>
       ) : (
-        <div className="h-12 w-12 shrink-0 overflow-hidden rounded-sm border border-sand/40 dark:border-zinc-700 bg-white dark:bg-zinc-800">
+        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-sm border border-sand/40 dark:border-zinc-700 bg-white dark:bg-zinc-800">
           {node.merchandise.product.featuredImage ? (
-            <img
+            <Image
               src={node.merchandise.product.featuredImage.url}
               alt={node.merchandise.product.featuredImage.altText || node.merchandise.product.title}
-              className="h-full w-full object-cover"
+              fill
+              className="object-cover"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center">
@@ -89,10 +91,12 @@ const CartPopupItem = ({ node, linkedItems }: CartPopupItemProps) => {
             {linkedItems.map((child) => (
               <div key={child.id} className="flex items-center gap-1.5">
                 {child.merchandise.product.featuredImage && (
-                  <img
+                  <Image
                     src={child.merchandise.product.featuredImage.url}
                     alt={child.merchandise.product.featuredImage.altText ?? child.merchandise.product.title}
-                    className="w-5 h-5 rounded object-cover border border-sand/40 dark:border-zinc-700 shrink-0"
+                    width={20}
+                    height={20}
+                    className="rounded object-cover border border-sand/40 dark:border-zinc-700 shrink-0"
                   />
                 )}
                 <span className="flex-1 text-[11px] text-stone dark:text-muted truncate">

@@ -97,7 +97,6 @@ export default async function ProductDetailPage({ params }: Props) {
       relatedLabel={relatedConfig.label}
       extraContentSlot={
         <Suspense fallback={<ExtraContentSkeleton />}>
-          {/* @ts-ignore */}
           <ExtraContentSection metaType={metaType} />
         </Suspense>
       }
