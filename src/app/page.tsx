@@ -7,6 +7,7 @@ import JoinUs from "./components/JoinUs";
 import HeroHighlight from "./components/HeroHighlight";
 import GiftFinder from "./components/Giftfinder";
 import Firehighlight from "./components/Firehighlight";
+import PrintLaserHighlight from "./components/PrintLaserHighlight";
 import { Personalization } from "./components/Personalization";
 import type { BarrelVariant } from "./components/PersonalizationVisual";
 import { Reviews } from "./components/Reviews";
@@ -86,6 +87,13 @@ export default async function HomePage() {
         image={{
           src: require("./img/stehtisch_nice.jpeg").default,
           alt: "Feuertonne",
+        }}
+      />
+      <PrintLaserHighlight
+        image={{
+          // TODO: Ersetze durch ein echtes 3D-Druck / Laser-Bild
+          src: require("./img/feuertonne_light.jpg").default,
+          alt: "3D-Druck und Laser-Gravur",
         }}
       />
       <GiftFinder />

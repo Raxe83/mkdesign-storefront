@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { cn } from "@/app/utils/utils";
 import type { JudgemeReview } from "@/app/services/judgeme";
+import { ReviewLightbox } from "@/app/components/ui/ReviewLightbox";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -22,12 +23,19 @@ function Stars({ rating, size = 13 }: { rating: number; size?: number }) {
   );
 }
 
-function ReviewCard({ review }: { review: JudgemeReview }) {
+function ReviewCard({
+  review,
+  onImageClick,
+}: {
+  review: JudgemeReview;
+  onImageClick: (urls: string[], i: number) => void;
+}) {
   const date = new Date(review.created_at).toLocaleDateString("de-DE", {
     day: "numeric",
     month: "long",
     year: "numeric",
   });
+  const originalUrls = review.pictures.map((p) => p.urls.original);
 
   return (
     <div className="flex flex-col gap-3 p-5 rounded border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors duration-150">
@@ -52,6 +60,30 @@ function ReviewCard({ review }: { review: JudgemeReview }) {
       )}
 
       <p className="text-sm text-muted leading-relaxed flex-1">{review.body}</p>
+
+      {review.pictures.length > 0 && (
+        <div className="flex flex-wrap gap-2 pt-1">
+          {review.pictures.map((pic, i) => (
+            <button
+              key={i}
+              onClick={() => onImageClick(originalUrls, i)}
+              className="relative overflow-hidden rounded border border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500 transition-all duration-150 hover:scale-[1.02] focus:outline-none"
+              aria-label={`Bild ${i + 1} vergrößern`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={pic.urls.large ?? pic.urls.medium ?? pic.urls.original}
+                alt={`Bewertungsbild ${i + 1}`}
+                className="w-20 h-20 object-cover block"
+                onError={(e) => {
+                  const img = e.currentTarget;
+                  if (img.src !== pic.urls.original) img.src = pic.urls.original;
+                }}
+              />
+            </button>
+          ))}
+        </div>
+      )}
 
       {review.product_title && (
         <p className="text-xs text-muted border-t border-zinc-100 dark:border-zinc-800 pt-3">
@@ -233,6 +265,7 @@ export function ReviewsClient({
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [sort, setSort] = useState<SortKey>("newest");
   const [visible, setVisible] = useState(PAGE_SIZE);
+  const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
 
   // Star distribution for filter bar badges
   const distribution = useMemo(() => {
@@ -266,6 +299,13 @@ export function ReviewsClient({
 
   return (
     <>
+      {lightbox && (
+        <ReviewLightbox
+          images={lightbox.images}
+          startIndex={lightbox.index}
+          onClose={() => setLightbox(null)}
+        />
+      )}
       <SummaryBar reviews={allReviews} total={total} />
 
       <FilterBar
@@ -288,7 +328,7 @@ export function ReviewsClient({
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {shown.map((r) => (
-              <ReviewCard key={r.id} review={r} />
+              <ReviewCard key={r.id} review={r} onImageClick={(urls, i) => setLightbox({ images: urls, index: i })} />
             ))}
           </div>
 

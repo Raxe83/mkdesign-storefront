@@ -1,22 +1,24 @@
+import Link from "next/link";
 import { Package, Truck, Calendar, ShoppingBag } from "lucide-react";
 import { cn } from "../../utils/utils";
 import type { Order, OrderFulfillmentStatus, OrderFinancialStatus } from "../../types/shopify";
 
 // ─── Status-Konfiguration ─────────────────────────────────────────────────────
 
-const FULFILLMENT: Record<OrderFulfillmentStatus, { label: string; className: string }> = {
-  FULFILLED:           { label: "Versandt",        className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" },
-  IN_PROGRESS:         { label: "Unterwegs",        className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
-  PARTIALLY_FULFILLED: { label: "Teilw. versandt",  className: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" },
-  UNFULFILLED:         { label: "In Bearbeitung",   className: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400" },
-  ON_HOLD:             { label: "Zurückgehalten",   className: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400" },
-  OPEN:                { label: "Offen",            className: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400" },
-  PENDING_FULFILLMENT: { label: "Ausstehend",       className: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" },
-  RESTOCKED:           { label: "Zurückgelegt",     className: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400" },
-  SCHEDULED:           { label: "Geplant",          className: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400" },
+export const FULFILLMENT: Record<OrderFulfillmentStatus, { label: string; className: string }> = {
+  FULFILLED:           { label: "Versandt",          className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" },
+  IN_PROGRESS:         { label: "Unterwegs",          className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
+  PARTIALLY_FULFILLED: { label: "Teilw. versandt",    className: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" },
+  READY_FOR_PICKUP:    { label: "Abholbereit",        className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" },
+  UNFULFILLED:         { label: "In Bearbeitung",     className: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400" },
+  ON_HOLD:             { label: "Zurückgehalten",     className: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400" },
+  OPEN:                { label: "Offen",              className: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400" },
+  PENDING_FULFILLMENT: { label: "Ausstehend",         className: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" },
+  RESTOCKED:           { label: "Zurückgelegt",       className: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400" },
+  SCHEDULED:           { label: "Geplant",            className: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400" },
 };
 
-const FINANCIAL: Record<OrderFinancialStatus, { label: string; className: string }> = {
+export const FINANCIAL: Record<OrderFinancialStatus, { label: string; className: string }> = {
   PAID:               { label: "Bezahlt",        className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" },
   PENDING:            { label: "Ausstehend",     className: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" },
   REFUNDED:           { label: "Erstattet",      className: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400" },
@@ -29,7 +31,7 @@ const FINANCIAL: Record<OrderFinancialStatus, { label: string; className: string
 
 // ─── Sub-Komponenten ──────────────────────────────────────────────────────────
 
-function StatusBadge({ label, className }: { label: string; className: string }) {
+export function StatusBadge({ label, className }: { label: string; className: string }) {
   return (
     <span className={cn("inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-medium", className)}>
       {label}
@@ -42,6 +44,7 @@ function OrderRow({ order }: { order: Order }) {
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
   const firstName = items[0]?.title ?? "—";
   const hasMore = items.length > 1;
+  const orderId = (order.id.split("/").pop() ?? "").split("?")[0];
 
   const date = new Date(order.processedAt).toLocaleDateString("de-DE", {
     day: "2-digit", month: "short", year: "numeric",
@@ -56,7 +59,11 @@ function OrderRow({ order }: { order: Order }) {
   const financial   = FINANCIAL[order.financialStatus]     ?? FINANCIAL.PENDING;
 
   return (
-    <li className="grid grid-cols-1 sm:grid-cols-[auto_1fr_auto] gap-3 sm:gap-6 px-5 py-4 border-b border-zinc-200/60 dark:border-zinc-800 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors duration-150">
+    <li>
+    <Link
+      href={`/pages/account/orders/${orderId}`}
+      className="grid grid-cols-1 sm:grid-cols-[auto_1fr_auto] gap-3 sm:gap-6 px-5 py-4 border-b border-zinc-200/60 dark:border-zinc-800 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors duration-150 group"
+    >
       {/* Icon */}
       <div className="hidden sm:flex items-start pt-0.5">
         <div className="w-9 h-9 rounded-sm bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0">
@@ -85,10 +92,12 @@ function OrderRow({ order }: { order: Order }) {
         </div>
       </div>
 
-      {/* Preis */}
+      {/* Preis + Arrow */}
       <div className="flex items-start justify-between sm:justify-end sm:flex-col sm:items-end gap-1">
         <span className="text-sm font-medium text-primary">{price}</span>
+        <span className="hidden sm:block text-xs text-muted group-hover:text-rust transition-colors duration-150">Details →</span>
       </div>
+    </Link>
     </li>
   );
 }

@@ -55,7 +55,7 @@ const CartPageItem = ({ node, linkedItems, index }: CartPageItemProps) => {
     >
       {/* Thumbnail */}
       {isCustomDesign && previewUrl ? (
-        <div className="relative h-20 w-20 shrink-0 rounded-sm border border-rust/30 overflow-hidden bg-stone-50 dark:bg-zinc-800">
+        <div className="relative h-20 w-20 shrink-0 rounded-sm border border-rust/30 overflow-hidden bg-charcoal">
           <Image src={previewUrl} alt="Dein Design" fill className="object-contain p-1" />
         </div>
       ) : (

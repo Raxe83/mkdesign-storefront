@@ -49,7 +49,7 @@ const CartPopupItem = ({ node, linkedItems }: CartPopupItemProps) => {
     <div className="px-4 py-3 flex items-start gap-3">
       {/* Thumbnail */}
       {isCustomDesign && previewUrl ? (
-        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-sm border border-rust/30 bg-stone-50 dark:bg-zinc-800">
+        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-sm border border-rust/30 bg-charcoal">
           <Image src={previewUrl} alt="Dein Design" fill className="object-contain p-0.5" />
         </div>
       ) : (

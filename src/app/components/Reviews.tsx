@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { cn } from "../utils/utils";
 import type { JudgemeReview } from "../services/judgeme";
+import { ReviewLightbox } from "./ui/ReviewLightbox";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -30,18 +31,26 @@ function StarRating({ rating, size = "sm" }: { rating: number; size?: "sm" | "lg
   );
 }
 
-function ReviewCard({ review, index }: { review: JudgemeReview; index: number }) {
+function ReviewCard({
+  review,
+  index,
+  onImageClick,
+}: {
+  review: JudgemeReview;
+  index: number;
+  onImageClick: (urls: string[], i: number) => void;
+}) {
   const date = new Date(review.created_at).toLocaleDateString("de-DE", {
     month: "long",
     year: "numeric",
   });
+  const originalUrls = review.pictures.map((p) => p.urls.original);
 
   return (
     <div
       className={cn(
         "flex flex-col gap-4 p-6 bg-white/5 border border-white/10 rounded-sm",
         "opacity-0 animate-gift-in",
-        // Mobile: fixed width card in horizontal scroll
         "snap-start flex-shrink-0 w-[82vw] sm:w-auto",
       )}
       style={{ animationDelay: `${index * 80}ms`, animationFillMode: "forwards" }}
@@ -58,6 +67,30 @@ function ReviewCard({ review, index }: { review: JudgemeReview; index: number })
       <blockquote className="text-white/70 text-sm leading-[1.8] italic flex-1">
         "{review.body}"
       </blockquote>
+
+      {review.pictures.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {review.pictures.map((pic, i) => (
+            <button
+              key={i}
+              onClick={() => onImageClick(originalUrls, i)}
+              className="relative overflow-hidden rounded border border-white/10 hover:border-white/30 transition-all duration-150 hover:scale-[1.03] focus:outline-none"
+              aria-label={`Bild ${i + 1} vergrößern`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={pic.urls.small ?? pic.urls.medium ?? pic.urls.original}
+                alt={`Bewertungsbild ${i + 1}`}
+                className="w-16 h-16 object-cover block"
+                onError={(e) => {
+                  const img = e.currentTarget;
+                  if (img.src !== pic.urls.original) img.src = pic.urls.original;
+                }}
+              />
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="border-t border-white/10 pt-4 flex items-start justify-between gap-2">
         <p className="text-white text-xs font-medium">{review.reviewer.name}</p>
@@ -108,6 +141,7 @@ export function Reviews({
   const [loading, setLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState(INITIAL);
   const [clickCount, setClickCount] = useState(0);
+  const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -141,6 +175,13 @@ export function Reviews({
 
   return (
     <div className={cn("w-full bg-charcoal", className)}>
+      {lightbox && (
+        <ReviewLightbox
+          images={lightbox.images}
+          startIndex={lightbox.index}
+          onClose={() => setLightbox(null)}
+        />
+      )}
       <div className="max-w-screen-xl mx-auto px-6 md:px-10 lg:px-16 py-16 lg:py-24">
 
         {/* Header */}
@@ -181,7 +222,7 @@ export function Reviews({
               : reviews.length === 0
                 ? <p className="text-white/40 text-sm py-10">Noch keine Bewertungen.</p>
                 : reviews.map((review, index) => (
-                    <ReviewCard key={review.id} review={review} index={index} />
+                    <ReviewCard key={review.id} review={review} index={index} onImageClick={(urls, i) => setLightbox({ images: urls, index: i })} />
                   ))
             }
           </div>
@@ -198,7 +239,7 @@ export function Reviews({
           ) : (
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
               {visible.map((review, index) => (
-                <ReviewCard key={review.id} review={review} index={index} />
+                <ReviewCard key={review.id} review={review} index={index} onImageClick={(urls, i) => setLightbox({ images: urls, index: i })} />
               ))}
             </div>
           )}

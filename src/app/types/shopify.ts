@@ -232,6 +232,7 @@ export interface RecoverPasswordResult {
 export type OrderFulfillmentStatus =
   | "FULFILLED" | "IN_PROGRESS" | "ON_HOLD" | "OPEN"
   | "PARTIALLY_FULFILLED" | "PENDING_FULFILLMENT"
+  | "READY_FOR_PICKUP"
   | "RESTOCKED" | "SCHEDULED" | "UNFULFILLED"
 
 export type OrderFinancialStatus =
@@ -256,6 +257,52 @@ export interface Order {
   totalPrice: Money
   lineItems: {
     edges: Array<{ node: OrderLineItem }>
+  }
+}
+
+export interface OrderDetailLineItem {
+  title: string
+  quantity: number
+  originalTotalPrice: Money | null
+  variant: {
+    title: string
+    sku: string | null
+    price: Money
+    image: Image | null
+    selectedOptions: Array<{ name: string; value: string }>
+    product: { handle: string } | null
+  } | null
+}
+
+export interface OrderDetail {
+  id: string
+  orderNumber: number
+  processedAt: string
+  fulfillmentStatus: OrderFulfillmentStatus
+  financialStatus: OrderFinancialStatus
+  statusUrl: string
+  cancelReason: string | null
+  canceledAt: string | null
+  totalPrice: Money
+  subtotalPrice: Money | null
+  totalShippingPrice: Money | null
+  totalTax: Money | null
+  shippingAddress: {
+    firstName: string
+    lastName: string
+    address1: string
+    address2: string | null
+    city: string
+    province: string | null
+    zip: string
+    country: string
+    phone: string | null
+  } | null
+  successfulFulfillments: Array<{
+    trackingInfo: Array<{ number: string; url: string | null }>
+  }>
+  lineItems: {
+    edges: Array<{ node: OrderDetailLineItem }>
   }
 }
 

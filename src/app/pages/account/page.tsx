@@ -44,7 +44,7 @@ export default async function AccountPage() {
             Mein Konto
           </p>
           <h1 className="font-display text-[clamp(1.6rem,3vw,2.4rem)] font-bold tracking-tight text-charcoal dark:text-primary leading-tight">
-            Hallo, {customer.firstName ?? "dort"} 👋
+            Hallo, {customer.firstName ?? "dort"}
           </h1>
         </div>
 

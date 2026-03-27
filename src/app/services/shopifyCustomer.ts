@@ -3,6 +3,7 @@ import type {
   CustomerAccessToken,
   CustomerUserError,
   Order,
+  OrderDetail,
   RecoverPasswordResult,
 } from "../types/shopify";
 
@@ -226,6 +227,76 @@ export async function getCustomerOrders(
 
   const orders = data.customer?.orders.edges.map((e) => e.node) ?? [];
   return { orders };
+}
+
+// ─── Bestelldetail ────────────────────────────────────────────────────────────
+
+// node(id:) on Storefront API requires buyer identity for orders — use customer.orders instead
+const ORDER_DETAIL_QUERY = `
+  query getOrderDetail($customerAccessToken: String!) {
+    customer(customerAccessToken: $customerAccessToken) {
+      orders(first: 50, sortKey: PROCESSED_AT, reverse: true) {
+        edges {
+          node {
+            id
+            orderNumber
+            processedAt
+            fulfillmentStatus
+            financialStatus
+            statusUrl
+            cancelReason
+            canceledAt
+            totalPrice { amount currencyCode }
+            subtotalPrice { amount currencyCode }
+            totalShippingPrice { amount currencyCode }
+            totalTax { amount currencyCode }
+            shippingAddress {
+              firstName lastName address1 address2
+              city province zip country phone
+            }
+            successfulFulfillments {
+              trackingInfo { number url }
+            }
+            lineItems(first: 50) {
+              edges {
+                node {
+                  title
+                  quantity
+                  originalTotalPrice { amount currencyCode }
+                  variant {
+                    title
+                    sku
+                    price { amount currencyCode }
+                    image { url altText }
+                    selectedOptions { name value }
+                    product { handle }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export async function getOrderDetail(
+  orderId: string,
+  accessToken: string,
+): Promise<OrderDetail | null> {
+  type Raw = {
+    customer: { orders: { edges: Array<{ node: OrderDetail }> } } | null;
+  };
+  try {
+    const data = await customerFetch<Raw>(ORDER_DETAIL_QUERY, {
+      customerAccessToken: accessToken,
+    });
+    const orders = data.customer?.orders.edges.map((e) => e.node) ?? [];
+    return orders.find((o) => o.id.split("/").pop()?.split("?")[0] === orderId) ?? null;
+  } catch {
+    return null;
+  }
 }
 
 // ─── Adress-Mutations ─────────────────────────────────────────────────────────
