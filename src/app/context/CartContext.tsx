@@ -87,7 +87,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         localStorage.setItem("shopifyCartId", newCart.id);
         setCart(newCart);
       } catch (error) {
-        console.error("Failed to initialize cart:", error);
       } finally {
         setIsLoading(false);
       }
@@ -127,7 +126,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       // Only show popup when explicitly adding a new item
       triggerPopup();
     } catch (error) {
-      console.error("Failed to add item to cart:", error);
     } finally {
       setIsLoading(false);
     }
@@ -147,7 +145,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         const updatedCart = await updateCartItem(cartId, lineId, quantity, shopifyLocale);
         setCart(updatedCart);
       } catch (error) {
-        console.error("Failed to sync item update:", error);
       }
     }, 500);
 
@@ -206,7 +203,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       const updatedCart = await removeCartItem(cartId, lineId);
       setCart(updatedCart);
     } catch (error) {
-      console.error("Failed to remove item:", error);
       // Re-fetch to recover correct state
       try {
         const recovered = await getCart(cartId, shopifyLocale);

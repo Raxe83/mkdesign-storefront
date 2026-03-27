@@ -48,7 +48,6 @@ const HomePage = () => {
         setFeaturedProducts(products);
         setCollections(fetchedCollections);
       } catch (err) {
-        console.error("Error fetching data:", err);
       } finally {
         setIsLoading(false);
       }

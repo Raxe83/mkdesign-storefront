@@ -5,9 +5,9 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        display: ['"Playfair Display"', "Georgia", "serif"],
-        serif: ['"Playfair Display"', "Georgia", "serif"],
-        body: ['"DM Sans"', "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "Georgia", "serif"],
+        serif: ["var(--font-display)", "Georgia", "serif"],
+        body: ["var(--font-sans)", "system-ui", "sans-serif"],
       },
       colors: {
         primary: "var(--color-primary)",

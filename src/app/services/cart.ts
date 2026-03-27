@@ -170,8 +170,7 @@ export async function getCart() {
     }).then((res) => res.json())
 
     return result.data.cart
-  } catch (error) {
-    console.error("Fehler beim Abrufen des Warenkorbs:", error)
+  } catch {
     return null
   }
 }

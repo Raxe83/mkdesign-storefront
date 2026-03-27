@@ -126,7 +126,6 @@ export default function DesignEditor() {
           : null;
         setSelectedProduct(preselected ?? mapped[0] ?? null);
       } catch (err) {
-        console.error("Produkte konnten nicht geladen werden:", err);
       } finally {
         setProductsLoading(false);
       }

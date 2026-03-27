@@ -58,7 +58,6 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
         additionalLines?.length ? additionalLines : undefined,
       );
     } catch (err) {
-      console.error("Error adding to cart:", err);
       addToast("Fehler beim Hinzufügen zum Warenkorb", "error");
     } finally {
       setIsLoading(false);

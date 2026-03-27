@@ -15,8 +15,8 @@ const FeaturedCollections: React.FC = () => {
       try {
         const data = await getCollections()
         setCollections(data)
-      } catch (error) {
-        console.error("Error fetching collections:", error)
+      } catch {
+        // ignore, show empty state
       } finally {
         setIsLoading(false)
       }

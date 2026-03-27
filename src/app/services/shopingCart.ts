@@ -28,7 +28,6 @@ async function shopifyFetch<T>({ query, variables = {} }: { query: string; varia
 
     return data as T
   } catch (error) {
-    console.error("Error fetching from Shopify:", error)
     throw error
   }
 }

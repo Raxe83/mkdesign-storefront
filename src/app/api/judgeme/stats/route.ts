@@ -13,8 +13,7 @@ export async function GET() {
         : 0;
 
     return NextResponse.json({ total, average: Math.round(average * 10) / 10 });
-  } catch (err) {
-    console.error("[judgeme/stats]", err);
+  } catch {
     return NextResponse.json({ total: 0, average: 0 }, { status: 500 });
   }
 }

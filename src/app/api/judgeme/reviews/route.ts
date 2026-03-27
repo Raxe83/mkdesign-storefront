@@ -34,7 +34,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(data);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error("[judgeme/reviews GET]", message);
     return NextResponse.json(
       { error: message },
       { status: 500 },
@@ -66,8 +65,7 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json(result, { status: 201 });
-  } catch (err) {
-    console.error("[judgeme/reviews POST]", err);
+  } catch {
     return NextResponse.json(
       { error: "Bewertung konnte nicht gespeichert werden." },
       { status: 500 },

@@ -1,6 +1,22 @@
 import type { Metadata } from "next";
+import { Playfair_Display, DM_Sans } from "next/font/google";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import "./global.css";
+
+const playfairDisplay = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+  variable: "--font-sans",
+  display: "swap",
+});
 import { CartProvider } from "./context/CartContext";
 import { ToastProvider } from "./context/ToastContext";
 import ScrollToTop from "./utils/ScrollToTop";
@@ -61,7 +77,7 @@ export default async function RootLayout({
   }
 
   return (
-    <html>
+    <html className={`${playfairDisplay.variable} ${dmSans.variable}`}>
       <body className="bg-background font-sans leading-relaxed">
         <CartProvider>
           <ToastProvider>

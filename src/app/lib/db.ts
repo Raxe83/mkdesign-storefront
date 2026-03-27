@@ -15,7 +15,6 @@ async function fetchRows<T>(query: any): Promise<T[]> {
     return result.rows as T[];
   }
 
-  console.error("⚠️ Unerwartetes SQL-Result:", result);
   throw new Error("Unexpected SQL result shape");
 }
 
@@ -93,7 +92,6 @@ export async function createReviewPlaceholder(
   `);
 
   if (!result || result.length === 0) {
-    console.error("INSERT returned no rows for placeholder review!");
     throw new Error("Failed to create review placeholder");
   }
 

@@ -12,10 +12,9 @@ export async function registerWebhook(topic: string, address: string): Promise<b
       const adminApiPassword = process.env.SHOPIFY_ADMIN_API_PASSWORD
   
       if (!shopDomain || !adminApiKey || !adminApiPassword) {
-        console.error("Fehlende Shopify-Admin-Anmeldedaten")
         return false
       }
-  
+
       const response = await fetch(`https://${shopDomain}/admin/api/2023-07/webhooks.json`, {
         method: "POST",
         headers: {
@@ -32,16 +31,11 @@ export async function registerWebhook(topic: string, address: string): Promise<b
       })
   
       if (!response.ok) {
-        const errorData = await response.json()
-        console.error("Fehler beim Registrieren des Webhooks:", errorData)
         return false
       }
-  
-      const data = await response.json()
-      console.log("Webhook erfolgreich registriert:", data.webhook.id)
+
       return true
-    } catch (error) {
-      console.error("Fehler beim Registrieren des Webhooks:", error)
+    } catch {
       return false
     }
   }
@@ -56,7 +50,6 @@ export async function registerWebhook(topic: string, address: string): Promise<b
       const adminApiPassword = process.env.SHOPIFY_ADMIN_API_PASSWORD
   
       if (!shopDomain || !adminApiKey || !adminApiPassword) {
-        console.error("Fehlende Shopify-Admin-Anmeldedaten")
         return []
       }
   
@@ -67,15 +60,12 @@ export async function registerWebhook(topic: string, address: string): Promise<b
       })
   
       if (!response.ok) {
-        const errorData = await response.json()
-        console.error("Fehler beim Abrufen der Webhooks:", errorData)
         return []
       }
-  
+
       const data = await response.json()
       return data.webhooks
-    } catch (error) {
-      console.error("Fehler beim Abrufen der Webhooks:", error)
+    } catch {
       return []
     }
   }
@@ -90,10 +80,9 @@ export async function registerWebhook(topic: string, address: string): Promise<b
       const adminApiPassword = process.env.SHOPIFY_ADMIN_API_PASSWORD
   
       if (!shopDomain || !adminApiKey || !adminApiPassword) {
-        console.error("Fehlende Shopify-Admin-Anmeldedaten")
         return false
       }
-  
+
       const response = await fetch(`https://${shopDomain}/admin/api/2023-07/webhooks/${webhookId}.json`, {
         method: "DELETE",
         headers: {
@@ -102,14 +91,11 @@ export async function registerWebhook(topic: string, address: string): Promise<b
       })
   
       if (!response.ok) {
-        const errorText = await response.text()
-        console.error("Fehler beim Löschen des Webhooks:", errorText)
         return false
       }
-  
+
       return true
-    } catch (error) {
-      console.error("Fehler beim Löschen des Webhooks:", error)
+    } catch {
       return false
     }
   }

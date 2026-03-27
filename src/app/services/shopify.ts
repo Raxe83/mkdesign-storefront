@@ -40,7 +40,6 @@ async function shopifyFetch<T>({
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Shopify API error response:", errorText);
       throw new Error(
         `HTTP error! Status: ${response.status}, Details: ${errorText}`,
       );
@@ -48,13 +47,11 @@ async function shopifyFetch<T>({
 
     const result = await response.json();
     if (result.errors) {
-      console.error("GraphQL errors:", result.errors);
-      throw new Error(result.errors.map((e: any) => e.message).join("\n"));
+      throw new Error(result.errors.map((e: { message: string }) => e.message).join("\n"));
     }
 
     return result.data as T;
   } catch (error) {
-    console.error("Error fetching from Shopify:", error);
     throw error;
   }
 }
@@ -220,11 +217,9 @@ export const fetchBlogPost = async (locale?: string) => {
     // Erfolgreiche Antwort
     if (data.blog) {
       return data.blog.articles.edges;
-    } else {
-      console.log("Keine Blog-Daten gefunden");
     }
-  } catch (error) {
-    console.error("Fehler beim Abrufen der Blog-Artikel:", error);
+  } catch {
+    // silently return undefined
   }
 };
 
@@ -433,7 +428,6 @@ export async function getProductByHandle(
     const { metafield: _drop, ...cleanProduct } = product;
     return { ...cleanProduct, zusatzoptionen };
   } catch (error) {
-    console.error("Error in getProductByHandle:", error);
     throw error;
   }
 }
@@ -1004,8 +998,7 @@ export async function getExtraInfoByType(
       revalidate: 3600,
     });
     return data.metaobjects.edges.map((e) => e.node);
-  } catch (error) {
-    console.error(`getExtraInfoByType error [${metaobjectType}]:`, error);
+  } catch {
     return [];
   }
 }
