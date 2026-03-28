@@ -5,6 +5,10 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 31536000, // 1 Jahr — Shopify-Bilder ändern sich nicht (neue URL bei Änderung)
+    deviceSizes: [390, 640, 828, 1080, 1280, 1920],
+    imageSizes: [64, 128, 256, 384, 512, 800],
     remotePatterns: [
       {
         protocol: "https",

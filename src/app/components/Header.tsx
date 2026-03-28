@@ -58,7 +58,7 @@ const useNavItems = () => {
     },
     {
       url: "/pages/categories",
-      title: "Kategorien",
+      title: "Kollektionen",
       icon: <LayoutGrid size={20} />,
     },
     {

@@ -16,6 +16,7 @@ import {
   updateCartItem,
   removeCartItem,
   getCart,
+  updateCartBuyerIdentity,
 } from "../services/shopify";
 
 interface PendingUpdate {
@@ -68,24 +69,41 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const itemCount =
     cart?.lines.edges.reduce((total, { node }) => total + node.quantity, 0) || 0;
 
-  // Initialize cart on mount
+  // Initialize cart on mount, then attach buyer identity if logged in
   useEffect(() => {
     const initCart = async (): Promise<void> => {
       try {
         const cartId = localStorage.getItem("shopifyCartId");
+        let activeCartId: string;
 
         if (cartId) {
           const existingCart = await getCart(cartId, shopifyLocale);
           if (existingCart) {
             setCart(existingCart);
-            setIsLoading(false);
-            return;
+            activeCartId = existingCart.id;
+          } else {
+            const newCart = await createCart();
+            localStorage.setItem("shopifyCartId", newCart.id);
+            setCart(newCart);
+            activeCartId = newCart.id;
           }
+        } else {
+          const newCart = await createCart();
+          localStorage.setItem("shopifyCartId", newCart.id);
+          setCart(newCart);
+          activeCartId = newCart.id;
         }
 
-        const newCart = await createCart();
-        localStorage.setItem("shopifyCartId", newCart.id);
-        setCart(newCart);
+        // Attach customer access token so Shopify pre-fills checkout
+        try {
+          const res = await fetch("/api/session");
+          const { customerAccessToken } = await res.json() as { customerAccessToken: string | null };
+          if (customerAccessToken) {
+            await updateCartBuyerIdentity(activeCartId, customerAccessToken);
+          }
+        } catch {
+          // non-blocking — checkout still works without pre-fill
+        }
       } catch (error) {
       } finally {
         setIsLoading(false);

@@ -36,13 +36,13 @@ export default function ProductsGrid({
             ? [
                 { label: "Start", href: "/" },
                 { label: "Produkte", href: "/pages/products" },
-                { label: collectionHandle },
+                { label: collectionHandle.toUpperCase() },
               ]
             : initialType
             ? [
                 { label: "Start", href: "/" },
                 { label: "Produkte", href: "/pages/products" },
-                { label: initialType },
+                { label: initialType.toUpperCase() },
               ]
             : [{ label: "Start", href: "/" }, { label: "Produkte" }]
         }
@@ -96,8 +96,8 @@ export default function ProductsGrid({
       {filter.paginated.length > 0 && (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
-            {filter.paginated.map((product) => (
-              <ProductCard key={product.id} product={product} />
+            {filter.paginated.map((product, i) => (
+              <ProductCard key={product.id} product={product} priority={i < 4} />
             ))}
           </div>
 

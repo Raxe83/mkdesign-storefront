@@ -56,7 +56,7 @@ export default async function HomePage() {
             variant: "primary",
           },
           {
-            label: "Alle Kategorien",
+            label: "Alle Kollektionen",
             href: "/pages/categories",
             variant: "outline",
           },
@@ -66,7 +66,7 @@ export default async function HomePage() {
             value: reviewStats ? `${reviewStats.average}★` : "4.9★",
             label: "Bewertung",
           },
-          { value: "25+", label: "Kategorien" },
+          { value: "25+", label: "Kollektionen" },
           { value: "100%", label: "Handarbeit" },
           {
             value: reviewStats ? `${reviewStats.total}+` : "500+",

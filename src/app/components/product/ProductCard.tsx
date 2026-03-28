@@ -9,10 +9,12 @@ import { useCart } from "@/app/context/CartContext";
 import { useToast } from "@/app/context/ToastContext";
 import Price from "@/app/components/ui/Price";
 import Skeleton from "@/app/components/ui/Skeleton";
+import { shopifyImageUrl } from "@/app/utils/shopifyImage";
 
 export interface ProductCardProps {
   product: Product;
   isLoading?: boolean;
+  priority?: boolean;
 }
 
 // ─── Inline cart button ───────────────────────────────────────────────────────
@@ -60,7 +62,7 @@ function CartButton({
 
 // ─── Card ─────────────────────────────────────────────────────────────────────
 
-const ProductCard = ({ product, isLoading = false }: ProductCardProps) => {
+const ProductCard = ({ product, isLoading = false, priority = false }: ProductCardProps) => {
   const [imgLoaded, setImgLoaded] = useState(false);
 
   if (isLoading) return <Skeleton.Card />;
@@ -85,9 +87,10 @@ const ProductCard = ({ product, isLoading = false }: ProductCardProps) => {
         <Link href={`/pages/products/${product.handle}`} prefetch={false} className="block w-full h-full">
           {product.featuredImage ? (
             <Image
-              src={product.featuredImage.url}
+              src={shopifyImageUrl(product.featuredImage.url, 800) ?? product.featuredImage.url}
               alt={product.featuredImage.altText || product.title}
               fill
+              priority={priority}
               onLoad={() => setImgLoaded(true)}
               className={`object-cover transition-all duration-500 ease-out group-hover:scale-[1.04] ${
                 imgLoaded ? "opacity-100" : "opacity-0"

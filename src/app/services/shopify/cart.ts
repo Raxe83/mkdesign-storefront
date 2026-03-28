@@ -183,6 +183,23 @@ export async function removeCartItem(
   return response.cartLinesRemove.cart;
 }
 
+export async function updateCartBuyerIdentity(
+  cartId: string,
+  customerAccessToken: string,
+): Promise<void> {
+  const query = `
+    mutation cartBuyerIdentityUpdate($cartId: ID!, $buyerIdentity: CartBuyerIdentityInput!) {
+      cartBuyerIdentityUpdate(cartId: $cartId, buyerIdentity: $buyerIdentity) {
+        userErrors { field message }
+      }
+    }
+  `;
+  await shopifyFetch<{ cartBuyerIdentityUpdate: { userErrors: unknown[] } }>({
+    query,
+    variables: { cartId, buyerIdentity: { customerAccessToken } },
+  });
+}
+
 export const updateItemQuantity = async (
   cartId: string,
   lineId: string,

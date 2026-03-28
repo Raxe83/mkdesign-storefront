@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "../utils/utils";
+import { shopifyImageUrl } from "../utils/shopifyImage";
 
 // ─── Shopify Types ─────────────────────────────────────────────────────────────
 // Spiegelt die Storefront API Collection-Felder wider.
@@ -55,6 +56,12 @@ export interface CategoryGridProps {
   title?: string;
   description?: string;
   className?: string;
+  /** Blendet den Section-Header (Label + Titel + Beschreibung) aus. Default: true */
+  showHeader?: boolean;
+  /** Anzahl Spalten im Grid (lg-Breakpoint). Default: 4 */
+  columns?: 2 | 3 | 4;
+  /** Überschreibt die Card-Größe aller Einträge (nützlich für gleichmäßige Grids). */
+  forceCardSize?: CardSize;
 }
 
 // ─── Default Layout Config ─────────────────────────────────────────────────────
@@ -104,7 +111,7 @@ function CategoryCard({ collection, config }: CategoryCardProps) {
       {/* Bild */}
       {imageSrc ? (
         <Image
-          src={imageSrc}
+          src={shopifyImageUrl(imageSrc, 1200) ?? imageSrc}
           alt={imageAlt}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -165,10 +172,13 @@ function CategoryCard({ collection, config }: CategoryCardProps) {
 export function CategoryGrid({
   collections,
   layout = DEFAULT_LAYOUT,
-  sectionLabel = "Produktkategorien",
+  sectionLabel = "Produktkollektionen",
   title = "Für jeden Anlass das <em>passende Stück</em>",
-  description = "Von robusten Gartenartikeln bis zu feinem persönlichem Schmuck – entdeckt alle Kategorien.",
+  description = "Von robusten Gartenartikeln bis zu feinem persönlichem Schmuck – entdeckt alle Kollektionen.",
   className,
+  showHeader = true,
+  columns = 4,
+  forceCardSize,
 }: CategoryGridProps) {
   // Collections nach Layout-Reihenfolge sortieren
   const collectionMap = new Map(collections.map((c) => [c.handle, c]));
@@ -197,35 +207,41 @@ export function CategoryGrid({
 
   if (orderedCards.length === 0) return null;
 
+  const colsClass =
+    columns === 2 ? "sm:grid-cols-2" :
+    columns === 3 ? "sm:grid-cols-2 lg:grid-cols-3" :
+    "sm:grid-cols-2 lg:grid-cols-4";
+
   return (
     <div className={cn("w-full", className)}>
     <div className="max-w-screen-xl mx-auto px-6 md:px-10 lg:px-16 py-8 sm:py-12 lg:py-16">
       {/* Section Header */}
-      <div className="max-w-lg mb-10">
-        <span className="block mb-2 text-xs font-medium tracking-[0.15em] uppercase text-rust">
-          {sectionLabel}
-        </span>
-        <h2
-          className={cn(
-            "font-display font-bold leading-[1.15] tracking-tight",
-            "text-[clamp(1.75rem,3.5vw,2.6rem)] text-charcoal",
-            "[&_em]:italic [&_em]:text-accent",
+      {showHeader && (
+        <div className="max-w-lg mb-10">
+          <span className="block mb-2 text-xs font-medium tracking-[0.15em] uppercase text-rust">
+            {sectionLabel}
+          </span>
+          <h2
+            className={cn(
+              "font-display font-bold leading-[1.15] tracking-tight",
+              "text-[clamp(1.75rem,3.5vw,2.6rem)] text-charcoal",
+              "[&_em]:italic [&_em]:text-accent",
+            )}
+            dangerouslySetInnerHTML={{ __html: title }}
+          />
+          {description && (
+            <p className="mt-3 text-stone text-sm leading-relaxed">
+              {description}
+            </p>
           )}
-          dangerouslySetInnerHTML={{ __html: title }}
-        />
-        {description && (
-          <p className="mt-3 text-stone text-sm leading-relaxed">
-            {description}
-          </p>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Asymmetrisches Grid */}
+      {/* Grid */}
       <div
         className={cn(
-          "grid gap-3",
-          "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
-          // Feste Zeilenhöhen für das asymmetrische Layout
+          "grid gap-3 grid-cols-1",
+          colsClass,
           "auto-rows-[240px]",
         )}
       >
@@ -233,7 +249,7 @@ export function CategoryGrid({
           <CategoryCard
             key={collection.id}
             collection={collection}
-            config={config}
+            config={forceCardSize ? { ...config, size: forceCardSize } : config}
           />
         ))}
       </div>
