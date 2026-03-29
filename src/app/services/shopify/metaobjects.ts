@@ -166,15 +166,19 @@ export async function getAnnouncementBarItems(): Promise<CmsAnnouncement[]> {
 
 const HOMEPAGE_HERO_QUERY = `
   query getCmsHomepageHero {
-    metaobjectByHandle(handle: { type: "cms_homepage_hero", handle: "main" }) {
-      id
-      fields { ${IMAGE_FRAGMENT} }
+    metaobjects(type: "cms_homepage_hero", first: 1) {
+      edges {
+        node {
+          id
+          fields { ${IMAGE_FRAGMENT} }
+        }
+      }
     }
   }
 `;
 
 interface HomepageHeroResponse {
-  metaobjectByHandle: { id: string; fields: RawField[] } | null;
+  metaobjects: { edges: Array<{ node: { id: string; fields: RawField[] } }> };
 }
 
 /** Returns hero CMS content, or null when MetaObject doesn't exist yet. ISR: 1h. */
@@ -184,8 +188,9 @@ export async function getHomepageHero(): Promise<CmsHomepageHero | null> {
       query: HOMEPAGE_HERO_QUERY,
       revalidate: 3600,
     });
-    if (!data.metaobjectByHandle) return null;
-    const f = data.metaobjectByHandle.fields;
+    const first = data.metaobjects.edges[0];
+    if (!first) return null;
+    const f = first.node.fields;
     return {
       eyebrow: fieldValue(f, "eyebrow"),
       title: fieldValue(f, "title"),

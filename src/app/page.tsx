@@ -47,7 +47,7 @@ export default async function HomePage() {
     <div>
       <Hero
         eyebrow={heroCms?.eyebrow ?? undefined}
-        title={heroCms?.title ?? "Jede Tonne ein Unikat"}
+        title={heroCms?.title ?? "Jede Tonne ein Unikat - Fallback"}
         description={
           heroCms?.description ??
           "Personalisierte Produkte in Handarbeit gefertigt – von Feuertonnen über Schmuck bis hin zu Schieferuhren. Direkt aus Bleckede zu Euch."

@@ -33,9 +33,9 @@ const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose, title, message }
             <div className="mt-6 flex justify-end">
               <button
                 onClick={onClose}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="rounded-sm bg-rust px-5 py-2.5 text-sm font-medium tracking-[0.04em] uppercase text-white hover:bg-rust/90 focus:outline-none focus:ring-2 focus:ring-rust focus:ring-offset-2"
               >
-                OK
+                Verstanden
               </button>
             </div>
           </motion.div>
