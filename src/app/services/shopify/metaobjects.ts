@@ -66,7 +66,10 @@ type RawField = {
   key: string;
   value: string | null;
   reference?: {
+    /** MediaImage (file_reference) */
     image?: { url: string; altText: string | null } | null;
+    /** Metaobject reference (e.g. cms_route) */
+    fields?: Array<{ key: string; value: string | null }> | null;
   } | null;
 };
 
@@ -81,12 +84,23 @@ function fieldImage(
   return fields.find((f) => f.key === key)?.reference?.image ?? null;
 }
 
-const IMAGE_FRAGMENT = `
+/** Resolves a metaobject_reference field and returns the `value` field of the linked cms_route. */
+function fieldRouteValue(fields: RawField[], key: string): string | null {
+  const refFields = fields.find((f) => f.key === key)?.reference?.fields;
+  if (!refFields) return null;
+  return refFields.find((f) => f.key === "value")?.value ?? null;
+}
+
+// Shared field fragment — covers text values, MediaImage and Metaobject (route) references.
+const FIELDS_FRAGMENT = `
   key
   value
   reference {
     ... on MediaImage {
       image { url altText }
+    }
+    ... on Metaobject {
+      fields { key value }
     }
   }
 `;
@@ -157,9 +171,9 @@ export async function getAnnouncementBarItems(): Promise<CmsAnnouncement[]> {
 //   title                 single_line_text_field   (may contain HTML)
 //   description           multi_line_text_field
 //   cta_primary_label     single_line_text_field
-//   cta_primary_href      single_line_text_field
+//   cta_primary_route     metaobject_reference → cms_route
 //   cta_secondary_label   single_line_text_field
-//   cta_secondary_href    single_line_text_field
+//   cta_secondary_route   metaobject_reference → cms_route
 //   stat_collections      single_line_text_field   (e.g. "25+")
 //   stat_craftsmanship    single_line_text_field   (e.g. "100%")
 //   image                 file_reference           (hero image)
@@ -170,7 +184,7 @@ const HOMEPAGE_HERO_QUERY = `
       edges {
         node {
           id
-          fields { ${IMAGE_FRAGMENT} }
+          fields { ${FIELDS_FRAGMENT} }
         }
       }
     }
@@ -196,9 +210,9 @@ export async function getHomepageHero(): Promise<CmsHomepageHero | null> {
       title: fieldValue(f, "title"),
       description: fieldValue(f, "description"),
       ctaPrimaryLabel: fieldValue(f, "cta_primary_label"),
-      ctaPrimaryHref: fieldValue(f, "cta_primary_href"),
+      ctaPrimaryHref: fieldRouteValue(f, "cta_primary_route"),
       ctaSecondaryLabel: fieldValue(f, "cta_secondary_label"),
-      ctaSecondaryHref: fieldValue(f, "cta_secondary_href"),
+      ctaSecondaryHref: fieldRouteValue(f, "cta_secondary_route"),
       statCollections: fieldValue(f, "stat_collections"),
       statCraftsmanship: fieldValue(f, "stat_craftsmanship"),
       imageUrl: fieldImage(f, "image")?.url ?? null,
@@ -218,7 +232,7 @@ export async function getHomepageHero(): Promise<CmsHomepageHero | null> {
 //   title           single_line_text_field   (may contain HTML)
 //   description     multi_line_text_field
 //   cta_label       single_line_text_field
-//   cta_href        single_line_text_field
+//   cta_href_route  metaobject_reference → cms_route
 //   features_json   list.single_line_text_field  (Shopify list → JSON array string)
 //   image           file_reference           (section image)
 //
@@ -231,7 +245,7 @@ const SECTION_TEXTS_QUERY = `
       edges {
         node {
           id
-          fields { ${IMAGE_FRAGMENT} }
+          fields { ${FIELDS_FRAGMENT} }
         }
       }
     }
@@ -257,7 +271,7 @@ function parseSectionNode(fields: RawField[]): CmsSectionText {
     title: fieldValue(fields, "title"),
     description: fieldValue(fields, "description"),
     ctaLabel: fieldValue(fields, "cta_label"),
-    ctaHref: fieldValue(fields, "cta_href"),
+    ctaHref: fieldRouteValue(fields, "cta_href_route"),
     features,
     imageUrl: fieldImage(fields, "image")?.url ?? null,
     imageAlt: fieldImage(fields, "image")?.altText ?? null,
