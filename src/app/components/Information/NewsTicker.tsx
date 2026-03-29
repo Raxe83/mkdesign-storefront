@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageType } from "../ImportantMessages";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // Theme configuration inspired by button styles
 const themes = {
@@ -108,8 +108,6 @@ interface NewsTickerProps {
   size?: "sm" | "md" | "lg";
   showIndicators?: boolean;
   autoSlideInterval?: number;
-  onClose?: () => void;
-  closeOnButtonClick?: boolean;
 }
 
 const NewsTicker: React.FC<NewsTickerProps> = ({
@@ -118,16 +116,13 @@ const NewsTicker: React.FC<NewsTickerProps> = ({
   size = "md",
   showIndicators = true,
   autoSlideInterval = 7000,
-  onClose,
-  closeOnButtonClick = true,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isVisible, setIsVisible] = useState(true);
   const selectedTheme = themes[theme] || themes.default;
   
   // Size configurations
   const sizeClasses = {
-    sm: "h-10",
+    sm: "h-14 md:h-10",
     md: "h-16",
     lg: "h-24",
   };
@@ -149,19 +144,12 @@ const NewsTicker: React.FC<NewsTickerProps> = ({
     setCurrentIndex((prev) => (prev - 1 + items.length) % items.length);
   };
   
-  const handleClose = () => {
-    setIsVisible(false);
-    if (onClose) {
-      onClose();
-    }
-  };
-
   // Responsive content based on size
   const renderContent = () => {
     switch (size) {
       case "sm":
         return (
-          <span className={`text-sm ${selectedTheme.text} font-medium text-center truncate max-w-full`}>
+          <span className={`text-base md:text-sm ${selectedTheme.text} font-medium text-center truncate max-w-full`}>
             {items[currentIndex].title
               ? `${items[currentIndex].title} – ${items[currentIndex].content}`
               : items[currentIndex].content}
@@ -204,16 +192,6 @@ const NewsTicker: React.FC<NewsTickerProps> = ({
     }
   };
 
-  // Close button size based on ticker size
-  const getCloseButtonSize = () => {
-    switch (size) {
-      case "sm": return 14;
-      case "md": return 16;
-      case "lg": return 18;
-      default: return 16;
-    }
-  };
-
   // Indicators position based on ticker size
   const getIndicatorPosition = () => {
     switch (size) {
@@ -223,11 +201,6 @@ const NewsTicker: React.FC<NewsTickerProps> = ({
       default: return "bottom-1.5";
     }
   };
-
-  // If not visible, don't render anything
-  if (!isVisible) {
-    return null;
-  }
 
   return (
     <motion.div
@@ -262,21 +235,12 @@ const NewsTicker: React.FC<NewsTickerProps> = ({
       <div className="flex items-center">
         <button
           onClick={handleNext}
-          className={`${selectedTheme.button} p-1.5 transition-colors duration-200 mr-2`}
+          className={`${selectedTheme.button} p-1.5 transition-colors duration-200`}
           aria-label="Next message"
         >
           <ChevronRight size={getButtonSize()} />
         </button>
         
-        {closeOnButtonClick && (
-          <button
-            onClick={handleClose}
-            className={`${selectedTheme.closeButton} absolute right-4 rounded-full p-1 flex items-center justify-center transition-colors duration-200`}
-            aria-label="Close news ticker"
-          >
-            <X size={getCloseButtonSize()} />
-          </button>
-        )}
       </div>
 
       {showIndicators && items.length > 1 && (
