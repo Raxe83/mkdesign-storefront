@@ -130,7 +130,7 @@ export default function ProductDetailClient({
             <div className="text-[10px] font-mono bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700 rounded px-2 py-1.5 space-y-0.5">
               <p><span className="font-bold">productType:</span> {product.productType || "—"}</p>
               <p><span className="font-bold">tags:</span> {product.tags?.join(", ") || "—"}</p>
-              <p><span className="font-bold">Profil:</span> {shippingOptions === null ? "❌ kein Match" : "✅ " + (shippingOptions[0]?.method ?? "")}</p>
+              <p><span className="font-bold">Profil:</span> {shippingOptions == null ? "❌ kein Match" : "✅ " + (shippingOptions[0]?.method ?? "")}</p>
             </div>
           )}
 
