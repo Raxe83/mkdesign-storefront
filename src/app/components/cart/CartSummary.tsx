@@ -22,7 +22,7 @@ const CartSummary = () => {
       {/* Shipping notice */}
       <div className="flex items-center gap-1.5 text-xs text-muted">
         <Truck size={13} />
-        <span>Versandkosten werden an der Kasse berechnet.</span>
+        <span>Versandkosten werden im Checkout berechnet.</span>
       </div>
 
       <div className="border-t border-zinc-200/60 dark:border-zinc-800 pt-3 flex justify-between text-sm font-medium">

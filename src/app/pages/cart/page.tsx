@@ -208,7 +208,7 @@ const CartPage = () => {
                 {/* Shipping */}
                 <div className="flex items-start gap-2 text-xs text-muted">
                   <Truck size={14} className="shrink-0 mt-0.5" />
-                  <span>Versandkosten werden an der Kasse berechnet.</span>
+                  <span>Versandkosten werden im Checkout berechnet.</span>
                 </div>
 
                 {/* Divider */}
@@ -249,10 +249,6 @@ const CartPage = () => {
                   <div className="flex items-center gap-1.5 text-[11px] text-muted">
                     <Shield size={13} className="shrink-0 text-accent" />
                     Sichere Zahlung
-                  </div>
-                  <div className="flex items-center gap-1.5 text-[11px] text-muted">
-                    <Truck size={13} className="shrink-0 text-accent" />
-                    Versandinfos
                   </div>
                   <div className="flex items-center gap-1.5 text-[11px] text-muted col-span-2">
                     <Package size={13} className="shrink-0 text-accent" />

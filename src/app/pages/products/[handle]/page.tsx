@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import type { Product } from "../../../types/shopify";
 import { getProductByHandle, getExtraInfoByType, getProducts } from "../../../services/shopify";
+import { getShippingOptions } from "../../../services/shopify/shipping";
 import { detectCategory, findMetaType, RELATED_CONFIG, type ProductCategory } from "@/app/components/product/product-category";
 import { HERO_CARDS } from "@/app/components/product/hero-cards-data";
 import { ProductExtraContent } from "@/app/components/product/ProductExtraContent";
@@ -84,8 +85,13 @@ export default async function ProductDetailPage({ params }: Props) {
   const heroCards     = HERO_CARDS[category];
   const metaType      = findMetaType(product.tags ?? []);
 
-  // ── 3. Related-Produkte laden (extra_info streamt separat) ────────────────
-  const rawRelated = await getProducts(5, undefined, relatedConfig.tag);
+  // ── 3. Related-Produkte & Versanddaten laden ──────────────────────────────
+  // getShippingOptions(product.id) gibt das produktspezifische Profil zurück,
+  // falls vorhanden — sonst das allgemeine Profil als Fallback.
+  const [rawRelated] = await Promise.all([
+    getProducts(5, undefined, relatedConfig.tag),
+  ]);
+  const shippingOptions = getShippingOptions(product.tags ?? [], product.productType ?? "");
   const relatedProducts = rawRelated.filter((p: Product) => p.id !== product.id).slice(0, 4);
 
   // ── 4. Rendern ────────────────────────────────────────────────────────────
@@ -95,6 +101,7 @@ export default async function ProductDetailPage({ params }: Props) {
       heroCards={heroCards}
       relatedProducts={relatedProducts}
       relatedLabel={relatedConfig.label}
+      shippingOptions={shippingOptions}
       extraContentSlot={
         <Suspense fallback={<ExtraContentSkeleton />}>
           <ExtraContentSection metaType={metaType} />

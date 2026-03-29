@@ -1,20 +1,12 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import {
-  ArrowLeft,
-  Minus,
-  Plus,
-  Truck,
-  RotateCcw,
-  Palette,
-} from "lucide-react";
+import { ArrowLeft, Minus, Plus, Truck, RotateCcw, Palette } from "lucide-react";
 import Link from "next/link";
-import type { Product } from "../../../types/shopify";
+import type { Product, CmsShippingOption } from "../../../types/shopify";
 import type { HeroCard } from "@/app/components/product/product-category";
 import { formatPrice } from "../../../utils/formatPrice";
 import AddToCartButton from "../../../components/ui/AddToCartButton";
-import { shipment } from "../../../types/products";
 import { ProductExtras, type ProductExtrasValues } from "@/app/components/product/ProductExtras";
 import { ProductReviews } from "@/app/components/product/product-reviews";
 import { ProductHeroCards } from "@/app/components/product/ProductHeroCards";
@@ -52,11 +44,14 @@ function variantFromProduct(tags: string[], title: string): BarrelVariant {
   return "full";
 }
 
+const FALLBACK_STANDARD: CmsShippingOption = { zone: "Deutschland", method: "Standard", days: "2–4 Werktage", price: "5,90 €", freeFrom: "250,00 €", isStandard: true, isExpress: false, sortOrder: 0 };
+
 interface Props {
   product: Product;
   heroCards: HeroCard[];
   relatedProducts: Product[];
   relatedLabel: string;
+  shippingOptions?: CmsShippingOption[] | null;
   extraContentSlot?: React.ReactNode;
 }
 
@@ -65,8 +60,10 @@ export default function ProductDetailClient({
   heroCards,
   relatedProducts,
   relatedLabel,
+  shippingOptions,
   extraContentSlot,
 }: Props) {
+  const standardShipping = shippingOptions?.find((o) => o.isStandard) ?? FALLBACK_STANDARD;
   const barrelVariant = variantFromProduct(product.tags, product.title);
   const images = product.images.edges.map((e) => e.node);
   const firstVariant = product.variants.edges[0]?.node;
@@ -128,6 +125,14 @@ export default function ProductDetailClient({
           <h1 className="font-display text-3xl lg:text-4xl font-medium text-primary dark:text-neutral-100 leading-tight">
             {product.title}
           </h1>
+
+          {process.env.NODE_ENV === "development" && (
+            <div className="text-[10px] font-mono bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700 rounded px-2 py-1.5 space-y-0.5">
+              <p><span className="font-bold">productType:</span> {product.productType || "—"}</p>
+              <p><span className="font-bold">tags:</span> {product.tags?.join(", ") || "—"}</p>
+              <p><span className="font-bold">Profil:</span> {shippingOptions === null ? "❌ kein Match" : "✅ " + (shippingOptions[0]?.method ?? "")}</p>
+            </div>
+          )}
 
           <p className="text-2xl font-medium text-primary dark:text-neutral-100">
             {formatPrice(displayPrice.amount, displayPrice.currencyCode)}
@@ -221,20 +226,22 @@ export default function ProductDetailClient({
           </Button>
 
           <div className="space-y-2.5 pt-4 border-t border-zinc-200/60 dark:border-zinc-800">
-            <div className="flex items-center gap-2.5 text-sm text-muted dark:text-neutral-400">
-              <Truck size={15} className="shrink-0" />
-              <span>
-                Standardversand: {shipment.standard.days} Werktage —{" "}
-                {formatPrice(shipment.standard.price.toFixed(2), currencyCode)}
-              </span>
-            </div>
-            <div className="flex items-center gap-2.5 text-sm text-muted dark:text-neutral-400">
-              <Truck size={15} className="shrink-0 text-accent" />
-              <span>
-                Expressversand: {shipment.premium.days} Werktage —{" "}
-                {formatPrice(shipment.premium.price.toFixed(2), currencyCode)}
-              </span>
-            </div>
+            {shippingOptions === null ? (
+              <div className="flex items-center gap-2.5 text-sm text-muted dark:text-neutral-400">
+                <Truck size={15} className="shrink-0" />
+                <span>Versand wird im Checkout berechnet</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2.5 text-sm text-muted dark:text-neutral-400">
+                <Truck size={15} className="shrink-0" />
+                <span>
+                  {standardShipping.method}: {standardShipping.days} — {standardShipping.price}
+                  {standardShipping.freeFrom && (
+                    <span className="ml-1 text-xs opacity-70">(ab {standardShipping.freeFrom} kostenlos)</span>
+                  )}
+                </span>
+              </div>
+            )}
             <div className="flex items-center gap-2.5 text-sm text-muted dark:text-neutral-400">
               <RotateCcw size={15} className="shrink-0" />
               <span>30 Tage kostenlose Rückgabe</span>

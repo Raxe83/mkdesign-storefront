@@ -1,23 +1,16 @@
-"use client";
-
-import { Truck, Clock, PackageCheck } from "lucide-react";
+import { Truck, PackageCheck, BadgeEuro } from "lucide-react";
 import PageHeader from "../../components/PageHeader";
-
-const rows = [
-  { zone: "Deutschland", method: "DHL Paket", time: "1–3 Werktage", price: "4,99 €" },
-  { zone: "Deutschland", method: "DHL Express", time: "1 Werktag", price: "9,99 €" },
-  { zone: "EU (Zone 1)", method: "DHL International", time: "3–5 Werktage", price: "8,99 €" },
-  { zone: "EU (Zone 2)", method: "DHL International", time: "5–8 Werktage", price: "12,99 €" },
-  { zone: "Weltweit", method: "DHL Worldwide", time: "7–14 Werktage", price: "19,99 €" },
-];
+import { getShippingProfiles } from "../../services/shopify/shipping";
 
 const highlights = [
-  { icon: Truck, label: "Gratis Versand", desc: "ab 50 € innerhalb DE" },
-  { icon: Clock, label: "Schnelle Lieferung", desc: "1–3 Werktage Standard" },
-  { icon: PackageCheck, label: "Sendungsverfolgung", desc: "für alle Bestellungen" },
+  { icon: Truck, label: "Schnelle Lieferung", desc: "2–4 Werktage Standard" },
+  { icon: BadgeEuro, label: "Kostenloser Versand", desc: "Ab Mindestbestellwert je Produkt" },
+  { icon: PackageCheck, label: "Sendungsverfolgung", desc: "Für alle Bestellungen" },
 ];
 
 export default function ShippingPage() {
+  const profiles = getShippingProfiles();
+
   return (
     <div className="pb-16">
       <PageHeader
@@ -29,12 +22,8 @@ export default function ShippingPage() {
         ]}
       />
 
-      <p className="text-sm text-muted mb-8 max-w-xl">
-        Alle Preise inkl. MwSt. Kostenloser Versand ab <span className="text-primary font-medium">50 €</span> Bestellwert innerhalb Deutschlands.
-      </p>
-
-      {/* Highlight cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+      {/* Highlights */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
         {highlights.map(({ icon: Icon, label, desc }) => (
           <div
             key={label}
@@ -51,32 +40,60 @@ export default function ShippingPage() {
         ))}
       </div>
 
-      {/* Table */}
-      <div className="rounded border border-zinc-200 dark:border-zinc-800 overflow-hidden max-w-3xl">
-        {/* Head */}
-        <div className="grid grid-cols-4 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
-          {["Zone", "Versandart", "Lieferzeit", "Kosten"].map((h) => (
-            <div key={h} className="px-4 py-3 text-[11px] font-medium text-muted uppercase tracking-widest">
-              {h}
+      {/* Profiles */}
+      <div className="flex flex-col gap-10 max-w-3xl">
+        {profiles.map((profile) => (
+          <div key={profile.id}>
+            <div className="flex items-baseline gap-3 mb-3">
+              <h2 className="text-xs font-medium uppercase tracking-widest text-muted">
+                {profile.name}
+              </h2>
+              <span className="text-xs text-muted/50">
+                {profile.productCount} {profile.productCount === 1 ? "Produkt" : "Produkte"}
+              </span>
             </div>
-          ))}
-        </div>
-        {/* Rows */}
-        {rows.map((row, i) => (
-          <div
-            key={i}
-            className="grid grid-cols-4 border-b border-zinc-100 dark:border-zinc-800/60 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors duration-150"
-          >
-            <div className="px-4 py-3.5 text-sm font-medium text-primary">{row.zone}</div>
-            <div className="px-4 py-3.5 text-sm text-muted">{row.method}</div>
-            <div className="px-4 py-3.5 text-sm text-muted">{row.time}</div>
-            <div className="px-4 py-3.5 text-sm font-medium text-primary">{row.price}</div>
+
+            <div className="rounded border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+              <div className="grid grid-cols-3 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
+                {["Versandart", "Lieferzeit", "Kosten"].map((h) => (
+                  <div
+                    key={h}
+                    className="px-4 py-3 text-[11px] font-medium text-muted uppercase tracking-widest"
+                  >
+                    {h}
+                  </div>
+                ))}
+              </div>
+
+              {profile.options.map((opt, i) => (
+                <div
+                  key={i}
+                  className="grid grid-cols-3 border-b border-zinc-100 dark:border-zinc-800/60 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors duration-150"
+                >
+                  <div className="px-4 py-3.5 text-sm font-medium text-primary">
+                    {opt.method}
+                  </div>
+                  <div className="px-4 py-3.5 text-sm text-muted">
+                    {opt.days}
+                  </div>
+                  <div className="px-4 py-3.5 text-sm font-medium text-primary">
+                    {opt.price}
+                    {opt.freeFrom && (
+                      <p className="text-xs font-normal text-muted mt-0.5">
+                        ab {opt.freeFrom} kostenlos
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         ))}
       </div>
 
-      <p className="mt-5 text-xs text-muted max-w-xl">
-        * Bei Bestellungen aus Nicht-EU-Ländern können zusätzliche Zölle und Steuern anfallen, die vom Empfänger zu tragen sind.
+      <p className="mt-8 text-xs text-muted max-w-xl">
+        * Bei Bestellungen aus Nicht-EU-Ländern können zusätzliche Zölle und
+        Steuern anfallen, die vom Empfänger zu tragen sind.
       </p>
     </div>
   );

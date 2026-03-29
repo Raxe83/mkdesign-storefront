@@ -1,10 +1,10 @@
 // Server-side only — uses Shopify Admin API (requires SHOPIFY_ADMIN_ACCESS_TOKEN)
 
-const DOMAIN = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN;
+const DOMAIN = process.env.SHOPIFY_ADMIN_DOMAIN;
 const ADMIN_TOKEN = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
 const BASE = () => {
   if (!DOMAIN || !ADMIN_TOKEN) {
-    throw new Error("SHOPIFY_ADMIN_ACCESS_TOKEN oder NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN fehlt in .env.local");
+    throw new Error("SHOPIFY_ADMIN_ACCESS_TOKEN oder SHOPIFY_ADMIN_DOMAIN fehlt in .env.local");
   }
   return `https://${DOMAIN}/admin/api/2024-10`;
 };

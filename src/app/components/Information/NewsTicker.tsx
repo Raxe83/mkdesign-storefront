@@ -64,7 +64,7 @@ const themes = {
     closeButton: "bg-green-600 hover:bg-green-700 text-white"
   },
   earthy: {
-    container: "bg-emerald-600 border-t border-emerald-800 text-white",
+    container: "bg-teal-600 border-t border-emerald-800 text-white",
     text: "text-white",
     button: "text-white/80 hover:text-white hover:bg-emerald-700/50 rounded-full",
     indicator: "bg-white",

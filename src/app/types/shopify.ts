@@ -1,5 +1,28 @@
 // ─── CMS MetaObjects ─────────────────────────────────────────────────────────
 
+/** One shipping method row within a profile. */
+export interface CmsShippingOption {
+  zone: string;
+  method: string;
+  days: string;
+  price: string;
+  /** Ab diesem Bestellwert ist der Versand kostenlos, z.B. "250,00 €". null = keine Bedingung. */
+  freeFrom: string | null;
+  isStandard: boolean;
+  isExpress: boolean;
+  sortOrder: number;
+}
+
+/** A Shopify delivery profile with all its shipping options. */
+export interface CmsShippingProfile {
+  id: string;
+  name: string;
+  isDefault: boolean;
+  productCount: number;
+  options: CmsShippingOption[];
+}
+
+
 /** One item in the announcement / news bar. MetaObject type: `cms_announcement` */
 export interface CmsAnnouncement {
   id: string;

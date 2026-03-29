@@ -15,7 +15,7 @@ import { Reviews } from "./components/Reviews";
 
 export const revalidate = 3600;
 
-const BARREL_VARIANTS: BarrelVariant[] = ["full", "schale", "schaleXL", "stehtisch"];
+const BARREL_VARIANTS: BarrelVariant[] = ["full", "noLegs", "stehtisch"];
 
 export default async function HomePage() {
   const [featuredProducts, collections, reviewData, heroCms, fireCms, printCms] =
