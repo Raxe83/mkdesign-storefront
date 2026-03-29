@@ -134,7 +134,7 @@ const Header = ({ customer = null }: { customer?: HeaderCustomer | null }) => {
               <ul className="flex items-center gap-3 lg:gap-7">
                 <NavLink url="/" title="Startseite" />
                 <NavLink url="/pages/products" title="Produkte" />
-                <NavLink url="/pages/categories" title="Kategorien" />
+                <NavLink url="/pages/categories" title="Kollektionen" />
                 <NavLink url="/pages/design" title="Eigenes Design" />
               </ul>
             </nav>

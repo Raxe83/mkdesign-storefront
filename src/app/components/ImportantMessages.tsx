@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from "react";
-import { fetchBlogPost } from "../services/shopify";
+import { useState } from "react";
+import type { CmsAnnouncement } from "../types/shopify";
 import InfoModal from "./Information/InfoModal";
 import NewsTicker from "./Information/NewsTicker";
 
@@ -28,45 +28,23 @@ const getCookie = (name: string) => {
   return null;
 };
 
-const ImportantMessage = () => {
-  const [modalMessage, setModalMessage] = useState<MessageType | null>(null);
-  const [stickyMessages, setStickyMessages] = useState<MessageType[]>([]);
+interface ImportantMessageProps {
+  /** Server-fetched announcements from cms_announcement MetaObjects */
+  announcements: CmsAnnouncement[];
+}
 
-  useEffect(() => {
-    const modalCookie = getCookie("importantMessageShown");
+const ImportantMessage = ({ announcements }: ImportantMessageProps) => {
+  const importantItem = announcements.find((a) => a.messageType === "important");
+  const initialModal =
+    importantItem && !getCookie("importantMessageShown")
+      ? { title: importantItem.title, content: importantItem.content, type: "modal" as const }
+      : null;
 
-    const getMessages = async () => {
-      const articles = await fetchBlogPost();
-      if (!articles || articles.length === 0) return;
+  const [modalMessage, setModalMessage] = useState<MessageType | null>(initialModal);
 
-      // Sticky
-      const sticky = articles
-        .filter((article) => article.node.tags.includes("sticky"))
-        .map(({ node }) => ({
-          content: node.content,
-          title: node.title,
-          type: "sticky" as const,
-        }));
-
-      setStickyMessages(sticky);
-
-      // Modal
-      if (!modalCookie) {
-        const important = articles.find((a) =>
-          a.node.tags.includes("important")
-        );
-        if (important) {
-          setModalMessage({
-            content: important.node.content,
-            title: important.node.title,
-            type: "modal",
-          });
-        }
-      }
-    };
-
-    getMessages();
-  }, []);
+  const stickyMessages: MessageType[] = announcements
+    .filter((a) => a.messageType === "sticky" || a.messageType === "promo")
+    .map((a) => ({ title: a.title, content: a.content, type: a.messageType }));
 
   const closeModal = () => {
     setModalMessage(null);
@@ -83,8 +61,9 @@ const ImportantMessage = () => {
           message={modalMessage.content}
         />
       )}
-
-      {stickyMessages.length > 0 && <NewsTicker items={stickyMessages} theme="earthy" size="sm"/>}
+      {stickyMessages.length > 0 && (
+        <NewsTicker items={stickyMessages} theme="earthy" size="sm" />
+      )}
     </>
   );
 };

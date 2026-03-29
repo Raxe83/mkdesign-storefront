@@ -162,7 +162,9 @@ const NewsTicker: React.FC<NewsTickerProps> = ({
       case "sm":
         return (
           <span className={`text-sm ${selectedTheme.text} font-medium text-center truncate max-w-full`}>
-            {items[currentIndex].content}
+            {items[currentIndex].title
+              ? `${items[currentIndex].title} – ${items[currentIndex].content}`
+              : items[currentIndex].content}
           </span>
         );
       case "md":

@@ -1,3 +1,52 @@
+// ─── CMS MetaObjects ─────────────────────────────────────────────────────────
+
+/** One item in the announcement / news bar. MetaObject type: `cms_announcement` */
+export interface CmsAnnouncement {
+  id: string;
+  title: string;
+  content: string;
+  /** "sticky" = always-visible bar, "important" = one-time modal */
+  messageType: "sticky" | "important" | "promo";
+  isActive: boolean;
+}
+
+/** Hero section content. MetaObject type: `cms_homepage_hero`, handle: `main` */
+export interface CmsHomepageHero {
+  eyebrow: string | null;
+  title: string | null;
+  description: string | null;
+  ctaPrimaryLabel: string | null;
+  ctaPrimaryHref: string | null;
+  ctaSecondaryLabel: string | null;
+  ctaSecondaryHref: string | null;
+  /** e.g. "25+" displayed in stat strip */
+  statCollections: string | null;
+  /** e.g. "100%" displayed in stat strip */
+  statCraftsmanship: string | null;
+  /** Shopify file_reference field `image` */
+  imageUrl: string | null;
+  imageAlt: string | null;
+}
+
+/**
+ * Generic section text block. MetaObject type: `cms_section_text`.
+ * Use the MetaObject's **handle** as the section identifier
+ * (e.g. `fire-highlight`, `print-highlight`).
+ */
+export interface CmsSectionText {
+  sectionLabel: string | null;
+  /** May contain `<em>`, `<br/>`, HTML entities */
+  title: string | null;
+  description: string | null;
+  ctaLabel: string | null;
+  ctaHref: string | null;
+  /** Feature bullet points parsed from `features_json` field */
+  features: string[];
+  /** Shopify file_reference field `image` — overrides the local fallback image */
+  imageUrl: string | null;
+  imageAlt: string | null;
+}
+
 // ─── Metaobjects ─────────────────────────────────────────────────────────────
 
 export interface MetaobjectField {

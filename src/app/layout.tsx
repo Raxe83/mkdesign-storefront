@@ -28,6 +28,7 @@ import { shopDetails } from "./global";
 import { env } from "process";
 import { getSessionToken } from "./lib/session";
 import { getCustomerData } from "./services/shopifyCustomer";
+import { getAnnouncementBarItems } from "./services/shopify/metaobjects";
 
 export const metadata: Metadata = {
   title: shopDetails.shopname,
@@ -76,6 +77,8 @@ export default async function RootLayout({
     // Session ungültig oder Shopify nicht erreichbar — kein Fehler werfen
   }
 
+  const announcements = await getAnnouncementBarItems().catch(() => []);
+
   return (
     <html className={`${playfairDisplay.variable} ${dmSans.variable}`}>
       <body className="bg-background font-sans leading-relaxed">
@@ -83,7 +86,7 @@ export default async function RootLayout({
           <ToastProvider>
             {/* <AgeVerification /> */}
             <ScrollToTop />
-            <ImportantMessage />
+            <ImportantMessage announcements={announcements} />
             <Header customer={customer} />
             {/* Main Content */}
             <div className="pt-16 min-h-screen">{children}</div>
