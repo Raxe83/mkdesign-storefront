@@ -8,11 +8,46 @@ export const HERO_CARDS: Record<ProductCategory, HeroCard[]> = {
     { imageIndex: 1, accentBg: "bg-rust",      title: "In 20 Minuten aufgebaut",  body: "Mitgeliefertes Werkzeug, klare Anleitung. Du brauchst keine Erfahrung – der Tisch steht, bevor dein Kaffee kalt wird." },
   ],
 
+  feuerschale: [
+    { imageIndex: 0, accentBg: "bg-zinc-900",  title: "Lebensmittelstahl, kein Öltonnen-Blech", body: "1,2 mm Stahlblech aus der Lebensmittelindustrie – sauber, robust, langlebig. Ein anderes Kaliber als die dünnen Billigschalen, die nach einem Winter rosten." },
+    { imageIndex: 1, accentBg: "bg-stone-600", title: "Motiv leuchtet im Feuer",                body: "Per Laser präzise eingeschnitten, nicht aufgeklebt. Wenn das Feuer brennt, leuchtet das Motiv von innen durch den Stahl – jede Schale wird zum Lichtobjekt." },
+    { imageIndex: 0, accentBg: "bg-rust",      title: "Klein oder XL",                          body: "48 cm hoch für Balkon und Terrasse, 78 cm hoch für den Garten. Beide Varianten gibt es einseitig oder zweiseitig graviert – dein Motiv, deine Wahl." },
+    { imageIndex: 1, accentBg: "bg-teal-700",  title: "Jedes Stück ein Unikat",                 body: "Sandgestrahlt, lackiert, graviert – einzeln, nicht vom Band. Wer ein eigenes Motiv möchte, schickt eine Nachricht. Wir setzen es um." },
+  ],
+
   feuertonne: [
     { imageIndex: 0, accentBg: "bg-zinc-900",  title: "3 Stunden Brenndauer", body: "Massiver 3–4 mm Stahl speichert Wärme und gibt sie gleichmäßig ab. Eine Füllung reicht für einen ganzen Abend." },
     { imageIndex: 1, accentBg: "bg-amber-800", title: "Ganzjährig draußen",    body: "Wetterfester Stahl für Garten, Terrasse und Camping. Ob Frühling, Herbst oder Winter – die Tonne macht mit." },
     { imageIndex: 0, accentBg: "bg-stone-700", title: "Sicher & kippsicher",   body: "Breite Standfüße verhindern Kippen. Mindestabstand zu Brennbarem einhalten – dann ist das Feuer entspannt genießbar." },
     { imageIndex: 1, accentBg: "bg-rust",      title: "360° Atmosphäre",       body: "Gleichmäßige Wärme rund um die Tonne, stimmungsvolles Licht. Der perfekte Mittelpunkt für Herbst- und Winterabende." },
+  ],
+
+  nachtlicht: [
+    { imageIndex: 0, accentBg: "bg-zinc-900",  title: "Motiv leuchtet von innen",   body: "LED-Licht strahlt durch das 3D-gedruckte Motiv. Kein blendender Schein – stimmungsvolles, warmes Licht für Schlafzimmer, Kinderzimmer und Wohnbereich." },
+    { imageIndex: 1, accentBg: "bg-stone-600", title: "Sofort einsatzbereit",       body: "Motiv, LED-Sockel und USB-Netzteil (5V) im Lieferumfang. Einstecken, fertig. Keine Batterie, kein Zubehör." },
+    { imageIndex: 0, accentBg: "bg-teal-700",  title: "Über 80 Motive",             body: "Tiere, Fahrzeuge, Weihnachten, Fantasy – für fast jeden Geschmack etwas dabei. Eigenes Wunschmotiv auf Anfrage möglich." },
+    { imageIndex: 1, accentBg: "bg-rust",      title: "Geschenk mit Wirkung",       body: "Verpackt, sofort einsatzbereit, motiv-stark. Beim ersten Einschalten weiß man warum man es gekauft hat." },
+  ],
+
+  holzuhr: [
+    { imageIndex: 0, accentBg: "bg-amber-800", title: "Echtholz Buche",             body: "Kein Furnier, kein Pressspan – echte Buche. Das Motiv ist dauerhaft ins Holz eingearbeitet, kein Aufkleber, der sich mit der Zeit ablöst." },
+    { imageIndex: 1, accentBg: "bg-zinc-800",  title: "Kein Ticken",                body: "Lautloses Quarzuhrwerk – ideal für Schlafzimmer, Arbeitszimmer und alle Räume, in denen Stille zählt." },
+    { imageIndex: 0, accentBg: "bg-stone-600", title: "Motiv mit Charakter",        body: "Barsch, Segelschiff, Coffee – jede Uhr hat ein klares Thema. Eigene Motive sind auf Anfrage möglich." },
+    { imageIndex: 1, accentBg: "bg-rust",      title: "Geschenk ohne Erklärung",   body: "Verpackt, sofort einsatzbereit, motiv-stark. Beliebt zu Geburtstagen, Einzügen und Weihnachten." },
+  ],
+
+  holzschild: [
+    { imageIndex: 0, accentBg: "bg-amber-800", title: "Echtholz Buche",              body: "Kein Pressspan, kein MDF – echte Buche. Dicht, hart, langlebig. Sieht nach Handwerk aus, nicht nach Ramschangebot." },
+    { imageIndex: 1, accentBg: "bg-stone-600", title: "Der Spruch bleibt",           body: "Dauerhaft im Holz eingearbeitet – nicht aufgeklebt, nicht aufgedruckt. Verblasst nicht, löst sich nicht ab. Einfach hält." },
+    { imageIndex: 0, accentBg: "bg-zinc-800",  title: "Juteseil inklusive",          body: "Sofort aufhängbar. Kein Bohren, kein Werkzeug. Einen Haken, Seil drüber – fertig. Überall passend: Küche, Flur, Werkstatt." },
+    { imageIndex: 1, accentBg: "bg-rust",      title: "Geschenk ohne große Worte",   body: "Der richtige Spruch trifft ohne Erklärung. Verpackt, sofort einsatzbereit – Geburtstag, Einzug oder einfach so." },
+  ],
+
+  grillzubehoer: [
+    { imageIndex: 0, accentBg: "bg-zinc-900",  title: "Stahl aus der Werkstatt",   body: "Jede Platte, jeder Einsatz – handgefertigt in Deutschland. Kein Katalogzubehör, sondern Werkzeug das wirklich hält." },
+    { imageIndex: 1, accentBg: "bg-stone-600", title: "Das Plancha-System",        body: "Grillplatte, Einsatz, Wokaufsatz – alles aufeinander abgestimmt. Jedes Teil passt zum nächsten, passgenau auf Ø 20 cm." },
+    { imageIndex: 0, accentBg: "bg-rust",      title: "Gleichmäßige Hitze",        body: "6 mm Stahl speichert Wärme länger als dünne Alternativen. Steaks scharf anbraten, Gemüse sanft garen – auf einer Platte." },
+    { imageIndex: 1, accentBg: "bg-teal-700",  title: "Einfach pflegen",           body: "Heiß abwischen, einölen, fertig. Edelstahlvarianten kommen in die Spülmaschine. Stahl entwickelt Charakter – keine Angst vor Patina." },
   ],
 
   "3d-druck": [

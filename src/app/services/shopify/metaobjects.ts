@@ -60,6 +60,28 @@ export async function getExtraInfoByType(
   }
 }
 
+/**
+ * Fetch category-specific FAQ items from a Shopify Metaobject.
+ * Builds the type as `{category}_faq_pdp` (hyphens → underscores).
+ * Each entry should have `frage` and `antwort` fields.
+ * Returns [] when no Metaobject of that type exists (no FAQ shown).
+ */
+export async function getFaqByType(
+  category: string,
+): Promise<Metaobject[]> {
+  const metaobjectType = `${category.replace(/-/g, "_")}_faq`;
+  try {
+    const data = await shopifyFetch<MetaobjectResponse>({
+      query: METAOBJECT_QUERY,
+      variables: { type: metaobjectType },
+      revalidate: 3600,
+    });
+    return data.metaobjects.edges.map((e) => e.node);
+  } catch {
+    return [];
+  }
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 type RawField = {

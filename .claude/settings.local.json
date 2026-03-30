@@ -2,7 +2,23 @@
   "permissions": {
     "allow": [
       "Bash(node -e \"const p = require\\(''./package.json''\\); console.log\\(JSON.stringify\\({deps: Object.keys\\(p.dependencies || {}\\), devDeps: Object.keys\\(p.devDependencies || {}\\)}, null, 2\\)\\)\")",
-      "WebFetch(domain:mkdesignweb.de)"
+      "WebFetch(domain:mkdesignweb.de)",
+      "Bash(node scripts/create-stehtisch-faq.mjs)",
+      "Bash(node scripts/create-feuerschale-faq.mjs)",
+      "Bash(node scripts/create-feuerschale-extra-info.mjs)",
+      "Bash(node scripts/update-feuerschalen.mjs)",
+      "Bash(node -e \":*)",
+      "Read(//c/Users/ewilh/blvckray-studios/Raxe_Dev_Brain/01_Shopify_Ecosystem/**)",
+      "Bash(for f:*)",
+      "Bash(do echo:*)",
+      "Read(//c/Users/ewilh/blvckray-studios/Webseiten/shopify-shop_template-main/**)",
+      "Bash(done)",
+      "Bash(node scripts/create-nachtlicht-extra-info.mjs)",
+      "Bash(node scripts/create-nachtlicht-faq.mjs)",
+      "Bash(node scripts/update-nachtlichter.mjs)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\ewilh\\blvckray-studios\\Raxe_Dev_Brain\\01_Shopify_Ecosystem\\Produkte\\Nachtlichter"
     ]
   }
 }

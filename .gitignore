@@ -20,6 +20,10 @@
 # AI Assistant Rules
 claude.md
 
+# Scripts
+*.js
+*.mjs
+
 # Obsidian
 .obsidian
 

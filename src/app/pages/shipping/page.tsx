@@ -8,8 +8,8 @@ const highlights = [
   { icon: PackageCheck, label: "Sendungsverfolgung", desc: "Für alle Bestellungen" },
 ];
 
-export default function ShippingPage() {
-  const profiles = getShippingProfiles();
+export default async function ShippingPage() {
+  const profiles = await getShippingProfiles();
 
   return (
     <div className="pb-16">

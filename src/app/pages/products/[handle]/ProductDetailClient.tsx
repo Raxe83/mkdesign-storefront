@@ -53,6 +53,7 @@ interface Props {
   relatedLabel: string;
   shippingOptions?: CmsShippingOption[] | null;
   extraContentSlot?: React.ReactNode;
+  faqSlot?: React.ReactNode;
 }
 
 export default function ProductDetailClient({
@@ -62,6 +63,7 @@ export default function ProductDetailClient({
   relatedLabel,
   shippingOptions,
   extraContentSlot,
+  faqSlot,
 }: Props) {
   const standardShipping = shippingOptions?.find((o) => o.isStandard) ?? FALLBACK_STANDARD;
   const barrelVariant = variantFromProduct(product.tags, product.title);
@@ -252,6 +254,9 @@ export default function ProductDetailClient({
 
       {/* ── Extra Content (RSC-Slot mit Suspense-Skeleton aus page.tsx) ── */}
       {extraContentSlot}
+
+      {/* ── FAQ (RSC-Slot mit Suspense-Skeleton aus page.tsx) ── */}
+      {faqSlot}
 
       {/* ── Hero-Karten ── */}
       {/* <div className="mt-16">

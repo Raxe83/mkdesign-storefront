@@ -2,11 +2,12 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import type { Product } from "../../../types/shopify";
-import { getProductByHandle, getExtraInfoByType, getProducts } from "../../../services/shopify";
+import { getProductByHandle, getExtraInfoByType, getFaqByType, getProducts } from "../../../services/shopify";
 import { getShippingOptions } from "../../../services/shopify/shipping";
 import { detectCategory, findMetaType, RELATED_CONFIG, type ProductCategory } from "@/app/components/product/product-category";
 import { HERO_CARDS } from "@/app/components/product/hero-cards-data";
 import { ProductExtraContent } from "@/app/components/product/ProductExtraContent";
+import { ProductFaq } from "@/app/components/product/ProductFaq";
 import ProductDetailClient from "./ProductDetailClient";
 
 interface Props {
@@ -41,6 +42,30 @@ function ExtraContentSkeleton() {
                 <div className="h-3 w-4/6 rounded bg-zinc-300 dark:bg-zinc-700" />
               </div>
             </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Streaming-Sektion für FAQ ────────────────────────────────────────────────
+
+async function FaqSection({ metaType }: { metaType: ProductCategory | null }) {
+  const metaobjects = metaType ? await getFaqByType(metaType) : [];
+  if (metaobjects.length === 0) return null;
+  return <ProductFaq metaobjects={metaobjects} />;
+}
+
+function FaqSkeleton() {
+  return (
+    <div className="mt-16 pt-10 border-t border-zinc-200/60 dark:border-zinc-800 animate-pulse">
+      <div className="h-5 w-36 rounded bg-zinc-200 dark:bg-zinc-800 mb-6" />
+      <div className="divide-y divide-zinc-200/60 dark:divide-zinc-800">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="py-4 flex items-center justify-between gap-4">
+            <div className="h-3 rounded bg-zinc-200 dark:bg-zinc-800" style={{ width: `${60 + i * 10}%` }} />
+            <div className="h-4 w-4 rounded bg-zinc-200 dark:bg-zinc-800 shrink-0" />
           </div>
         ))}
       </div>
@@ -105,6 +130,11 @@ export default async function ProductDetailPage({ params }: Props) {
       extraContentSlot={
         <Suspense fallback={<ExtraContentSkeleton />}>
           <ExtraContentSection metaType={metaType} />
+        </Suspense>
+      }
+      faqSlot={
+        <Suspense fallback={<FaqSkeleton />}>
+          <FaqSection metaType={metaType} />
         </Suspense>
       }
     />
