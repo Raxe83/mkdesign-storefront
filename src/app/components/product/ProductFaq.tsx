@@ -1,3 +1,6 @@
+'use client'
+
+import { useState } from "react";
 import type { Metaobject } from "@/app/types/shopify";
 
 interface Props {
@@ -8,10 +11,56 @@ function fieldValue(fields: Metaobject["fields"], key: string): string | null {
   return fields.find((f) => f.key === key)?.value ?? null;
 }
 
+interface FaqItemProps {
+  frage: string;
+  antwort: string;
+}
+
+function FaqItem({ frage, antwort }: FaqItemProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="py-4 md:py-5">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex w-full items-center justify-between gap-4 text-left"
+        aria-expanded={isOpen}
+      >
+        <dt className="text-sm font-medium text-primary dark:text-neutral-100">
+          {frage}
+        </dt>
+        <span
+          aria-hidden="true"
+          className={`shrink-0 text-muted dark:text-neutral-400 transition-transform duration-300 ${
+            isOpen ? "rotate-45" : "rotate-0"
+          }`}
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path
+              d="M8 3v10M3 8h10"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
+          </svg>
+        </span>
+      </button>
+      <div
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${
+          isOpen ? "max-h-96 opacity-100 mt-3" : "max-h-0 opacity-0"
+        }`}
+      >
+        <dd className="pr-8 text-sm text-muted dark:text-neutral-400 leading-relaxed whitespace-pre-line">
+          {antwort}
+        </dd>
+      </div>
+    </div>
+  );
+}
+
 /**
  * Renders a FAQ accordion from `{category}_faq_pdp` Metaobjects.
  * Each entry needs `frage` (single_line_text) and `antwort` (multi_line_text).
- * Uses native <details>/<summary> — no client JS required.
  *
  * Shopify Metaobject setup:
  *   Type:   {category}_faq_pdp  (e.g. feuertonne_faq_pdp)
@@ -45,30 +94,7 @@ export function ProductFaq({ metaobjects }: Props) {
 
       <dl className="divide-y divide-zinc-200/60 dark:divide-zinc-800">
         {items.map((item, i) => (
-          <details key={i} className="group py-4 md:py-5">
-            <summary className="flex cursor-pointer select-none items-center justify-between gap-4 list-none [&::-webkit-details-marker]:hidden">
-              <dt className="text-sm font-medium text-primary dark:text-neutral-100">
-                {item.frage}
-              </dt>
-              {/* + rotates to × when open */}
-              <span
-                aria-hidden="true"
-                className="shrink-0 text-muted dark:text-neutral-400 transition-transform duration-200 group-open:rotate-45"
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path
-                    d="M8 3v10M3 8h10"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </span>
-            </summary>
-            <dd className="mt-3 pr-8 text-sm text-muted dark:text-neutral-400 leading-relaxed whitespace-pre-line">
-              {item.antwort}
-            </dd>
-          </details>
+          <FaqItem key={i} frage={item.frage} antwort={item.antwort} />
         ))}
       </dl>
     </section>
