@@ -1,6 +1,13 @@
 import type { HeroCard, ProductCategory } from "./product-category";
 
 export const HERO_CARDS: Record<ProductCategory, HeroCard[]> = {
+  "stehtisch-zubehoer": [
+    { imageIndex: 0, accentBg: "bg-rust",      title: "Wärme gezielt lenken",          body: "Die Wärmehaube (Ø 80 cm) sitzt auf dem Abzugsrohr und lenkt die Hitze zu den Gästen statt nutzlos nach oben. Gleichzeitig Windschutz und Funkensperre – besonders bei Veranstaltungen im Freien." },
+    { imageIndex: 1, accentBg: "bg-zinc-800",  title: "Feueröffnung sauber abdecken",  body: "Das Lochblech liegt passgenau über der Feueröffnung. Funken und Asche bleiben unten, der Tisch wirkt aufgeräumt – egal ob das Feuer brennt oder nicht. Stahl, handgefertigt." },
+    { imageIndex: 0, accentBg: "bg-stone-600", title: "Wetterfest einlagern",           body: "Der wasserdichte Überwurf (190 × 115 cm, 210D-Oxford-Tuch) schützt den Stehtisch vor Regen, UV und Staub. Kordelzug und Reißverschluss halten auch bei Wind sicher." },
+    { imageIndex: 1, accentBg: "bg-teal-700",  title: "Ersatzteile griffbereit",        body: "Der Holzgriff (135 mm, Ø 24 mm) ist identisch mit dem verbauten – direkt austauschbar, Schraube inklusive. Kein langes Suchen, kein Warten." },
+  ],
+
   stehtisch: [
     { imageIndex: 0, accentBg: "bg-teal-700",  title: "Optimale Stehhöhe",       body: "Ergonomisch auf 90–115 cm ausgelegt – perfekt für Stehempfänge, Messen und Gastronomie. Der Rücken dankt es." },
     { imageIndex: 1, accentBg: "bg-stone-600", title: "Pflegeleichte Platte",     body: "Kratz- und feuchtigkeitsresistent behandelte Oberfläche. Ein feuchtes Tuch genügt – keine Spezialreiniger nötig." },
@@ -20,6 +27,13 @@ export const HERO_CARDS: Record<ProductCategory, HeroCard[]> = {
     { imageIndex: 1, accentBg: "bg-amber-800", title: "Ganzjährig draußen",    body: "Wetterfester Stahl für Garten, Terrasse und Camping. Ob Frühling, Herbst oder Winter – die Tonne macht mit." },
     { imageIndex: 0, accentBg: "bg-stone-700", title: "Sicher & kippsicher",   body: "Breite Standfüße verhindern Kippen. Mindestabstand zu Brennbarem einhalten – dann ist das Feuer entspannt genießbar." },
     { imageIndex: 1, accentBg: "bg-rust",      title: "360° Atmosphäre",       body: "Gleichmäßige Wärme rund um die Tonne, stimmungsvolles Licht. Der perfekte Mittelpunkt für Herbst- und Winterabende." },
+  ],
+
+  schieferuhr: [
+    { imageIndex: 0, accentBg: "bg-stone-700", title: "Echter Naturschiefer",        body: "Kein Kunststoff, kein Laminat – echter Stein. Jede Uhr hat eine eigene Maserung, gebrochene Kanten. Man sieht, dass sie nicht aus dem Katalog kommt." },
+    { imageIndex: 1, accentBg: "bg-zinc-800",  title: "Motiv dauerhaft graviert",    body: "Per Laser in den Stein geschnitten – tief, scharf, dauerhaft. Kein Aufkleber, keine Folie. Verblasst nicht, löst sich nicht ab." },
+    { imageIndex: 0, accentBg: "bg-stone-600", title: "10 Zeigervarianten",          body: "Von klassisch schwarz bis farbenfroh. Das Motiv bleibt gleich – der Charakter ändert sich. Einfach beim Kauf auswählen." },
+    { imageIndex: 1, accentBg: "bg-rust",      title: "Geschenk mit Gewicht",        body: "Verpackt, sofort einsatzbereit, wirkungsstark. Ideal zu Geburtstagen, Einzügen und Hochzeiten – mit oder ohne persönliche Gravur." },
   ],
 
   nachtlicht: [

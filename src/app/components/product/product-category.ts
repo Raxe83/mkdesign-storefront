@@ -2,12 +2,14 @@ import type { Product } from "@/app/types/shopify";
 
 export type ProductCategory =
   | "stehtisch"
+  | "stehtisch-zubehoer"
   | "feuertonne"
   | "feuerschale"
   | "grillzubehoer"
   | "holzschild"
   | "holzuhr"
   | "nachtlicht"
+  | "schieferuhr"
   | "3d-druck"
   | "laser"
   | "custom-design"
@@ -31,6 +33,7 @@ export function detectCategory(product: Product): ProductCategory {
   const matches = (terms: string[]) =>
     terms.some((term) => type.includes(term) || tags.some((tag) => tag.includes(term)));
 
+  if (matches(["tischzubehoer", "stehtisch-zubehoer", "lochblech", "waermehaube", "stehtisch zubehoer"])) return "stehtisch-zubehoer";
   if (matches(["stehtisch", "bistrotisch", "bartisch", "stehtische", "möbel", "furniture"])) return "stehtisch";
   if (matches(["feuerschale"]))                                                               return "feuerschale";
   if (matches(["feuertonne", "feuerkorb", "fire pit", "brazier"]))                           return "feuertonne";
@@ -38,6 +41,7 @@ export function detectCategory(product: Product): ProductCategory {
   if (matches(["holzschild", "wandschild", "buchenholzschild"]))                               return "holzschild";
   if (matches(["holzuhr", "wanduhr", "holzuhr-buche"]))                                        return "holzuhr";
   if (matches(["nachtlicht", "schlummerlicht", "led-nachtlicht"]))                              return "nachtlicht";
+  if (matches(["schieferuhr", "schiefer-wanduhr", "wanduhr-schiefer"]))                        return "schieferuhr";
   if (matches(["3d-druck", "3d druck", "3ddruck", "3d-print", "fdm", "pla", "petg", "resin"])) return "3d-druck";
   if (matches(["laser", "gravur", "graviert", "lasercut", "laser cut", "engraving"]))          return "laser";
   if (matches(["customdesign", "custom-design", "custom design", "wunschdruck", "personali"])) return "custom-design";
@@ -55,9 +59,14 @@ export function detectCategory(product: Product): ProductCategory {
 
 export const TAG_TO_META_TYPE: Readonly<Record<string, ProductCategory>> = {
   // Tische & Möbel
-  stehtisch:          "stehtisch",
-  bistrotisch:        "stehtisch",
-  bartisch:           "stehtisch",
+  stehtisch:            "stehtisch",
+  bistrotisch:          "stehtisch",
+  bartisch:             "stehtisch",
+  // Stehtisch-Zubehör
+  tischzubehoer:        "stehtisch-zubehoer",
+  "stehtisch-zubehoer": "stehtisch-zubehoer",
+  lochblech:            "stehtisch-zubehoer",
+  waermehaube:          "stehtisch-zubehoer",
   // Feuer
   feuertonne:         "feuertonne",
   feuerkorb:          "feuertonne",
@@ -83,6 +92,10 @@ export const TAG_TO_META_TYPE: Readonly<Record<string, ProductCategory>> = {
   nachtlicht:         "nachtlicht",
   schlummerlicht:     "nachtlicht",
   "led-nachtlicht":   "nachtlicht",
+  // Schieferuhren
+  schieferuhr:            "schieferuhr",
+  "schiefer-wanduhr":     "schieferuhr",
+  "wanduhr-schiefer":     "schieferuhr",
   // 3D-Druck
   "3d-druck":         "3d-druck",
   "3d-print":         "3d-druck",
@@ -113,13 +126,15 @@ export function findMetaType(tags: readonly string[]): ProductCategory | null {
 // ─── Verwandte-Produkte-Konfiguration ─────────────────────────────────────────
 
 export const RELATED_CONFIG: Record<ProductCategory, { tag?: string; label: string }> = {
-  stehtisch:       { tag: "tischzubehoer",  label: "Passendes Zubehör für deinen Stehtisch" },
+  stehtisch:            { tag: "tischzubehoer",        label: "Passendes Zubehör für deinen Stehtisch" },
+  "stehtisch-zubehoer": { tag: "tischzubehoer",        label: "Weiteres Zubehör für den Stehtisch" },
   feuertonne:      { tag: "feuertonne",     label: "Weitere Modelle & saisonale Empfehlungen" },
   feuerschale:     { tag: "feuerschale",    label: "Weitere Feuerschalen von MK Design" },
   grillzubehoer:   { tag: "grillzubehoer",  label: "Weiteres Plancha-Zubehör von MK Design" },
   holzschild:      { tag: "holzschild",     label: "Weitere Holzschilder mit Spruch" },
   holzuhr:         { tag: "holzuhr",        label: "Weitere Holzuhren von MK Design" },
   nachtlicht:      { tag: "nachtlicht",     label: "Weitere Nachtlichter entdecken" },
+  schieferuhr:     { tag: "schieferuhr",   label: "Weitere Schieferuhren von MK Design" },
   "3d-druck":      { tag: "3d-druck",       label: "Weitere 3D-Drucke aus unserem Sortiment" },
   laser:           { tag: "laser",          label: "Weitere Gravuren & Laserarbeiten" },
   "custom-design": { tag: "CustomDesign",   label: "Weitere Custom-Designs" },
