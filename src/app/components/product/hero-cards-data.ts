@@ -1,11 +1,25 @@
 import type { HeroCard, ProductCategory } from "./product-category";
 
 export const HERO_CARDS: Record<ProductCategory, HeroCard[]> = {
+  schieferuntersetzer: [
+    { imageIndex: 0, accentBg: "bg-stone-700", title: "Echter Naturschiefer",        body: "Kein Kunststein, kein Keramik – echter Schiefer. Jedes Stück hat eine eigene Maserung. Hitzefest, feuchtigkeitsbeständig, formstabil. Schützt Tische zuverlässig vor Gläsern und Tassen." },
+    { imageIndex: 1, accentBg: "bg-zinc-800",  title: "Motiv dauerhaft graviert",    body: "Per Laser präzise in den Stein geschnitten – kein Aufkleber, keine Folie. Das Motiv verblasst nicht, löst sich nicht ab und hält ein Leben lang." },
+    { imageIndex: 0, accentBg: "bg-stone-600", title: "Rund oder eckig, mit Aufsteller", body: "Jeder Untersetzer ist in zwei Formen erhältlich – 10 × 10 cm. Mit dem optionalen Aufsteller auch als Tischdeko aufstellbar." },
+    { imageIndex: 1, accentBg: "bg-rust",      title: "Geschenk mit Wirkung",        body: "Verpackt, sofort einsatzbereit, motiv-stark. Das richtige Motiv trifft ohne Erklärung – zu Geburtstagen, Einzügen und Weihnachten." },
+  ],
+
   "stehtisch-zubehoer": [
     { imageIndex: 0, accentBg: "bg-rust",      title: "Wärme gezielt lenken",          body: "Die Wärmehaube (Ø 80 cm) sitzt auf dem Abzugsrohr und lenkt die Hitze zu den Gästen statt nutzlos nach oben. Gleichzeitig Windschutz und Funkensperre – besonders bei Veranstaltungen im Freien." },
     { imageIndex: 1, accentBg: "bg-zinc-800",  title: "Feueröffnung sauber abdecken",  body: "Das Lochblech liegt passgenau über der Feueröffnung. Funken und Asche bleiben unten, der Tisch wirkt aufgeräumt – egal ob das Feuer brennt oder nicht. Stahl, handgefertigt." },
     { imageIndex: 0, accentBg: "bg-stone-600", title: "Wetterfest einlagern",           body: "Der wasserdichte Überwurf (190 × 115 cm, 210D-Oxford-Tuch) schützt den Stehtisch vor Regen, UV und Staub. Kordelzug und Reißverschluss halten auch bei Wind sicher." },
     { imageIndex: 1, accentBg: "bg-teal-700",  title: "Ersatzteile griffbereit",        body: "Der Holzgriff (135 mm, Ø 24 mm) ist identisch mit dem verbauten – direkt austauschbar, Schraube inklusive. Kein langes Suchen, kein Warten." },
+  ],
+
+  weinverpackung: [
+    { imageIndex: 0, accentBg: "bg-amber-800", title: "Pappelholz, kein Karton",       body: "Echtes Pappelholz – leicht, stabil, natürlich. Schützt die Flasche zuverlässig und macht optisch mehr her als jede Papier- oder Kartonverpackung. Bleibt auch nach dem Auspacken als Deko ein Hingucker." },
+    { imageIndex: 1, accentBg: "bg-zinc-800",  title: "Spruch dauerhaft ins Holz",     body: "Spruch oder Motiv wird per Laser direkt in das Holz graviert – kein Aufkleber, kein Aufdruck, keine Folie. Die Gravur ist dauerhaft und sieht nach Jahren noch genauso aus wie am ersten Tag." },
+    { imageIndex: 0, accentBg: "bg-stone-600", title: "Mit oder ohne Name",             body: "Alle Verpackungen sind ohne Personalisierung sofort lieferbar. Wer einen Namen, ein Datum oder eine eigene Zeile ergänzen möchte, wählt die Variante 'mit Personalisierung' und gibt die Wunschzeile nach dem Kauf durch." },
+    { imageIndex: 1, accentBg: "bg-rust",      title: "Zwei Größen verfügbar",         body: "Die Holzverpackung gibt es für die Standard-0,75L-Flasche und für die 1L-Flasche. Einfach beim Kauf die passende Variante wählen. Beide Größen passen für gängige Wein- und Sektflaschen." },
   ],
 
   stehtisch: [

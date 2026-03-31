@@ -3,6 +3,8 @@ import type { Product } from "@/app/types/shopify";
 export type ProductCategory =
   | "stehtisch"
   | "stehtisch-zubehoer"
+  | "schieferuntersetzer"
+  | "weinverpackung"
   | "feuertonne"
   | "feuerschale"
   | "grillzubehoer"
@@ -34,6 +36,8 @@ export function detectCategory(product: Product): ProductCategory {
     terms.some((term) => type.includes(term) || tags.some((tag) => tag.includes(term)));
 
   if (matches(["tischzubehoer", "stehtisch-zubehoer", "lochblech", "waermehaube", "stehtisch zubehoer"])) return "stehtisch-zubehoer";
+  if (matches(["schieferuntersetzer", "schiefer-untersetzer", "untersetzer"])) return "schieferuntersetzer";
+  if (matches(["weinverpackung", "holzverpackung", "weingeschenk", "weinflaschen-verpackung"])) return "weinverpackung";
   if (matches(["stehtisch", "bistrotisch", "bartisch", "stehtische", "möbel", "furniture"])) return "stehtisch";
   if (matches(["feuerschale"]))                                                               return "feuerschale";
   if (matches(["feuertonne", "feuerkorb", "fire pit", "brazier"]))                           return "feuertonne";
@@ -92,8 +96,17 @@ export const TAG_TO_META_TYPE: Readonly<Record<string, ProductCategory>> = {
   nachtlicht:         "nachtlicht",
   schlummerlicht:     "nachtlicht",
   "led-nachtlicht":   "nachtlicht",
+  // Schieferuntersetzer
+  schieferuntersetzer:       "schieferuntersetzer",
+  "schiefer-untersetzer":    "schieferuntersetzer",
+  untersetzer:               "schieferuntersetzer",
+  // Weinverpackungen
+  weinverpackung:            "weinverpackung",
+  holzverpackung:            "weinverpackung",
+  weingeschenk:              "weinverpackung",
+  "weinflaschen-verpackung": "weinverpackung",
   // Schieferuhren
-  schieferuhr:            "schieferuhr",
+  schieferuhr:               "schieferuhr",
   "schiefer-wanduhr":     "schieferuhr",
   "wanduhr-schiefer":     "schieferuhr",
   // 3D-Druck
@@ -127,7 +140,9 @@ export function findMetaType(tags: readonly string[]): ProductCategory | null {
 
 export const RELATED_CONFIG: Record<ProductCategory, { tag?: string; label: string }> = {
   stehtisch:            { tag: "tischzubehoer",        label: "Passendes Zubehör für deinen Stehtisch" },
-  "stehtisch-zubehoer": { tag: "tischzubehoer",        label: "Weiteres Zubehör für den Stehtisch" },
+  "stehtisch-zubehoer":   { tag: "tischzubehoer",        label: "Weiteres Zubehör für den Stehtisch" },
+  schieferuntersetzer:    { tag: "schieferuntersetzer",  label: "Weitere Schieferuntersetzer entdecken" },
+  weinverpackung:         { tag: "weinverpackung",       label: "Weitere Weinverpackungen aus Holz" },
   feuertonne:      { tag: "feuertonne",     label: "Weitere Modelle & saisonale Empfehlungen" },
   feuerschale:     { tag: "feuerschale",    label: "Weitere Feuerschalen von MK Design" },
   grillzubehoer:   { tag: "grillzubehoer",  label: "Weiteres Plancha-Zubehör von MK Design" },

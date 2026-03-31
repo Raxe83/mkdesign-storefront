@@ -95,6 +95,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function shuffleArray<T>(arr: T[]): T[] {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function ProductDetailPage({ params }: Props) {
@@ -111,20 +122,26 @@ export default async function ProductDetailPage({ params }: Props) {
   const metaType      = findMetaType(product.tags ?? []);
 
   // ── 3. Related-Produkte & Versanddaten laden ──────────────────────────────
-  // getShippingOptions(product.id) gibt das produktspezifische Profil zurück,
-  // falls vorhanden — sonst das allgemeine Profil als Fallback.
-  const [rawRelated] = await Promise.all([
+  const [rawRelated, allProducts] = await Promise.all([
     getProducts(5, undefined, relatedConfig.tag),
+    getProducts(20),
   ]);
   const shippingOptions = getShippingOptions(product.tags ?? [], product.productType ?? "");
   const relatedProducts = rawRelated.filter((p: Product) => p.id !== product.id).slice(0, 4);
 
-  // ── 4. Rendern ────────────────────────────────────────────────────────────
+  // ── 4. Random-Füller: alle Produkte minus aktuelles + bereits verwandte ──
+  const relatedIds = new Set([product.id, ...relatedProducts.map((p: Product) => p.id)]);
+  const randomProducts = shuffleArray(
+    allProducts.filter((p: Product) => !relatedIds.has(p.id))
+  ).slice(0, 8);
+
+  // ── 5. Rendern ────────────────────────────────────────────────────────────
   return (
     <ProductDetailClient
       product={product}
       heroCards={heroCards}
       relatedProducts={relatedProducts}
+      randomProducts={randomProducts}
       relatedLabel={relatedConfig.label}
       shippingOptions={shippingOptions}
       extraContentSlot={

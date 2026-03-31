@@ -50,6 +50,7 @@ interface Props {
   product: Product;
   heroCards: HeroCard[];
   relatedProducts: Product[];
+  randomProducts?: Product[];
   relatedLabel: string;
   shippingOptions?: CmsShippingOption[] | null;
   extraContentSlot?: React.ReactNode;
@@ -60,6 +61,7 @@ export default function ProductDetailClient({
   product,
   heroCards,
   relatedProducts,
+  randomProducts,
   relatedLabel,
   shippingOptions,
   extraContentSlot,
@@ -297,12 +299,12 @@ export default function ProductDetailClient({
       </div>
 
       {/* ── Ähnliche Produkte ── */}
-      {relatedProducts.length > 0 && (
+      {(relatedProducts.length > 0 || (randomProducts?.length ?? 0) > 0) && (
         <div className="mt-16">
           <h2 className="font-display text-xl font-medium text-primary dark:text-neutral-100 mb-5">
             {relatedLabel}
           </h2>
-          <RelatedProducts products={relatedProducts} />
+          <RelatedProducts products={relatedProducts} randomProducts={randomProducts} />
         </div>
       )}
 
