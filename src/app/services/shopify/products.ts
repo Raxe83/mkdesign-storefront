@@ -300,11 +300,7 @@ export async function getFeaturedProducts(
 
 const PRODUCTS_LIST_QUERY = `
   query getProductsPage($first: Int!, $after: String, $query: String, $sortKey: ProductSortKeys, $reverse: Boolean) {
-    allCount: products(first: 1, query: "-tag:CustomDesign") {
-      totalCount
-    }
     products(first: $first, after: $after, sortKey: $sortKey, reverse: $reverse, query: $query) {
-      totalCount
       pageInfo { hasNextPage endCursor }
       edges {
         node {
@@ -343,27 +339,44 @@ export interface ProductsPageResult {
   totalPages: number;
 }
 
-async function getCursorBeforePage(
-  page: number,
-  pageSize: number,
-  query: string | undefined,
-  sortKey: ShopifySortKey,
-  reverse: boolean,
-  locale?: string,
-): Promise<string | undefined> {
-  if (page <= 1) return undefined;
-  let cursor: string | undefined;
-  let remaining = (page - 1) * pageSize;
-  while (remaining > 0) {
-    const take = Math.min(250, remaining);
+type CursorCountResult = { cursor: string | undefined; total: number };
+
+/**
+ * Traverses products with only id fields (fast, ISR-cached).
+ * Returns the cursor after `targetCursorPosition` items AND the total count.
+ * targetCursorPosition = 0 → count-only mode (cursor will be undefined).
+ */
+async function getCountAndCursor(params: {
+  targetCursorPosition: number;
+  query: string | undefined;
+  sortKey: ShopifySortKey;
+  reverse: boolean;
+  locale?: string;
+}): Promise<CursorCountResult> {
+  const { targetCursorPosition, query, sortKey, reverse, locale } = params;
+  let afterCursor: string | undefined;
+  let total = 0;
+  let pageCursor: string | undefined;
+  let hasNext = true;
+
+  while (hasNext) {
+    const needed = targetCursorPosition - total;
+    // Fetch exactly what's needed to reach the cursor position, then 250 at a time
+    const take = needed > 0 ? Math.min(250, needed) : 250;
     const res = await shopifyFetch<{
       products: { pageInfo: { hasNextPage: boolean; endCursor: string }; edges: { node: { id: string } }[] };
-    }>({ query: CURSOR_ONLY_QUERY, variables: { first: take, after: cursor, query, sortKey, reverse }, locale, revalidate: 3600 });
-    cursor = res.products.pageInfo.endCursor;
-    remaining -= res.products.edges.length;
-    if (!res.products.pageInfo.hasNextPage) break;
+    }>({ query: CURSOR_ONLY_QUERY, variables: { first: take, after: afterCursor, query, sortKey, reverse }, locale, revalidate: 3600 });
+
+    total += res.products.edges.length;
+    afterCursor = res.products.pageInfo.endCursor;
+    hasNext = res.products.pageInfo.hasNextPage;
+
+    if (pageCursor === undefined && targetCursorPosition > 0 && total >= targetCursorPosition) {
+      pageCursor = afterCursor; // cursor after the targetCursorPosition-th item
+    }
+    if (!hasNext) break;
   }
-  return cursor;
+  return { cursor: pageCursor, total };
 }
 
 export async function getProductsPage(params: {
@@ -375,17 +388,25 @@ export async function getProductsPage(params: {
   locale?: string;
 }): Promise<ProductsPageResult> {
   const { page = 1, pageSize = 15, query, sortKey = "BEST_SELLING", reverse = false, locale } = params;
-  const cursor = await getCursorBeforePage(page, pageSize, query, sortKey, reverse, locale);
+  const targetCursorPosition = (page - 1) * pageSize;
+  const UNFILTERED = "-tag:CustomDesign";
+
+  // Parallel: (a) traverse filtered products for cursor + filteredCount,
+  //           (b) traverse unfiltered products for totalCount
+  const [{ cursor, total: filteredCount }, { total: totalCount }] = await Promise.all([
+    getCountAndCursor({ targetCursorPosition, query, sortKey, reverse, locale }),
+    getCountAndCursor({ targetCursorPosition: 0, query: UNFILTERED, sortKey: "BEST_SELLING", reverse: false, locale }),
+  ]);
+
   const res = await shopifyFetch<{
-    allCount: { totalCount: number };
-    products: { totalCount: number; pageInfo: { hasNextPage: boolean; endCursor: string }; edges: { node: Product }[] };
+    products: { pageInfo: { hasNextPage: boolean }; edges: { node: Product }[] };
   }>({ query: PRODUCTS_LIST_QUERY, variables: { first: pageSize, after: cursor, query, sortKey, reverse }, locale, revalidate: 3600 });
-  const filteredCount = res.products.totalCount;
+
   const totalPages = Math.max(1, Math.ceil(filteredCount / pageSize));
   return {
     products: res.products.edges.map((e) => e.node),
     filteredCount,
-    totalCount: res.allCount.totalCount,
+    totalCount,
     page,
     totalPages,
   };

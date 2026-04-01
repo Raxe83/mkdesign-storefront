@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useEffect, useRef } from "react";
+import { useCallback, useState, useEffect, useRef, useTransition } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import type { SortOption, PageSizeOption } from "./useProductFilter";
 import { PAGE_SIZE_OPTIONS } from "./useProductFilter";
@@ -15,6 +15,7 @@ function parseTypes(val: string | null): Set<string> {
 }
 
 export function useProductPageParams() {
+  const [isPending, startTransition] = useTransition();
   const router   = useRouter();
   const pathname = usePathname();
   const sp       = useSearchParams();
@@ -44,8 +45,10 @@ export function useProductPageParams() {
     }
     if (!("page" in updates)) params.delete("page");
     const qs = params.toString();
-    router.push(qs ? `${pathname}?${qs}` : pathname);
-  }, [router, pathname, sp]);
+    startTransition(() => {
+      router.push(qs ? `${pathname}?${qs}` : pathname);
+    });
+  }, [router, pathname, sp, startTransition]);
 
   // Keep latest push in ref to avoid stale closures in debounce timeouts
   const pushRef = useRef(push);
@@ -103,12 +106,16 @@ export function useProductPageParams() {
   }, [push]);
 
   const goToPage = useCallback((n: number) => {
-    const params = new URLSearchParams(sp.toString());
-    if (n <= 1) params.delete("page"); else params.set("page", String(n));
-    const qs = params.toString();
-    router.push(qs ? `${pathname}?${qs}` : pathname);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [router, pathname, sp]);
+    const urlParams = new URLSearchParams(sp.toString());
+    if (n <= 1) urlParams.delete("page"); else urlParams.set("page", String(n));
+    const qs = urlParams.toString();
+    // setTimeout(0) breaks out of React's event batching so the scroll
+    // is guaranteed to run after any pending DOM updates
+    setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 0);
+    startTransition(() => {
+      router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    });
+  }, [router, pathname, sp, startTransition]);
 
   const setPageSize = useCallback((size: PageSizeOption) => {
     push({ per: size === PAGE_SIZE_OPTIONS[0] ? null : String(size), page: null });
@@ -123,7 +130,7 @@ export function useProductPageParams() {
     search, sort: urlSort, onlyAvailable: sp.get("available") === "1",
     selectedTypes: urlTypes, priceMin, priceMax,
     page: urlPage, pageSize: urlPerPage,
-    hasActiveFilters, activeFilterCount,
+    hasActiveFilters, activeFilterCount, isPending,
     setSearch, setSort, setOnlyAvailable, setSelectedTypes,
     setPriceMin, setPriceMax, clearFilters, toggleType, goToPage, setPageSize,
   };

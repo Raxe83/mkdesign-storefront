@@ -8,6 +8,7 @@ import ProductCard from "../../components/product/ProductCard";
 import FilterDropdown from "../../components/product/FilterDropdown";
 import ProductPagination from "../../components/product/ProductPagination";
 import PageHeader from "../../components/PageHeader";
+import Skeleton from "../../components/ui/Skeleton";
 
 interface Props {
   products: Product[];
@@ -61,7 +62,7 @@ function Inner({ products, filteredCount, totalCount, totalPages, currentPage, c
         />
       </PageHeader>
 
-      {filteredCount === 0 && (
+      {!params.isPending && filteredCount === 0 && (
         <div className="text-center py-20">
           <p className="font-display text-lg text-primary mb-1">Keine Produkte gefunden</p>
           <p className="text-sm text-muted mb-5">Versuche andere Filter oder Suchbegriffe.</p>
@@ -73,12 +74,14 @@ function Inner({ products, filteredCount, totalCount, totalPages, currentPage, c
         </div>
       )}
 
-      {products.length > 0 && (
+      {(params.isPending || products.length > 0) && (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
-            {products.map((product, i) => (
-              <ProductCard key={product.id} product={product} priority={i < 4} />
-            ))}
+            {params.isPending
+              ? Array.from({ length: currentPageSize }).map((_, i) => <Skeleton.Card key={i} />)
+              : products.map((product, i) => (
+                  <ProductCard key={product.id} product={product} priority={i < 4} />
+                ))}
           </div>
 
           <ProductPagination

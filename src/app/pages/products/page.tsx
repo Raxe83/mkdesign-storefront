@@ -2,8 +2,8 @@ import { getProductsByCollection } from "../../services/shopify";
 import { getProductsPage, getProductTypes, type ShopifySortKey } from "../../services/shopify/products";
 import ProductsGrid from "./ProductsGrid";
 import ProductsGridPaged from "./ProductsGridPaged";
-import type { PageSizeOption } from "../../hooks/useProductFilter";
-import { PAGE_SIZE_OPTIONS } from "../../hooks/useProductFilter";
+type PageSizeOption = 15 | 30 | 40;
+const VALID_PAGE_SIZES = [15, 30, 40] as const;
 
 interface SearchParams {
   collection?: string;
@@ -43,7 +43,7 @@ function buildShopifyQuery(params: { search?: string; types?: string[]; priceMin
 
 function parsePageSize(val: string | undefined): PageSizeOption {
   const n = parseInt(val ?? "15", 10);
-  return (PAGE_SIZE_OPTIONS.includes(n as PageSizeOption) ? n : 15) as PageSizeOption;
+  return (VALID_PAGE_SIZES.includes(n as PageSizeOption) ? n : 15) as PageSizeOption;
 }
 
 export default async function ProductsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
