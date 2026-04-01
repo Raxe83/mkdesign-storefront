@@ -69,7 +69,7 @@ export default function ProductDetailClient({
 }: Props) {
   const standardShipping = shippingOptions?.find((o) => o.isStandard) ?? FALLBACK_STANDARD;
   const barrelVariant = variantFromProduct(product.tags, product.title);
-  const images = product.images.edges.map((e) => e.node);
+  const images = (product.images?.edges ?? []).map((e) => e.node);
   const firstVariant = product.variants.edges[0]?.node;
   const price =
     firstVariant?.price.amount ?? product.priceRange.minVariantPrice.amount;

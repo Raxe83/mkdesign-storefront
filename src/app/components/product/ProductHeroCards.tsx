@@ -17,7 +17,7 @@ function HeroCardItem({
   product: Product;
   reversed: boolean;
 }) {
-  const images = product.images.edges.map((e) => e.node);
+  const images = (product.images?.edges ?? []).map((e) => e.node);
   const imgNode = images.length > 0 ? images[card.imageIndex % images.length] : null;
 
   return (

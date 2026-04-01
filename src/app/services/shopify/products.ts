@@ -296,6 +296,110 @@ export async function getFeaturedProducts(
   return getProducts(first, locale);
 }
 
+// ─── Paginated list view (lean, no images array) ──────────────────────────────
+
+const PRODUCTS_LIST_QUERY = `
+  query getProductsPage($first: Int!, $after: String, $query: String, $sortKey: ProductSortKeys, $reverse: Boolean) {
+    allCount: products(first: 1, query: "-tag:CustomDesign") {
+      totalCount
+    }
+    products(first: $first, after: $after, sortKey: $sortKey, reverse: $reverse, query: $query) {
+      totalCount
+      pageInfo { hasNextPage endCursor }
+      edges {
+        node {
+          id title handle description tags productType
+          priceRange { minVariantPrice { amount currencyCode } }
+          featuredImage { url altText }
+          variants(first: 1) {
+            edges { node { id title price { amount currencyCode } availableForSale } }
+          }
+        }
+      }
+    }
+  }
+`;
+
+const CURSOR_ONLY_QUERY = `
+  query getCursors($first: Int!, $after: String, $query: String, $sortKey: ProductSortKeys, $reverse: Boolean) {
+    products(first: $first, after: $after, sortKey: $sortKey, reverse: $reverse, query: $query) {
+      pageInfo { hasNextPage endCursor }
+      edges { node { id } }
+    }
+  }
+`;
+
+const PRODUCT_TYPES_QUERY = `
+  query { productTypes(first: 250) { edges { node } } }
+`;
+
+export type ShopifySortKey = "BEST_SELLING" | "CREATED_AT" | "PRICE" | "TITLE";
+
+export interface ProductsPageResult {
+  products: Product[];
+  filteredCount: number;
+  totalCount: number;
+  page: number;
+  totalPages: number;
+}
+
+async function getCursorBeforePage(
+  page: number,
+  pageSize: number,
+  query: string | undefined,
+  sortKey: ShopifySortKey,
+  reverse: boolean,
+  locale?: string,
+): Promise<string | undefined> {
+  if (page <= 1) return undefined;
+  let cursor: string | undefined;
+  let remaining = (page - 1) * pageSize;
+  while (remaining > 0) {
+    const take = Math.min(250, remaining);
+    const res = await shopifyFetch<{
+      products: { pageInfo: { hasNextPage: boolean; endCursor: string }; edges: { node: { id: string } }[] };
+    }>({ query: CURSOR_ONLY_QUERY, variables: { first: take, after: cursor, query, sortKey, reverse }, locale, revalidate: 3600 });
+    cursor = res.products.pageInfo.endCursor;
+    remaining -= res.products.edges.length;
+    if (!res.products.pageInfo.hasNextPage) break;
+  }
+  return cursor;
+}
+
+export async function getProductsPage(params: {
+  page?: number;
+  pageSize?: number;
+  query?: string;
+  sortKey?: ShopifySortKey;
+  reverse?: boolean;
+  locale?: string;
+}): Promise<ProductsPageResult> {
+  const { page = 1, pageSize = 15, query, sortKey = "BEST_SELLING", reverse = false, locale } = params;
+  const cursor = await getCursorBeforePage(page, pageSize, query, sortKey, reverse, locale);
+  const res = await shopifyFetch<{
+    allCount: { totalCount: number };
+    products: { totalCount: number; pageInfo: { hasNextPage: boolean; endCursor: string }; edges: { node: Product }[] };
+  }>({ query: PRODUCTS_LIST_QUERY, variables: { first: pageSize, after: cursor, query, sortKey, reverse }, locale, revalidate: 3600 });
+  const filteredCount = res.products.totalCount;
+  const totalPages = Math.max(1, Math.ceil(filteredCount / pageSize));
+  return {
+    products: res.products.edges.map((e) => e.node),
+    filteredCount,
+    totalCount: res.allCount.totalCount,
+    page,
+    totalPages,
+  };
+}
+
+export async function getProductTypes(locale?: string): Promise<string[]> {
+  const res = await shopifyFetch<{ productTypes: { edges: { node: string }[] } }>({
+    query: PRODUCT_TYPES_QUERY,
+    locale,
+    revalidate: 86400,
+  });
+  return res.productTypes.edges.map((e) => e.node).filter((t) => t && t !== "CustomDesign");
+}
+
 export async function fetchBlogPost(locale?: string) {
   const query = `
     query {

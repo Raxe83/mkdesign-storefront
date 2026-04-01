@@ -191,14 +191,14 @@ export interface Product {
   title: string
   handle: string
   description: string
-  descriptionHtml: string
+  descriptionHtml?: string
   tags: string[]
   productType: string
   priceRange: {
     minVariantPrice: Money
   }
   featuredImage: Image | null
-  images: {
+  images?: {
     edges: Array<{
       node: Image
     }>
