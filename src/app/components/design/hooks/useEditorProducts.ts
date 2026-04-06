@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { getProducts } from "@/app/services/shopify";
+import { getDesignProducts } from "@/app/services/shopify/products";
 import { getPresetForTitle } from "../constants";
 import type { ProductOption } from "../types";
 
@@ -15,9 +15,10 @@ export function useEditorProducts() {
   useEffect(() => {
     (async () => {
       try {
-        const raw = await getProducts(50, undefined, "CustomDesign");
+        const raw = await getDesignProducts();
         const mapped: ProductOption[] = raw.map((p) => {
           const variant = p.variants.edges[0]?.node ?? null;
+          const firstZusatz = p.zusatzoptionen?.zusatzprodukte[0] ?? null;
           return {
             id: p.id,
             label: p.title,
@@ -28,6 +29,12 @@ export function useEditorProducts() {
               ? `${parseFloat(variant.price.amount).toFixed(2)} ${variant.price.currencyCode}`
               : "",
             canvasPresetId: getPresetForTitle(p.title).id,
+            sideBZusatzprodukt: firstZusatz
+              ? {
+                  variantId: firstZusatz.defaultVariantId,
+                  price: `${parseFloat(firstZusatz.price.amount).toFixed(2)} ${firstZusatz.price.currencyCode}`,
+                }
+              : null,
           };
         });
         setProducts(mapped);

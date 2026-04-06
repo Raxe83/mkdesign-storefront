@@ -176,13 +176,21 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     // Optimistic update — instant UI, no loading state
     setCart((prev) => {
       if (!prev) return prev;
+      const updatedEdges = prev.lines.edges.map((edge) =>
+        edge.node.id === lineId ? { node: { ...edge.node, quantity } } : edge
+      );
+      const newSubtotal = updatedEdges.reduce((sum, { node }) => {
+        const price = parseFloat(node.merchandise?.price?.amount ?? "0");
+        return sum + price * node.quantity;
+      }, 0);
+      const currencyCode = prev.estimatedCost?.subtotalAmount?.currencyCode ?? "EUR";
       return {
         ...prev,
-        lines: {
-          ...prev.lines,
-          edges: prev.lines.edges.map((edge) =>
-            edge.node.id === lineId ? { node: { ...edge.node, quantity } } : edge
-          ),
+        lines: { ...prev.lines, edges: updatedEdges },
+        estimatedCost: {
+          ...prev.estimatedCost,
+          subtotalAmount: { amount: newSubtotal.toFixed(2), currencyCode },
+          totalAmount:    { amount: newSubtotal.toFixed(2), currencyCode },
         },
       };
     });

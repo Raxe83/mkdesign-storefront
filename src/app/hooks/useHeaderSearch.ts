@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import type { Product } from "../types/shopify";
 import { shopDetails } from "../global";
 import { shipment } from "../types/products";
+import { HIDDEN_TAGS, HIDDEN_TAGS_QUERY, filterHiddenProducts } from "../utils/productVisibility";
 
 export type SearchResultType = "product" | "page" | "info";
 
@@ -158,7 +159,7 @@ export function useHeaderSearch(query: string): {
 
     const GQL_QUERY = `
       query FetchProducts($cursor: String) {
-        products(first: 250, after: $cursor, query: "-tag:CustomDesign") {
+        products(first: 250, after: $cursor, query: "${HIDDEN_TAGS_QUERY}") {
           pageInfo { hasNextPage endCursor }
           edges {
             node {
@@ -195,7 +196,7 @@ export function useHeaderSearch(query: string): {
             (e: { node: Product }) => e.node
           ) ?? [];
 
-          all.push(...batch);
+          all.push(...filterHiddenProducts(batch));
           hasNextPage = productsData?.pageInfo?.hasNextPage ?? false;
           cursor = productsData?.pageInfo?.endCursor ?? null;
         }
@@ -212,13 +213,14 @@ export function useHeaderSearch(query: string): {
     const q = query.trim();
     if (!q) return { products: [], info: [] };
 
+    const INTERNAL_TAGS = new Set<string>(HIDDEN_TAGS);
     const products: SearchResult[] = allProducts
       .filter(
         (p) =>
           matches(p.title, q) ||
           matches(p.description, q) ||
           matches(p.productType, q) ||
-          p.tags.some((t) => matches(t, q))
+          p.tags.some((t) => !INTERNAL_TAGS.has(t) && matches(t, q))
       )
       .map((p) => {
         const inTitle = matches(p.title, q);
@@ -229,7 +231,7 @@ export function useHeaderSearch(query: string): {
           if (matches(p.description, q)) {
             matchSnippet = extractSnippet(p.description, q);
           } else {
-            const matchingTags = p.tags.filter((t) => matches(t, q));
+            const matchingTags = p.tags.filter((t) => !INTERNAL_TAGS.has(t) && matches(t, q));
             if (matchingTags.length > 0) {
               matchSnippet = matchingTags.slice(0, 4).join(" · ");
             }

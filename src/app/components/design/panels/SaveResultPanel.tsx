@@ -10,11 +10,12 @@ import type { CartButtonState } from "../types";
 type Props = {
   result:      DualDesignUploadResult;
   variantId:   string | null;
+  totalPrice:  string | null;
   onAddToCart: () => Promise<void>;
   onReset:     () => void;
 };
 
-export function SaveResultPanel({ result, variantId, onAddToCart, onReset }: Props) {
+export function SaveResultPanel({ result, variantId, totalPrice, onAddToCart, onReset }: Props) {
   const [cartState, setCartState] = useState<CartButtonState>(variantId ? "idle" : "no-variant");
 
   const handleCart = async () => {
@@ -40,17 +41,24 @@ export function SaveResultPanel({ result, variantId, onAddToCart, onReset }: Pro
       </div>
 
       <div className={`grid gap-2 ${result.sideB ? "grid-cols-2" : "grid-cols-1"}`}>
-        <div className="relative aspect-square rounded overflow-hidden border border-stone-200/60 dark:border-zinc-700/60 bg-stone-50 dark:bg-zinc-800">
-          <Image src={result.sideA.previewUrl} alt="Seite A" fill className="object-contain" />
+        <div className="relative aspect-square rounded overflow-hidden border border-rust/30 bg-charcoal">
+          <Image src={result.sideA.previewUrl} alt="Seite A" fill className="object-contain p-1" />
           <span className="absolute bottom-1 left-1 text-[9px] font-medium bg-black/50 text-white px-1.5 py-0.5 rounded">A</span>
         </div>
         {result.sideB && (
-          <div className="relative aspect-square rounded overflow-hidden border border-stone-200/60 dark:border-zinc-700/60 bg-stone-50 dark:bg-zinc-800">
-            <Image src={result.sideB.previewUrl} alt="Seite B" fill className="object-contain" />
+          <div className="relative aspect-square rounded overflow-hidden border border-rust/30 bg-charcoal">
+            <Image src={result.sideB.previewUrl} alt="Seite B" fill className="object-contain p-1" />
             <span className="absolute bottom-1 left-1 text-[9px] font-medium bg-black/50 text-white px-1.5 py-0.5 rounded">B</span>
           </div>
         )}
       </div>
+
+      {totalPrice && (
+        <div className="flex items-center justify-between px-1 text-xs">
+          <span className="text-muted">{result.sideB ? "Gesamt (Seite A + B)" : "Preis"}</span>
+          <span className="font-semibold text-primary dark:text-cream tabular-nums">{totalPrice}</span>
+        </div>
+      )}
 
       {cartState === "added" ? (
         <div className="flex items-center justify-center gap-2 py-2.5 rounded bg-rustLight dark:bg-zinc-800 text-sm font-medium text-rust">

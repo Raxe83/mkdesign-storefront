@@ -96,9 +96,11 @@ const CartPopupItem = ({ node, linkedItems }: CartPopupItemProps) => {
         {/* Linked sub-items */}
         {linkedItems.length > 0 && (
           <div className="mt-1.5 pt-1.5 border-t border-sand/30 dark:border-zinc-800 space-y-1">
-            {linkedItems.map((child) => (
+            {linkedItems.map((child) => {
+              const isSideBItem = child.attributes?.some(a => a.key === "_seite_b_aufpreis");
+              return (
               <div key={child.id} className="flex items-center gap-1.5">
-                {child.merchandise.product.featuredImage && (
+                {!isSideBItem && child.merchandise.product.featuredImage && (
                   <Image
                     src={child.merchandise.product.featuredImage.url}
                     alt={child.merchandise.product.featuredImage.altText ?? child.merchandise.product.title}
@@ -108,19 +110,22 @@ const CartPopupItem = ({ node, linkedItems }: CartPopupItemProps) => {
                   />
                 )}
                 <span className="flex-1 text-[11px] text-stone dark:text-muted truncate">
-                  {child.merchandise.product.title}
+                  {isSideBItem ? "Seite B" : child.merchandise.product.title}
                 </span>
                 <span className="text-[11px] text-muted tabular-nums shrink-0">
                   +{formatPrice(child.merchandise.price?.amount ?? "0", child.merchandise.price?.currencyCode ?? "EUR")}
                 </span>
-                <button
-                  onClick={() => removeItem(child.id)}
-                  className="text-muted hover:text-rust transition-colors duration-150 shrink-0"
-                >
-                  <X className="h-3 w-3" />
-                </button>
+                {!isSideBItem && (
+                  <button
+                    onClick={() => removeItem(child.id)}
+                    className="text-muted hover:text-rust transition-colors duration-150 shrink-0"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
@@ -159,7 +164,10 @@ const CartPopupItem = ({ node, linkedItems }: CartPopupItemProps) => {
       <div className="shrink-0 text-right">
         <p className="text-sm font-medium text-charcoal dark:text-primary tabular-nums">
           {formatPrice(
-            (parseFloat(node.merchandise.price?.amount ?? "0") * localQty).toString(),
+            (
+              parseFloat(node.merchandise.price?.amount ?? "0") * localQty +
+              linkedItems.reduce((s, c) => s + parseFloat(c.merchandise.price?.amount ?? "0") * localQty, 0)
+            ).toString(),
             node.merchandise.price?.currencyCode ?? "EUR"
           )}
         </p>

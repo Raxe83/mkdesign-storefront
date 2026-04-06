@@ -6,6 +6,7 @@ import type {
   ZusatzoptionenRaw,
   ZusatzproduktOption,
 } from "../../types/shopify";
+import { HIDDEN_TAGS, HIDDEN_TAGS_QUERY, VISIBILITY_TAGS_QUERY, filterHiddenProducts, filterVisibilityHidden } from "../../utils/productVisibility";
 
 // ─── Hilfsfunktionen ─────────────────────────────────────────────────────────
 
@@ -138,7 +139,13 @@ export async function getProducts(
 
     const queryParts: string[] = [];
     if (tag) queryParts.push(`tag:${tag}`);
-    if (tag !== "CustomDesign") queryParts.push(`-tag:CustomDesign`);
+    if (tag !== "CustomDesign") {
+      // Exclude all hidden tags (both spellings of display_none + CustomDesign)
+      HIDDEN_TAGS.forEach((t) => queryParts.push(`-tag:${t}`));
+    } else {
+      // For CustomDesign queries, still exclude visibility-hidden products
+      queryParts.push(VISIBILITY_TAGS_QUERY);
+    }
 
     const response: ProductsResponse = await shopifyFetch<ProductsResponse>({
       query: PRODUCTS_QUERY,
@@ -154,7 +161,9 @@ export async function getProducts(
     const edges = response.products.edges;
     const pageInfo = response.products.pageInfo;
 
-    all.push(...edges.map((e) => e.node));
+    // Post-filter safety net (handles both spellings from Shopify)
+    const nodes = edges.map((e) => e.node);
+    all.push(...(tag === "CustomDesign" ? filterVisibilityHidden(nodes) : filterHiddenProducts(nodes)));
     hasNextPage = pageInfo.hasNextPage && (first === undefined || all.length < first);
     cursor = pageInfo.endCursor;
   }
@@ -290,6 +299,78 @@ async function _getProductByHandle(
   return { ...cleanProduct, zusatzoptionen };
 }
 
+// ─── Design-Editor Produkte (CustomDesign-Tag + Zusatzoptionen-Metafeld) ──────
+
+const DESIGN_PRODUCTS_QUERY = `
+  query getDesignProducts($first: Int!, $query: String) {
+    products(first: $first, sortKey: BEST_SELLING, query: $query) {
+      edges {
+        node {
+          id title handle description tags productType
+          featuredImage { url altText }
+          variants(first: 1) {
+            edges { node { id title price { amount currencyCode } availableForSale } }
+          }
+          priceRange { minVariantPrice { amount currencyCode } }
+          metafield(namespace: "custom", key: "layout_konfiguration") {
+            reference {
+              ... on Metaobject {
+                id
+                fields {
+                  key value
+                  references(first: 10) {
+                    nodes {
+                      ... on Product {
+                        id title handle
+                        featuredImage { url altText }
+                        priceRange { minVariantPrice { amount currencyCode } }
+                        variants(first: 1) { edges { node { id } } }
+                      }
+                      ... on ProductVariant {
+                        id
+                        price { amount currencyCode }
+                        product {
+                          id title handle
+                          featuredImage { url altText }
+                          priceRange { minVariantPrice { amount currencyCode } }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+type DesignProductRaw = Product & {
+  metafield?: { reference?: ZusatzoptionenRaw | null } | null;
+};
+
+export async function getDesignProducts(
+  locale?: string,
+): Promise<(Product & { zusatzoptionen: ReturnType<typeof parseZusatzoptionen> | null })[]> {
+  const response = await shopifyFetch<{
+    products: { edges: Array<{ node: DesignProductRaw }> };
+  }>({
+    query: DESIGN_PRODUCTS_QUERY,
+    variables: { first: 50, query: "tag:CustomDesign" },
+    locale,
+    revalidate: 3600,
+  });
+
+  return response.products.edges.map(({ node: product }) => {
+    const rawRef = product.metafield?.reference ?? null;
+    const zusatzoptionen = rawRef ? parseZusatzoptionen(rawRef) : null;
+    const { metafield: _drop, ...cleanProduct } = product;
+    return { ...cleanProduct, zusatzoptionen };
+  });
+}
+
 export const getProductByHandle = unstable_cache(
   _getProductByHandle,
   ["product-by-handle"],
@@ -396,7 +477,7 @@ export async function getProductsPage(params: {
 }): Promise<ProductsPageResult> {
   const { page = 1, pageSize = 15, query, sortKey = "BEST_SELLING", reverse = false, locale } = params;
   const targetCursorPosition = (page - 1) * pageSize;
-  const UNFILTERED = "-tag:CustomDesign";
+  const UNFILTERED = HIDDEN_TAGS_QUERY;
 
   // Parallel: (a) traverse filtered products for cursor + filteredCount,
   //           (b) traverse unfiltered products for totalCount
@@ -411,7 +492,7 @@ export async function getProductsPage(params: {
 
   const totalPages = Math.max(1, Math.ceil(filteredCount / pageSize));
   return {
-    products: res.products.edges.map((e) => e.node),
+    products: filterHiddenProducts(res.products.edges.map((e) => e.node)),
     filteredCount,
     totalCount,
     page,

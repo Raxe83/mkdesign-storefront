@@ -6,6 +6,8 @@ export type ProductOption = {
   variantId:      string | null;
   price:          string;
   canvasPresetId: string;
+  /** Erstes Zusatzprodukt aus `zusatzoptionen` → aktiviert Seite B und definiert den Aufpreis. */
+  sideBZusatzprodukt: { variantId: string; price: string } | null;
 };
 
 export type SidebarTab = "shapes" | "text" | "image";

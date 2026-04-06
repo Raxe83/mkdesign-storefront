@@ -309,12 +309,13 @@ export function useDesignCanvas(
 
   return {
     // from init
-    canvasElRef:  init.canvasElRef,
-    fileInputRef: init.fileInputRef,
-    wrapperRef:   init.wrapperRef,
-    canvasReady:  init.canvasReady,
-    objectCount:  init.objectCount,
-    canvasWidth:  canvasPreset.width,
+    canvasElRef:   init.canvasElRef,
+    fileInputRef:  init.fileInputRef,
+    wrapperRef:    init.wrapperRef,
+    canvasReady:   init.canvasReady,
+    objectCount:   init.objectCount,
+    lastModified:  init.lastModified,
+    canvasWidth:   canvasPreset.width,
     canvasHeight: canvasPreset.height,
     wrapperWidth: init.wrapperWidth,
     canvasScale:  Math.min(1, init.wrapperWidth / canvasPreset.width),

@@ -25,9 +25,10 @@ export function useCanvasInit(canvasPreset: CanvasPreset) {
   const wrapperRef      = useRef<HTMLDivElement>(null);
   const canvasPresetRef = useRef<CanvasPreset>(canvasPreset);
 
-  const [canvasReady,  setCanvasReady]  = useState(false);
-  const [objectCount,  setObjectCount]  = useState(0);
-  const [wrapperWidth, setWrapperWidth] = useState(canvasPreset.width);
+  const [canvasReady,   setCanvasReady]   = useState(false);
+  const [objectCount,   setObjectCount]   = useState(0);
+  const [wrapperWidth,  setWrapperWidth]  = useState(canvasPreset.width);
+  const [lastModified,  setLastModified]  = useState(0);
 
   // Selection state (synced from canvas events)
   const [hasActiveObject,  setHasActiveObject]  = useState(false);
@@ -97,7 +98,8 @@ export function useCanvasInit(canvasPreset: CanvasPreset) {
       });
       fabricRef.current = canvas;
 
-      const syncCount     = () => setObjectCount(canvas!.getObjects().length);
+      const touch         = () => setLastModified(Date.now());
+      const syncCount     = () => { setObjectCount(canvas!.getObjects().length); touch(); };
       const syncSelection = () => {
         const obj = canvas!.getActiveObject();
         if (!obj) return;
@@ -121,6 +123,7 @@ export function useCanvasInit(canvasPreset: CanvasPreset) {
 
       canvas.on("object:added",      syncCount);
       canvas.on("object:removed",    syncCount);
+      canvas.on("object:modified",   touch);
       canvas.on("selection:created", syncSelection);
       canvas.on("selection:updated", syncSelection);
       canvas.on("selection:cleared", () => {
@@ -169,7 +172,7 @@ export function useCanvasInit(canvasPreset: CanvasPreset) {
     // refs
     canvasElRef, fileInputRef, wrapperRef, fabricRef, canvasPresetRef,
     // status
-    canvasReady, objectCount, wrapperWidth,
+    canvasReady, objectCount, wrapperWidth, lastModified,
     // selection state + setters (setters used by apply callbacks in useDesignCanvas)
     hasActiveObject,  setHasActiveObject,
     activeObjectType, setActiveObjectType,

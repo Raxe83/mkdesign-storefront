@@ -1,6 +1,7 @@
 import { shopifyFetch } from "./client";
 import type { Product } from "../../types/shopify";
 import { ShopifyCollection } from "../../components/CollectionsList";
+import { HIDDEN_TAGS_QUERY, filterHiddenProducts } from "../../utils/productVisibility";
 
 export async function getCollections(
   first = 6,
@@ -19,7 +20,7 @@ export async function getCollections(
               url
               altText
             }
-            products(first: 4) {
+            products(first: 4, query: "${HIDDEN_TAGS_QUERY}") {
               edges {
                 node {
                   id
@@ -144,11 +145,7 @@ export async function getProductsByCollection(
 
     const edges: Array<{ node: Product }> = res.collection.products.edges;
     const pageInfo: { hasNextPage: boolean; endCursor: string } = res.collection.products.pageInfo;
-    all.push(
-      ...edges
-        .map((e: { node: Product }) => e.node)
-        .filter((p: Product) => !p.tags.includes("CustomDesign")),
-    );
+    all.push(...filterHiddenProducts(edges.map((e: { node: Product }) => e.node)));
 
     hasNextPage = pageInfo.hasNextPage && (first === undefined || all.length < first);
     cursor = pageInfo.endCursor;

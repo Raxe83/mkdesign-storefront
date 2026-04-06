@@ -1,11 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useDesignDraft } from "./hooks/useDesignDraft";
 import { Hand, HelpCircle, Info, Loader2, Monitor, X } from "lucide-react";
 import { cn } from "@/app/utils/utils";
 import { useCart } from "@/app/context/CartContext";
 import { getPresetForTitle } from "./constants";
-import { getBarrelEntry, type BarrelFit } from "./barrel";
+import { getBarrelEntry } from "./barrel";
 import { useDesignCanvas } from "./hooks/useDesignCanvas";
 import { useEditorProducts } from "./hooks/useEditorProducts";
 import { useEditorZoomPan } from "./hooks/useEditorZoomPan";
@@ -79,10 +80,59 @@ export default function DesignEditor() {
   );
 
   /* ── Dual canvas (Seite A / B) ─────────────────────────────────── */
+  const hasSideB = !!selectedProduct?.sideBZusatzprodukt;
+  const [sideBEnabled, setSideBEnabled] = useState(false);
   const [activeSide, setActiveSide] = useState<"A" | "B">("A");
   const sideAJsonRef = useRef<object | null>(null);
   const sideBJsonRef = useRef<object | null>(null);
   const [sideBCount, setSideBCount] = useState(0);
+
+  /* ── Draft (localStorage, 24h TTL) ─────────────────────────────── */
+  const draft        = useDesignDraft();
+  const saveTimer    = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  // Produkt wechsel oder Canvas-Ready → State zurücksetzen + Draft laden
+  useEffect(() => {
+    if (!canvas.canvasReady || !selectedProduct) return;
+
+    clearTimeout(saveTimer.current);
+    setSideBEnabled(false);
+    sideBJsonRef.current = null;
+    sideAJsonRef.current = null;
+    setSideBCount(0);
+    setActiveSide("A");
+
+    const saved = draft.load(selectedProduct.id);
+    if (saved) {
+      sideAJsonRef.current = saved.sideAJson;
+      sideBJsonRef.current = saved.sideBJson;
+      if (saved.sideBEnabled) setSideBEnabled(true);
+      canvas.loadCanvasJSON(saved.sideAJson);
+    } else {
+      canvas.loadCanvasJSON(null);
+    }
+  }, [selectedProduct?.id, canvas.canvasReady]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Debounced save bei jeder Canvas-Änderung (Objekt add/remove/modify)
+  useEffect(() => {
+    if (!canvas.canvasReady || !selectedProduct || canvas.lastModified === 0) return;
+    clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      const sideAJson = activeSide === "A" ? (canvas.getCanvasJSON() ?? null) : sideAJsonRef.current;
+      const sideBJson = activeSide === "B" ? (canvas.getCanvasJSON() ?? null) : sideBJsonRef.current;
+      draft.save(selectedProduct.id, sideAJson, sideBJson, sideBEnabled);
+    }, 1500);
+    return () => clearTimeout(saveTimer.current);
+  }, [canvas.lastModified]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* ── Gesamtpreis (Basis + Seite B falls aktiviert) ─────────────── */
+  const displayPrice = useMemo(() => {
+    if (!sideBEnabled || !selectedProduct?.sideBZusatzprodukt) return selectedProduct?.price ?? null;
+    const base  = parseFloat(selectedProduct.price);
+    const extra = parseFloat(selectedProduct.sideBZusatzprodukt.price);
+    const code  = selectedProduct.price.split(" ")[1] ?? "EUR";
+    return `${(base + extra).toFixed(2)} ${code}`;
+  }, [sideBEnabled, selectedProduct]);
 
   const switchSide = useCallback(async (to: "A" | "B") => {
     if (to === activeSide) return;
@@ -90,18 +140,24 @@ export default function DesignEditor() {
     const currentCount = canvas.objectCount;
 
     if (activeSide === "A") {
-      // Seite A verlassen → A-State sichern, B laden
       sideAJsonRef.current = currentJson;
       await canvas.loadCanvasJSON(sideBJsonRef.current);
     } else {
-      // Seite B verlassen → B-State sichern, A laden
       sideBJsonRef.current = currentJson;
       setSideBCount(currentCount);
       await canvas.loadCanvasJSON(sideAJsonRef.current);
     }
 
     setActiveSide(to);
-  }, [activeSide, canvas]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Sofort speichern nach Seitenwechsel (Refs sind jetzt aktuell)
+    if (selectedProduct) {
+      clearTimeout(saveTimer.current);
+      const sideAJson = to === "B" ? currentJson : sideBJsonRef.current;
+      const sideBJson = to === "A" ? currentJson : sideAJsonRef.current;
+      draft.save(selectedProduct.id, sideAJson as object | null, sideBJson as object | null, sideBEnabled);
+    }
+  }, [activeSide, canvas, selectedProduct, sideBEnabled, draft]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── Sidebar state ─────────────────────────────────────────────── */
   const [activeTab, setActiveTab] = useState<SidebarTab>("shapes");
@@ -130,8 +186,20 @@ export default function DesignEditor() {
       attrs.push({ key: "Design-Vorschau-B", value: result.sideB.previewUrl });
       attrs.push({ key: "_design_json_b",    value: result.sideB.jsonUrl });
     }
-    await addItem(selectedProduct.variantId, 1, attrs);
-  }, [addItem, selectedProduct?.variantId, canvas.uploadState]);
+    // Seite B als additionalLine → beides in einer Shopify-Mutation, ein Cart-Refresh
+    const additionalLines = (result.sideB && selectedProduct.sideBZusatzprodukt)
+      ? [{
+          variantId:        selectedProduct.sideBZusatzprodukt.variantId,
+          quantity:         1,
+          customAttributes: [
+            { key: "_linkedTo",         value: selectedProduct.variantId },
+            { key: "_seite_b_aufpreis", value: "true" },
+          ],
+        }]
+      : undefined;
+
+    await addItem(selectedProduct.variantId, 1, attrs, additionalLines);
+  }, [addItem, selectedProduct, canvas.uploadState]);
 
   const [showHelp, setShowHelp] = useState(false);
 
@@ -242,27 +310,45 @@ export default function DesignEditor() {
 
             {/* ── Side A / B Tabs ──────────────────────────────── */}
             <div className="flex items-center gap-2" data-no-deselect>
-              {(["A", "B"] as const).map((side) => (
+              {/* Seite A — immer sichtbar */}
+              <button
+                onClick={() => switchSide("A")}
+                className={cn(
+                  "flex items-center gap-1.5 px-3.5 py-1.5 rounded border text-[11px] font-medium transition-all duration-200 cursor-pointer",
+                  activeSide === "A"
+                    ? "border-rust bg-rustLight dark:bg-rustLight/20 text-rust"
+                    : "border-stone-200/80 dark:border-zinc-700 text-muted hover:text-primary hover:border-rust/40 dark:hover:text-cream hover:bg-stone-50 dark:hover:bg-zinc-800",
+                )}
+              >
+                Seite A
+              </button>
+
+              {/* Seite B: erst "+" zum Aktivieren, dann Tab */}
+              {hasSideB && !sideBEnabled && (
                 <button
-                  key={side}
-                  onClick={() => switchSide(side)}
+                  onClick={() => { setSideBEnabled(true); switchSide("B"); }}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded border border-dashed border-stone-300 dark:border-zinc-600 text-[11px] font-medium text-muted hover:text-rust hover:border-rust/60 transition-all duration-200 cursor-pointer"
+                  title="Zweite Seite hinzufügen"
+                >
+                  <span className="text-base leading-none">+</span>
+                  {selectedProduct!.sideBZusatzprodukt!.price}
+                </button>
+              )}
+              {hasSideB && sideBEnabled && (
+                <button
+                  onClick={() => switchSide("B")}
                   className={cn(
                     "flex items-center gap-1.5 px-3.5 py-1.5 rounded border text-[11px] font-medium transition-all duration-200 cursor-pointer",
-                    activeSide === side
+                    activeSide === "B"
                       ? "border-rust bg-rustLight dark:bg-rustLight/20 text-rust"
                       : "border-stone-200/80 dark:border-zinc-700 text-muted hover:text-primary hover:border-rust/40 dark:hover:text-cream hover:bg-stone-50 dark:hover:bg-zinc-800",
                   )}
                 >
-                  Seite {side}
-                  {side === "B" && sideBCount > 0 && (
-                    <span className="ml-1 px-1.5 py-0.5 rounded-sm bg-rust/15 text-rust text-[9px] font-semibold">+5 €</span>
-                  )}
+                  Seite B
+                  <span className="ml-0.5 px-1.5 py-0.5 rounded-sm bg-rust/15 text-rust text-[9px] font-semibold">
+                    +{selectedProduct!.sideBZusatzprodukt!.price}
+                  </span>
                 </button>
-              ))}
-              {sideBCount > 0 && (
-                <span className="text-[11px] text-muted ml-1">
-                  Beide Seiten bedruckt — Aufpreis wird beim Speichern berechnet
-                </span>
               )}
             </div>
 
@@ -365,6 +451,8 @@ export default function DesignEditor() {
               selectedProduct={selectedProduct}
               objectCount={canvas.objectCount}
               uploadState={canvas.uploadState}
+              displayPrice={displayPrice}
+              sideBEnabled={sideBEnabled}
               onSelectProduct={(p) => { setSelectedProduct(p); canvas.resetUploadState(); }}
               onSave={handleSave}
               onResetUpload={canvas.resetUploadState}

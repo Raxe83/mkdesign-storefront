@@ -1,5 +1,6 @@
 import { getProductsByCollection } from "../../services/shopify";
 import { getProductsPage, getProductTypes, type ShopifySortKey } from "../../services/shopify/products";
+import { HIDDEN_TAGS } from "../../utils/productVisibility";
 import ProductsGrid from "./ProductsGrid";
 import ProductsGridPaged from "./ProductsGridPaged";
 type PageSizeOption = 15 | 30 | 40;
@@ -29,7 +30,7 @@ function buildSortParams(sort: string): { sortKey: ShopifySortKey; reverse: bool
 }
 
 function buildShopifyQuery(params: { search?: string; types?: string[]; priceMin?: string; priceMax?: string }): string {
-  const parts = ["-tag:CustomDesign"];
+  const parts = HIDDEN_TAGS.map((t) => `-tag:${t}`);
   if (params.search?.trim()) parts.push(params.search.trim());
   if (params.types && params.types.length === 1) {
     parts.push(`product_type:"${params.types[0].replace(/"/g, "")}"`);

@@ -43,7 +43,12 @@ const CartPageItem = ({ node, linkedItems, index }: CartPageItemProps) => {
     for (const child of linkedItems) removeItem(child.id);
   };
 
-  const lineTotal = (parseFloat(node.merchandise.price?.amount ?? "0") * localQty).toString();
+  const baseAmount   = parseFloat(node.merchandise.price?.amount ?? "0") * localQty;
+  const linkedAmount = linkedItems.reduce(
+    (sum, child) => sum + parseFloat(child.merchandise.price?.amount ?? "0") * localQty,
+    0,
+  );
+  const lineTotal    = (baseAmount + linkedAmount).toString();
   const isCustomDesign = node.attributes?.some((a) => a.key === "_design_json");
   const previewUrl  = node.attributes?.find((a) => a.key === "Design-Vorschau")?.value;
   const previewUrlB = node.attributes?.find((a) => a.key === "Design-Vorschau-B")?.value;
@@ -112,9 +117,11 @@ const CartPageItem = ({ node, linkedItems, index }: CartPageItemProps) => {
         {linkedItems.length > 0 && (
           <div className="mt-2.5 pt-2.5 border-t border-zinc-100 dark:border-zinc-800 space-y-1.5">
             <p className="text-[10px] uppercase tracking-widest text-muted dark:text-neutral-500">Zusatzprodukte</p>
-            {linkedItems.map((child) => (
+            {linkedItems.map((child) => {
+              const isSideBItem = child.attributes?.some(a => a.key === "_seite_b_aufpreis");
+              return (
               <div key={child.id} className="flex items-center gap-2">
-                {child.merchandise.product.featuredImage && (
+                {!isSideBItem && child.merchandise.product.featuredImage && (
                   <Image
                     src={child.merchandise.product.featuredImage.url}
                     alt={child.merchandise.product.featuredImage.altText ?? child.merchandise.product.title}
@@ -124,20 +131,22 @@ const CartPageItem = ({ node, linkedItems, index }: CartPageItemProps) => {
                   />
                 )}
                 <span className="flex-1 text-xs text-muted dark:text-neutral-400 truncate">
-                  {child.merchandise.product.title}
+                  {isSideBItem ? "Seite B (beidseitig)" : child.merchandise.product.title}
                 </span>
                 <span className="text-xs text-muted tabular-nums shrink-0">
                   +{formatPrice(child.merchandise.price?.amount ?? "0", child.merchandise.price?.currencyCode ?? "EUR")}
                 </span>
-                <button
-                  onClick={() => removeItem(child.id)}
-                  className="text-muted hover:text-rust transition-colors duration-150 shrink-0"
-                  aria-label="Entfernen"
-                >
-                  <Trash2 size={11} />
-                </button>
+                {!isSideBItem && (
+                  <button
+                    onClick={() => removeItem(child.id)}
+                    className="text-muted hover:text-rust transition-colors duration-150 shrink-0"
+                    aria-label="Entfernen"
+                  >
+                    <Trash2 size={11} />
+                  </button>
+                )}
               </div>
-            ))}
+            );})}
           </div>
         )}
 

@@ -13,6 +13,8 @@ type Props = {
   selectedProduct:       ProductOption | null;
   objectCount:           number;
   uploadState:           UploadState;
+  displayPrice:          string | null;
+  sideBEnabled:          boolean;
   onSelectProduct:       (p: ProductOption) => void;
   onSave:                () => void;
   onResetUpload:         () => void;
@@ -21,7 +23,7 @@ type Props = {
 
 export function ProductPanel({
   products, productsLoading, selectedProduct,
-  objectCount, uploadState,
+  objectCount, uploadState, displayPrice, sideBEnabled,
   onSelectProduct, onSave, onResetUpload, onAddToCart,
 }: Props) {
   const isUploading = uploadState.status === "uploading";
@@ -69,8 +71,12 @@ export function ProductPanel({
               ? <Loader2 size={13} className="animate-spin absolute right-2.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
               : <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted" />}
           </div>
-          {selectedProduct?.price && (
-            <p className="text-xs text-stone dark:text-muted mt-1.5 text-right">ab {selectedProduct.price}</p>
+          {displayPrice && (
+            <p className="text-xs text-stone dark:text-muted mt-1.5 text-right font-medium">
+              {displayPrice !== selectedProduct?.price
+                ? <><span className="line-through opacity-50 mr-1">{selectedProduct?.price}</span>{displayPrice}</>
+                : <>ab {displayPrice}</>}
+            </p>
           )}
         </div>
       </div>
@@ -92,8 +98,10 @@ export function ProductPanel({
               <div className="flex flex-col gap-1.5">
                 <UploadStep label="Seite A — Vorschau" done={["json-a","preview-b","json-b"].includes(uploadState.step)} active={uploadState.step === "preview-a"} />
                 <UploadStep label="Seite A — JSON"     done={["preview-b","json-b"].includes(uploadState.step)}          active={uploadState.step === "json-a"} />
-                <UploadStep label="Seite B — Vorschau" done={uploadState.step === "json-b"}                               active={uploadState.step === "preview-b"} />
-                <UploadStep label="Seite B — JSON"     done={false}                                                       active={uploadState.step === "json-b"} />
+                {sideBEnabled && <>
+                  <UploadStep label="Seite B — Vorschau" done={uploadState.step === "json-b"} active={uploadState.step === "preview-b"} />
+                  <UploadStep label="Seite B — JSON"     done={false}                         active={uploadState.step === "json-b"} />
+                </>}
               </div>
             )}
 
@@ -123,6 +131,7 @@ export function ProductPanel({
           <SaveResultPanel
             result={(uploadState as { status: "success"; result: DualDesignUploadResult }).result}
             variantId={selectedProduct?.variantId ?? null}
+            totalPrice={displayPrice}
             onAddToCart={onAddToCart}
             onReset={onResetUpload}
           />
