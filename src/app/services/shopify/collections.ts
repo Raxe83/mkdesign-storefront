@@ -1,7 +1,7 @@
 import { shopifyFetch } from "./client";
 import type { Product } from "../../types/shopify";
 import { ShopifyCollection } from "../../components/CollectionsList";
-import { HIDDEN_TAGS_QUERY, filterHiddenProducts } from "../../utils/productVisibility";
+import { filterHiddenProducts } from "../../utils/productVisibility";
 
 export async function getCollections(
   first = 6,
@@ -19,25 +19,6 @@ export async function getCollections(
             image {
               url
               altText
-            }
-            products(first: 4, query: "${HIDDEN_TAGS_QUERY}") {
-              edges {
-                node {
-                  id
-                  title
-                  handle
-                  featuredImage {
-                    url
-                    altText
-                  }
-                  priceRange {
-                    minVariantPrice {
-                      amount
-                      currencyCode
-                    }
-                  }
-                }
-              }
             }
           }
         }
