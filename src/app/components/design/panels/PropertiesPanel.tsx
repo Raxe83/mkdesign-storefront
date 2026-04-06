@@ -1,146 +1,188 @@
 "use client";
 
-import { Copy, MousePointer, Trash2 } from "lucide-react";
+import {
+  AlignLeft, AlignCenter, AlignRight,
+  Bold, Italic, Underline,
+  Copy, MousePointer, Trash2,
+  ChevronUp, ChevronDown,
+  Minus, Type,
+} from "lucide-react";
 import { cn } from "@/app/utils/utils";
+import { FONT_OPTIONS } from "../constants";
 
 type Props = {
   hasActiveObject:  boolean;
   isTextSelected:   boolean;
   strokeWidth:      number;
   fillColor:        string;
-  opacity:          number;
   textAlign:        "left" | "center" | "right";
   isBold:           boolean;
   isItalic:         boolean;
+  isUnderline:      boolean;
+  fontFamily:       string;
+  fontSize:         number;
   applyStrokeWidth: (n: number) => void;
   applyFillColor:   (c: string) => void;
-  applyOpacity:     (n: number) => void;
   applyTextAlign:   (a: "left" | "center" | "right") => void;
   applyBold:        (b: boolean) => void;
   applyItalic:      (b: boolean) => void;
+  applyUnderline:   (b: boolean) => void;
+  applyFontFamily:  (f: string) => void;
+  applyFontSize:    (n: number) => void;
   bringForward:     () => void;
   sendBackward:     () => void;
   duplicate:        () => void;
   deleteSelected:   () => void;
+  onAddText:        () => void;
 };
+
+const SEP = <div className="h-5 w-px bg-stone-200/80 dark:bg-zinc-700 shrink-0 mx-0.5" />;
 
 export function PropertiesPanel({
   hasActiveObject, isTextSelected,
-  strokeWidth, fillColor, opacity,
-  textAlign, isBold, isItalic,
-  applyStrokeWidth, applyFillColor, applyOpacity,
-  applyTextAlign, applyBold, applyItalic,
+  strokeWidth, fillColor,
+  textAlign, isBold, isItalic, isUnderline,
+  fontFamily, fontSize,
+  applyStrokeWidth, applyFillColor,
+  applyTextAlign, applyBold, applyItalic, applyUnderline,
+  applyFontFamily, applyFontSize,
   bringForward, sendBackward, duplicate, deleteSelected,
+  onAddText,
 }: Props) {
-  const activeBtn   = "border-rust bg-rustLight dark:bg-rustLight/20 text-rust";
-  const inactiveBtn = "border-stone-200/80 dark:border-zinc-700 text-muted hover:border-rust/40";
+
+  const on  = "border-rust bg-rustLight dark:bg-rustLight/20 text-rust";
+  const off = "border-stone-200/80 dark:border-zinc-700 text-muted hover:border-rust/40 hover:text-primary dark:hover:text-cream hover:bg-stone-50 dark:hover:bg-zinc-800";
+  const btn = "w-8 h-8 rounded border flex items-center justify-center transition-all duration-150 cursor-pointer shrink-0";
 
   const noFill = fillColor === "transparent" || fillColor === "";
 
   return (
-    <div className="w-full rounded border border-stone-200/60 dark:border-zinc-700/60 bg-surface dark:bg-zinc-900 shadow-sm px-4 py-2.5">
+    <div className="w-full rounded border border-stone-200/60 dark:border-zinc-700/60 bg-surface dark:bg-zinc-900 shadow-sm px-3 py-1.5 flex flex-col gap-1.5">
 
-      {/* ── Idle ───────────────────────────────────────────────────── */}
-      {!hasActiveObject && (
-        <div className="flex items-center gap-2 text-[12px] py-1 text-muted/70 italic">
-          <MousePointer size={12} className="shrink-0" />
-          Kein Element ausgewählt — klicke auf ein Objekt auf der Leinwand
-        </div>
-      )}
+      {/* ── Hauptzeile ───────────────────────────────────────────────── */}
+      <div className="flex flex-wrap items-center gap-y-1.5 gap-x-0.5">
 
-      {/* ── Active object controls ─────────────────────────────────── */}
-      {hasActiveObject && (
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+        {/* Immer sichtbar: Text hinzufügen */}
+        <button
+          onClick={onAddText}
+          title="Text hinzufügen"
+          className={cn(btn, off, "gap-1 px-2.5 w-auto text-[11px] font-medium")}
+        >
+          <Type size={12} /> Text
+        </button>
 
-          <span className="text-[10px] font-medium text-muted uppercase tracking-[0.1em] shrink-0">
-            Objekt
-          </span>
+        {/* ── Schrift (nur bei Textauswahl) ───────────────────────── */}
+        {isTextSelected && (
+          <>
+            {SEP}
+            <select
+              value={fontFamily}
+              onChange={(e) => applyFontFamily(e.target.value)}
+              style={{ fontFamily }}
+              className="h-8 rounded border border-stone-200 dark:border-zinc-700 bg-background dark:bg-zinc-950 text-primary dark:text-cream text-[12px] px-2 focus:outline-none focus:ring-1 focus:ring-rust/40 cursor-pointer max-w-[120px]"
+            >
+              {FONT_OPTIONS.map((f) => (
+                <option key={f.value} value={f.value} style={{ fontFamily: f.value }}>
+                  {f.label}
+                </option>
+              ))}
+            </select>
 
-          {/* ── Füllung (transparent toggle) ── */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            <span className="text-[10px] text-muted whitespace-nowrap">Füllung</span>
+            <div className="flex items-center gap-0.5">
+              <button
+                onClick={() => applyFontSize(Math.max(10, fontSize - 2))}
+                title="Kleiner"
+                className={cn(btn, off, "text-base font-bold")}
+              >−</button>
+              <span className="w-9 text-center text-[12px] font-medium text-primary dark:text-cream tabular-nums select-none">
+                {fontSize}
+              </span>
+              <button
+                onClick={() => applyFontSize(Math.min(120, fontSize + 2))}
+                title="Größer"
+                className={cn(btn, off, "text-base font-bold")}
+              >+</button>
+            </div>
+
+            {SEP}
+
+            <div className="flex items-center gap-0.5">
+              <button onClick={() => applyBold(!isBold)}            title="Fett"          className={cn(btn, isBold      ? on : off)}><Bold      size={13} /></button>
+              <button onClick={() => applyItalic(!isItalic)}        title="Kursiv"        className={cn(btn, isItalic    ? on : off)}><Italic    size={13} /></button>
+              <button onClick={() => applyUnderline(!isUnderline)}  title="Unterstrichen" className={cn(btn, isUnderline ? on : off)}><Underline size={13} /></button>
+            </div>
+
+            {SEP}
+
+            <div className="flex items-center gap-0.5">
+              <button onClick={() => applyTextAlign("left")}   title="Links"  className={cn(btn, textAlign === "left"   ? on : off)}><AlignLeft   size={13} /></button>
+              <button onClick={() => applyTextAlign("center")} title="Mitte"  className={cn(btn, textAlign === "center" ? on : off)}><AlignCenter size={13} /></button>
+              <button onClick={() => applyTextAlign("right")}  title="Rechts" className={cn(btn, textAlign === "right"  ? on : off)}><AlignRight  size={13} /></button>
+            </div>
+
+            {SEP}
+          </>
+        )}
+
+        {/* ── Objekt-Eigenschaften (bei jeder Auswahl) ───────────── */}
+        {hasActiveObject && (
+          <>
             <button
               onClick={() => applyFillColor(noFill ? "#ffffff" : "transparent")}
               title={noFill ? "Füllung aktivieren" : "Keine Füllung"}
-              className={cn(
-                "w-5 h-5 rounded border text-[9px] flex items-center justify-center transition-all cursor-pointer font-medium",
-                noFill
-                  ? "border-rust bg-rustLight dark:bg-rustLight/20 text-rust"
-                  : "border-stone-300 dark:border-zinc-600 text-muted hover:border-rust/40",
-              )}
-            >∅</button>
-          </div>
-
-          <div className="h-4 w-px bg-stone-200/80 dark:bg-zinc-700 shrink-0" />
-
-          {/* ── Kontur ── */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            <span className="text-[10px] text-muted whitespace-nowrap">
-              Kontur — <span className="text-primary dark:text-cream">{strokeWidth}px</span>
-            </span>
-            <input
-              type="range" min={0} max={20} step={1}
-              value={strokeWidth}
-              onChange={(e) => applyStrokeWidth(Number(e.target.value))}
-              className="w-20 accent-rust cursor-pointer"
-            />
-          </div>
-
-          <div className="h-4 w-px bg-stone-200/80 dark:bg-zinc-700 shrink-0" />
-
-          {/* ── Deckkraft ── */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            <span className="text-[10px] text-muted whitespace-nowrap">
-              Deckkraft — <span className="text-primary dark:text-cream">{opacity}%</span>
-            </span>
-            <input
-              type="range" min={10} max={100} step={5}
-              value={opacity}
-              onChange={(e) => applyOpacity(Number(e.target.value))}
-              className="w-20 accent-rust cursor-pointer"
-            />
-          </div>
-
-          {/* ── Text controls ── */}
-          {isTextSelected && (
-            <>
-              <div className="h-4 w-px bg-stone-200/80 dark:bg-zinc-700 shrink-0" />
-              <div className="flex gap-1">
-                <button onClick={() => applyBold(!isBold)}       className={cn("w-7 h-7 rounded border text-[11px] font-bold transition-all duration-150 cursor-pointer", isBold            ? activeBtn : inactiveBtn)}>B</button>
-                <button onClick={() => applyItalic(!isItalic)}   className={cn("w-7 h-7 rounded border text-[11px] italic   transition-all duration-150 cursor-pointer", isItalic          ? activeBtn : inactiveBtn)}>I</button>
-                <button onClick={() => applyTextAlign("left")}   className={cn("w-7 h-7 rounded border text-[11px]          transition-all duration-150 cursor-pointer", textAlign === "left"   ? activeBtn : inactiveBtn)}>L</button>
-                <button onClick={() => applyTextAlign("center")} className={cn("w-7 h-7 rounded border text-[11px]          transition-all duration-150 cursor-pointer", textAlign === "center" ? activeBtn : inactiveBtn)}>M</button>
-                <button onClick={() => applyTextAlign("right")}  className={cn("w-7 h-7 rounded border text-[11px]          transition-all duration-150 cursor-pointer", textAlign === "right"  ? activeBtn : inactiveBtn)}>R</button>
-              </div>
-            </>
-          )}
-
-          <div className="h-4 w-px bg-stone-200/80 dark:bg-zinc-700 shrink-0" />
-
-          {/* ── Ebene ── */}
-          <div className="flex gap-1 shrink-0">
-            <button onClick={bringForward} className="px-2.5 h-7 rounded border border-stone-200/80 dark:border-zinc-700 text-muted hover:text-primary hover:border-rust/40 hover:bg-rustLight dark:hover:bg-zinc-800 text-[10px] font-medium transition-all duration-150 cursor-pointer">↑ Vorne</button>
-            <button onClick={sendBackward} className="px-2.5 h-7 rounded border border-stone-200/80 dark:border-zinc-700 text-muted hover:text-primary hover:border-rust/40 hover:bg-rustLight dark:hover:bg-zinc-800 text-[10px] font-medium transition-all duration-150 cursor-pointer">↓ Hinten</button>
-          </div>
-
-          {/* ── Aktionen ── */}
-          <div className="flex gap-1 shrink-0 ml-auto">
-            <button
-              onClick={duplicate}
-              className="flex items-center gap-1.5 px-2.5 h-7 rounded border border-stone-200/80 dark:border-zinc-700 text-stone dark:text-muted hover:text-primary dark:hover:text-cream hover:bg-stone-50 dark:hover:bg-zinc-800 text-[10px] font-medium transition-colors duration-200 cursor-pointer"
+              className={cn(btn, noFill ? on : off)}
             >
-              <Copy size={11} /> Duplizieren
+              <Minus size={13} />
             </button>
-            <button
-              onClick={deleteSelected}
-              className="flex items-center gap-1.5 px-2.5 h-7 rounded border border-red-200/60 dark:border-red-900/40 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 text-[10px] font-medium transition-colors duration-200 cursor-pointer"
-            >
-              <Trash2 size={11} /> Löschen
-            </button>
-          </div>
 
-        </div>
-      )}
+            {SEP}
+
+            <div className="flex items-center gap-1.5 shrink-0 px-1">
+              <span className="text-[10px] text-muted whitespace-nowrap hidden sm:inline">
+                Kontur <span className="text-primary dark:text-cream font-medium">{strokeWidth}px</span>
+              </span>
+              <input
+                type="range" min={0} max={20} step={1}
+                value={strokeWidth}
+                onChange={(e) => applyStrokeWidth(Number(e.target.value))}
+                className="w-16 accent-rust cursor-pointer"
+              />
+            </div>
+
+            {SEP}
+
+            <div className="flex items-center gap-0.5">
+              <button onClick={bringForward}  title="Nach vorne"  className={cn(btn, off)}><ChevronUp   size={14} /></button>
+              <button onClick={sendBackward}  title="Nach hinten" className={cn(btn, off)}><ChevronDown size={14} /></button>
+            </div>
+
+            {SEP}
+
+            <div className="flex items-center gap-0.5">
+              <button onClick={duplicate}      title="Duplizieren" className={cn(btn, off)}><Copy size={13} /></button>
+              <button
+                onClick={deleteSelected}
+                title="Löschen"
+                className="w-8 h-8 rounded border border-red-200/60 dark:border-red-900/40 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 flex items-center justify-center transition-all duration-150 cursor-pointer shrink-0"
+              >
+                <Trash2 size={13} />
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* Hint wenn nichts ausgewählt */}
+        {!hasActiveObject && (
+          <>
+            {SEP}
+            <div className="flex items-center gap-1.5 text-[11px] text-muted/60 italic py-0.5 pl-1">
+              <MousePointer size={11} className="shrink-0" />
+              Klicke auf ein Objekt um es zu bearbeiten
+            </div>
+          </>
+        )}
+      </div>
+
     </div>
   );
 }

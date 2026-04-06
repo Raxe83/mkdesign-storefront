@@ -42,15 +42,23 @@ const CartPopupItem = ({ node, linkedItems }: CartPopupItemProps) => {
   };
 
   const isCustomDesign = node.attributes?.some((a) => a.key === "_design_json");
-  const previewUrl = node.attributes?.find((a) => a.key === "Design-Vorschau")?.value;
-  const visibleAttrs = node.attributes?.filter((a) => !a.key.startsWith("_")) ?? [];
+  const previewUrl  = node.attributes?.find((a) => a.key === "Design-Vorschau")?.value;
+  const previewUrlB = node.attributes?.find((a) => a.key === "Design-Vorschau-B")?.value;
+  const visibleAttrs = node.attributes?.filter((a) => !a.key.startsWith("_") && a.key !== "Design-Vorschau" && a.key !== "Design-Vorschau-B") ?? [];
 
   return (
     <div className="px-4 py-3 flex items-start gap-3">
       {/* Thumbnail */}
       {isCustomDesign && previewUrl ? (
-        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-sm border border-rust/30 bg-charcoal">
-          <Image src={previewUrl} alt="Dein Design" fill className="object-contain p-0.5" />
+        <div className="flex gap-1 shrink-0">
+          <div className="relative h-12 w-12 overflow-hidden rounded-sm border border-rust/30 bg-charcoal">
+            <Image src={previewUrl} alt="Seite A" fill className="object-contain p-0.5" />
+          </div>
+          {previewUrlB && (
+            <div className="relative h-12 w-12 overflow-hidden rounded-sm border border-rust/30 bg-charcoal">
+              <Image src={previewUrlB} alt="Seite B" fill className="object-contain p-0.5" />
+            </div>
+          )}
         </div>
       ) : (
         <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-sm border border-sand/40 dark:border-zinc-700 bg-white dark:bg-zinc-800">

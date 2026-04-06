@@ -1,10 +1,11 @@
-import type { ComponentType } from "react";
 import {
   BarrelNoLegs,
   BarrelSchale,
   BarrelSchaleXL,
   BarrelStehtisch,
 } from "@/app/components/illustrations/FireBarrels";
+import type { ComponentType } from "react";
+import { ZippoLighter } from "../illustrations/Zippolighter";
 
 export interface BarrelFit {
   /** Canvas display width as fraction of SVG display width. */
@@ -28,7 +29,7 @@ const BARREL_ENTRIES: BarrelEntry[] = [
   {
     keywords: ["stehtisch", "tisch", "table", "platte"],
     Component: BarrelStehtisch,
-    fit: { widthFrac: 0.53, svgAspect: 410 / 300, topFrac: 0.20, canvasH: 1240 },
+    fit: { widthFrac: 0.31, svgAspect: 0.8, topFrac: 0.20, canvasH: 1240 },
   },
   {
     keywords: ["schale xl", "xl schale"],
@@ -40,12 +41,17 @@ const BARREL_ENTRIES: BarrelEntry[] = [
     Component: BarrelSchale,
     fit: { widthFrac: 0.38, svgAspect: 120 / 300, topFrac: 0.19, canvasH: 250 },
   },
+    {
+    keywords: ["zippo", "feuerzeug", "zippo original"],
+    Component: ZippoLighter,
+    fit: { widthFrac: 0.33, svgAspect: 0.8, topFrac: 0.32, canvasH: 980 },
+  },
 ];
 
 export const BARREL_DEFAULT: BarrelEntry = {
   keywords: [],
   Component: BarrelNoLegs,
-  fit: { widthFrac: 0.53, svgAspect: 410 / 300, topFrac: 0.24, canvasH: 1150 },
+  fit: { widthFrac: 0.36, svgAspect: 0.8, topFrac: 0.2, canvasH: 1140 },
 };
 
 export function getBarrelEntry(title: string): BarrelEntry {

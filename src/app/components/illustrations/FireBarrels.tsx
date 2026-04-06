@@ -182,10 +182,10 @@ function WoodTabletop({ id }: { id: string }) {
         fill="#5a5450" opacity="0.35" />
 
       {/* ── Tischplatte (Unterseite bei y=50) ─────────────── */}
-      {/* Kante */}
-      <ellipse cx="150" cy="42" rx="185" ry="10" fill={`url(#${id}WoodEdge)`} stroke="#3d2812" strokeWidth="1" />
+      {/* Kante — cy leicht nach oben gesetzt damit kein Gap zum Top entsteht */}
+      <ellipse cx="150" cy="39" rx="187" ry="13" fill={`url(#${id}WoodEdge)`} stroke="#3d2812" strokeWidth="1" />
       {/* Oberfläche */}
-      <ellipse cx="150" cy="32" rx="185" ry="10" fill={`url(#${id}WoodTop)`} stroke="#7a5228" strokeWidth="1" />
+      <ellipse cx="150" cy="32" rx="185" ry="11" fill={`url(#${id}WoodTop)`} stroke="#7a5228" strokeWidth="1" />
 
       {/* Holzmaserung */}
       <g stroke="#c07a38" strokeWidth="1" fill="none" opacity="0.22">

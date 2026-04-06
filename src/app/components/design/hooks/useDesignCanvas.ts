@@ -1,11 +1,26 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { uploadDesign, uploadCanvasImage, type UploadState } from "@/app/lib/designApi";
+import { uploadDualDesign, uploadCanvasImage, type UploadState } from "@/app/lib/designApi";
 import { FONT_OPTIONS, type CanvasPreset } from "../constants";
 import type { FabricConf, ProductOption } from "../types";
 import type { FabricObject } from "fabric";
 import { useCanvasInit } from "./useCanvasInit";
+
+/** Rendert ein Fabric-JSON-Objekt auf einem Offscreen-Canvas und gibt ein PNG-DataURL zurück. */
+async function renderJsonToDataUrl(json: object, preset: CanvasPreset): Promise<string> {
+  const el = document.createElement("canvas");
+  el.width  = preset.width;
+  el.height = preset.height;
+  const { Canvas } = await import("fabric");
+  const fc = new Canvas(el, { width: preset.width, height: preset.height });
+  await fc.loadFromJSON(json);
+  fc.backgroundColor = "transparent";
+  fc.requestRenderAll();
+  const dataUrl = fc.toDataURL({ format: "png", multiplier: 2 });
+  fc.dispose();
+  return dataUrl;
+}
 
 export function useDesignCanvas(
   selectedProduct: ProductOption | null,
@@ -43,12 +58,6 @@ export function useDesignCanvas(
     if (obj) { obj.set("strokeWidth", w); fabricRef.current?.requestRenderAll(); }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const applyOpacity = useCallback((val: number) => {
-    init.setOpacity(val);
-    const obj = fabricRef.current?.getActiveObject();
-    if (obj) { obj.set("opacity", val / 100); fabricRef.current?.requestRenderAll(); }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
   const applyFillColor = useCallback((color: string) => {
     init.setFillColor(color);
     const obj = fabricRef.current?.getActiveObject();
@@ -63,10 +72,20 @@ export function useDesignCanvas(
 
   const applyTextAlign = useCallback((align: "left" | "center" | "right") => {
     init.setTextAlign(align);
-    const obj = fabricRef.current?.getActiveObject();
+    const canvas = fabricRef.current;
+    const obj = canvas?.getActiveObject();
     if (obj && (obj.type === "i-text" || obj.type === "text")) {
+      const w = canvasPresetRef.current.width;
       obj.set("textAlign", align);
-      fabricRef.current?.requestRenderAll();
+      // Snap position to canvas edge
+      if (align === "left") {
+        obj.set({ originX: "left", left: 10 });
+      } else if (align === "center") {
+        obj.set({ originX: "center", left: w / 2 });
+      } else {
+        obj.set({ originX: "right", left: w - 10 });
+      }
+      canvas?.requestRenderAll();
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -84,6 +103,15 @@ export function useDesignCanvas(
     const obj = fabricRef.current?.getActiveObject();
     if (obj && (obj.type === "i-text" || obj.type === "text")) {
       obj.set("fontStyle", italic ? "italic" : "normal");
+      fabricRef.current?.requestRenderAll();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const applyUnderline = useCallback((underline: boolean) => {
+    init.setIsUnderline(underline);
+    const obj = fabricRef.current?.getActiveObject();
+    if (obj && (obj.type === "i-text" || obj.type === "text")) {
+      obj.set("underline", underline);
       fabricRef.current?.requestRenderAll();
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -138,6 +166,34 @@ export function useDesignCanvas(
     });
     fabricRef.current.add(t);
     fabricRef.current.setActiveObject(t);
+    fabricRef.current.requestRenderAll();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const addCurvedText = useCallback(async (text: string, radius = 180, fontFamily = FONT_OPTIONS[0].value, fontSize = 36) => {
+    if (!fabricRef.current) return;
+    const size = radius * 2 + fontSize * 2;
+    const cx = size / 2;
+    const cy = size / 2;
+    const r  = radius;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">
+      <defs>
+        <path id="arc" d="M ${cx - r},${cy} a ${r},${r} 0 0,1 ${r * 2},0" />
+      </defs>
+      <text fill="white" font-size="${fontSize}" font-family="${fontFamily}" text-anchor="middle">
+        <textPath href="#arc" startOffset="50%">${text}</textPath>
+      </text>
+    </svg>`;
+    const { FabricImage } = await import("fabric");
+    const blob = new Blob([svg], { type: "image/svg+xml" });
+    const url  = URL.createObjectURL(blob);
+    const img  = await FabricImage.fromURL(url);
+    const canvasW = canvasPresetRef.current.width;
+    const canvasH = canvasPresetRef.current.height;
+    img.set({ left: canvasW / 2, top: canvasH / 2, originX: "center", originY: "center" });
+    img.scaleToWidth(Math.min(canvasW * 0.8, size));
+    URL.revokeObjectURL(url);
+    fabricRef.current.add(img);
+    fabricRef.current.setActiveObject(img);
     fabricRef.current.requestRenderAll();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -201,14 +257,24 @@ export function useDesignCanvas(
 
   // ─── Save & upload ──────────────────────────────────────────────────────────
 
-  const saveDesign = useCallback(async () => {
+  const saveDesign = useCallback(async (otherSideJson?: object | null) => {
     if (!fabricRef.current || !selectedProduct) return;
-    setUploadState({ status: "uploading", step: "preview" });
+    setUploadState({ status: "uploading", step: "preview-a" });
     try {
       const canvasJson     = fabricRef.current.toJSON();
       const previewDataUrl = fabricRef.current.toDataURL({ format: "png", multiplier: 2 });
-      const result = await uploadDesign(
-        { productId: selectedProduct.id, canvasJson, previewDataUrl },
+
+      const result = await uploadDualDesign(
+        {
+          productId: selectedProduct.id,
+          sideA: { canvasJson, previewDataUrl },
+          sideB: otherSideJson
+            ? {
+                canvasJson: otherSideJson,
+                previewDataUrl: await renderJsonToDataUrl(otherSideJson, canvasPresetRef.current),
+              }
+            : undefined,
+        },
         (step) => setUploadState({ status: "uploading", step }),
       );
       setUploadState({ status: "success", result });
@@ -221,6 +287,25 @@ export function useDesignCanvas(
   }, [selectedProduct]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const resetUploadState = useCallback(() => setUploadState({ status: "idle" }), []);
+
+  const getCanvasJSON = useCallback(() => {
+    return fabricRef.current?.toJSON() ?? null;
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const loadCanvasJSON = useCallback(async (json: object | null) => {
+    if (!fabricRef.current) return;
+    if (!json) {
+      fabricRef.current.clear();
+      fabricRef.current.backgroundColor = "transparent";
+      fabricRef.current.requestRenderAll();
+      return;
+    }
+    await fabricRef.current.loadFromJSON(json);
+    fabricRef.current.backgroundColor = "transparent";
+    fabricRef.current.requestRenderAll();
+    // Trigger object count sync
+    fabricRef.current.fire("object:added" as Parameters<typeof fabricRef.current.fire>[0]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
     // from init
@@ -241,20 +326,22 @@ export function useDesignCanvas(
     strokeWidth:      init.strokeWidth,
     strokeColor:      init.strokeColor,
     fillColor:        init.fillColor,
-    opacity:          init.opacity,
     textAlign:        init.textAlign,
     isBold:           init.isBold,
     isItalic:         init.isItalic,
+    isUnderline:      init.isUnderline,
     // upload
     imageUploading,
     uploadState,
     // apply callbacks
     applyFontSize, applyFontFamily, applyStrokeWidth, applyStrokeColor,
-    applyFillColor, applyOpacity, applyTextAlign, applyBold, applyItalic,
+    applyFillColor, applyTextAlign, applyBold, applyItalic, applyUnderline,
     // actions
     bringForward, sendBackward, duplicate, deleteSelected,
-    downloadPNG, addText, addShapeFromCatalog, handleImageUpload,
+    downloadPNG, addText, addCurvedText, addShapeFromCatalog, handleImageUpload,
     // save
     saveDesign, resetUploadState,
+    // side switching
+    getCanvasJSON, loadCanvasJSON,
   };
 }

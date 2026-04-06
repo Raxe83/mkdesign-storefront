@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { shopifyFetch } from "./client";
 import type {
   Product,
@@ -161,7 +162,7 @@ export async function getProducts(
   return all;
 }
 
-export async function getProductByHandle(
+async function _getProductByHandle(
   handle: string,
   locale?: string,
 ): Promise<Product | null> {
@@ -288,6 +289,12 @@ export async function getProductByHandle(
   const { metafield: _drop, ...cleanProduct } = product;
   return { ...cleanProduct, zusatzoptionen };
 }
+
+export const getProductByHandle = unstable_cache(
+  _getProductByHandle,
+  ["product-by-handle"],
+  { revalidate: 3600, tags: ["product"] },
+);
 
 export async function getFeaturedProducts(
   first = 4,

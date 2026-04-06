@@ -4,11 +4,11 @@ import { useState } from "react";
 import Image from "next/image";
 import { Check, Loader2, ShoppingCart } from "lucide-react";
 import { cn } from "@/app/utils/utils";
-import type { DesignUploadResult } from "@/app/lib/designApi";
+import type { DualDesignUploadResult } from "@/app/lib/designApi";
 import type { CartButtonState } from "../types";
 
 type Props = {
-  result:      DesignUploadResult;
+  result:      DualDesignUploadResult;
   variantId:   string | null;
   onAddToCart: () => Promise<void>;
   onReset:     () => void;
@@ -39,8 +39,17 @@ export function SaveResultPanel({ result, variantId, onAddToCart, onReset }: Pro
         </div>
       </div>
 
-      <div className="relative aspect-square rounded overflow-hidden border border-stone-200/60 dark:border-zinc-700/60 bg-stone-50 dark:bg-zinc-800">
-        <Image src={result.previewUrl} alt="Design-Vorschau" fill className="object-contain" />
+      <div className={`grid gap-2 ${result.sideB ? "grid-cols-2" : "grid-cols-1"}`}>
+        <div className="relative aspect-square rounded overflow-hidden border border-stone-200/60 dark:border-zinc-700/60 bg-stone-50 dark:bg-zinc-800">
+          <Image src={result.sideA.previewUrl} alt="Seite A" fill className="object-contain" />
+          <span className="absolute bottom-1 left-1 text-[9px] font-medium bg-black/50 text-white px-1.5 py-0.5 rounded">A</span>
+        </div>
+        {result.sideB && (
+          <div className="relative aspect-square rounded overflow-hidden border border-stone-200/60 dark:border-zinc-700/60 bg-stone-50 dark:bg-zinc-800">
+            <Image src={result.sideB.previewUrl} alt="Seite B" fill className="object-contain" />
+            <span className="absolute bottom-1 left-1 text-[9px] font-medium bg-black/50 text-white px-1.5 py-0.5 rounded">B</span>
+          </div>
+        )}
       </div>
 
       {cartState === "added" ? (

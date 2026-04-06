@@ -59,12 +59,21 @@ export function getPresetForTitle(title: string): CanvasPreset {
 export const CANVAS_SIZE = 500;
 
 export const FONT_OPTIONS = [
-  { label: "Playfair",   value: '"Playfair Display", Georgia, serif' },
-  { label: "DM Sans",    value: '"DM Sans", system-ui, sans-serif' },
-  { label: "Georgia",    value: "Georgia, serif" },
-  { label: "Mono",       value: '"Courier New", monospace' },
-  { label: "Arial",      value: "Arial, Helvetica, sans-serif" },
-  { label: "Times",      value: '"Times New Roman", Times, serif' },
-  { label: "Impact",     value: "Impact, Haettenschweiler, sans-serif" },
-  { label: "Brush",      value: '"Brush Script MT", cursive' },
+  // Serif
+  { label: "Playfair",    value: '"Playfair Display", Georgia, serif',        google: "Playfair+Display:wght@400;700" },
+  { label: "Cinzel",      value: '"Cinzel", Georgia, serif',                   google: "Cinzel:wght@400;700" },
+  { label: "Georgia",     value: "Georgia, serif",                              google: null },
+  { label: "Times",       value: '"Times New Roman", Times, serif',            google: null },
+  // Sans-Serif
+  { label: "DM Sans",     value: '"DM Sans", system-ui, sans-serif',           google: "DM+Sans:wght@400;700" },
+  { label: "Oswald",      value: '"Oswald", sans-serif',                        google: "Oswald:wght@400;700" },
+  { label: "Bebas",       value: '"Bebas Neue", Impact, sans-serif',            google: "Bebas+Neue" },
+  { label: "Orbitron",    value: '"Orbitron", monospace',                       google: "Orbitron:wght@400;700" },
+  // Script / Display
+  { label: "Dancing",     value: '"Dancing Script", cursive',                   google: "Dancing+Script:wght@400;700" },
+  { label: "Pacifico",    value: '"Pacifico", cursive',                         google: "Pacifico" },
+  { label: "Lobster",     value: '"Lobster", cursive',                          google: "Lobster" },
+  // Mono / Technical
+  { label: "Mono",        value: '"Courier New", monospace',                    google: null },
+  { label: "Impact",      value: "Impact, Haettenschweiler, sans-serif",        google: null },
 ] as const;

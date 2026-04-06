@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { parseProductDescription } from "@/app/utils/parseProductDescription";
+import { TechnicalSpecsModal } from "@/app/components/product/TechnicalSpecsModal";
 import { ArrowLeft, Minus, Plus, Truck, RotateCcw, Palette } from "lucide-react";
 import Link from "next/link";
 import type { Product, CmsShippingOption } from "../../../types/shopify";
@@ -96,6 +98,11 @@ export default function ProductDetailClient({
     return { amount: (basePrice + addonsTotal).toFixed(2), currencyCode: selected[0].price.currencyCode };
   }, [extrasValues.zusatzprodukte, price, currencyCode]);
 
+  const { mainHtml, specs } = useMemo(
+    () => parseProductDescription(product.descriptionHtml || `<p>${product.description}</p>`),
+    [product.descriptionHtml, product.description]
+  );
+
   const extrasValid = useMemo(() => {
     const cfg = product.zusatzoptionen;
     if (!cfg) return true;
@@ -150,13 +157,12 @@ export default function ProductDetailClient({
 
           <hr className="border-zinc-200/60 dark:border-zinc-800" />
 
-          <div
-            className="prose prose-sm prose-zinc dark:prose-invert max-w-none text-muted leading-relaxed"
-            dangerouslySetInnerHTML={{
-              __html:
-                product.descriptionHtml || `<p>${product.description}</p>`,
-            }}
-          />
+          {mainHtml && (
+            <div
+              className="prose prose-sm prose-zinc dark:prose-invert max-w-none text-muted leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: mainHtml }}
+            />
+          )}
 
           {/* ── Dynamische Zusatzoptionen (aus Shopify Metaobjekt) ── */}
           {product.zusatzoptionen && (
@@ -253,6 +259,9 @@ export default function ProductDetailClient({
           </div>
         </div>
       </div>
+
+      {/* ── Technische Details (aus Beschreibungstabelle gefiltert) ── */}
+      <TechnicalSpecsModal specs={specs} />
 
       {/* ── Extra Content (RSC-Slot mit Suspense-Skeleton aus page.tsx) ── */}
       {extraContentSlot}

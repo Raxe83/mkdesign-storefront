@@ -4,6 +4,20 @@ import { useEffect, useRef, useState } from "react";
 import { CANVAS_BG, FONT_OPTIONS, type CanvasPreset } from "../constants";
 import type { Canvas, FabricObject, IText } from "fabric";
 
+function loadCanvasFonts() {
+  if (typeof document === "undefined") return;
+  if (document.getElementById("canvas-extra-fonts")) return;
+  const families = FONT_OPTIONS
+    .filter((f) => f.google)
+    .map((f) => f.google)
+    .join("&family=");
+  const link = document.createElement("link");
+  link.id = "canvas-extra-fonts";
+  link.rel = "stylesheet";
+  link.href = `https://fonts.googleapis.com/css2?family=${families}&display=swap`;
+  document.head.appendChild(link);
+}
+
 export function useCanvasInit(canvasPreset: CanvasPreset) {
   const canvasElRef     = useRef<HTMLCanvasElement>(null);
   const fabricRef       = useRef<Canvas | null>(null);
@@ -23,10 +37,10 @@ export function useCanvasInit(canvasPreset: CanvasPreset) {
   const [strokeWidth,      setStrokeWidth]      = useState(2);
   const [strokeColor,      setStrokeColor]      = useState("#ffffff");
   const [fillColor,        setFillColor]        = useState<string>("transparent");
-  const [opacity,          setOpacity]          = useState(100);
   const [textAlign,        setTextAlign]        = useState<"left" | "center" | "right">("left");
   const [isBold,           setIsBold]           = useState(false);
   const [isItalic,         setIsItalic]         = useState(false);
+  const [isUnderline,      setIsUnderline]      = useState(false);
 
   // Keep preset ref current
   useEffect(() => { canvasPresetRef.current = canvasPreset; }, [canvasPreset]);
@@ -48,6 +62,7 @@ export function useCanvasInit(canvasPreset: CanvasPreset) {
 
   // Init Fabric.js canvas
   useEffect(() => {
+    loadCanvasFonts();
     if (!canvasElRef.current) return;
     let canvas: Canvas | undefined;
 
@@ -95,13 +110,13 @@ export function useCanvasInit(canvasPreset: CanvasPreset) {
           setTextAlign((t.textAlign as "left" | "center" | "right") ?? "left");
           setIsBold(t.fontWeight === "bold");
           setIsItalic(t.fontStyle === "italic");
+          setIsUnderline(t.underline === true);
         }
         setStrokeWidth(obj.strokeWidth ?? 2);
         setStrokeColor(
           typeof obj.stroke === "string" && obj.stroke ? obj.stroke : "#1c1917",
         );
         setFillColor(typeof obj.fill === "string" ? obj.fill : "transparent");
-        setOpacity(Math.round((obj.opacity ?? 1) * 100));
       };
 
       canvas.on("object:added",      syncCount);
@@ -164,9 +179,9 @@ export function useCanvasInit(canvasPreset: CanvasPreset) {
     strokeWidth, setStrokeWidth,
     strokeColor, setStrokeColor,
     fillColor,   setFillColor,
-    opacity,     setOpacity,
     textAlign,   setTextAlign,
     isBold,      setIsBold,
     isItalic,    setIsItalic,
+    isUnderline, setIsUnderline,
   };
 }

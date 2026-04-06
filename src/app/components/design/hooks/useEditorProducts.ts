@@ -21,6 +21,7 @@ export function useEditorProducts() {
           return {
             id: p.id,
             label: p.title,
+            description: (p as { description?: string }).description ?? "",
             backgroundUrl: p.featuredImage?.url ?? null,
             variantId: variant?.id ?? null,
             price: variant

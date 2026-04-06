@@ -2,8 +2,7 @@
 
 import { ChevronDown, Loader2, ShoppingCart } from "lucide-react";
 import { cn } from "@/app/utils/utils";
-import type { UploadState } from "@/app/lib/designApi";
-import type { DesignUploadResult } from "@/app/lib/designApi";
+import type { UploadState, DualDesignUploadResult } from "@/app/lib/designApi";
 import type { ProductOption } from "../types";
 import { UploadStep } from "./UploadStep";
 import { SaveResultPanel } from "./SaveResultPanel";
@@ -27,7 +26,9 @@ export function ProductPanel({
 }: Props) {
   const isUploading = uploadState.status === "uploading";
   const showResult  = uploadState.status === "success";
-  const uploadLabel = uploadState.status === "uploading" && uploadState.step === "json" ? "JSON lädt…" : "Vorschau lädt…";
+  const uploadLabel = uploadState.status === "uploading"
+    ? ({ "preview-a": "Seite A Vorschau…", "json-a": "Seite A JSON…", "preview-b": "Seite B Vorschau…", "json-b": "Seite B JSON…" } as Record<string, string>)[uploadState.step] ?? "Lädt…"
+    : "";
 
   return (
     <>
@@ -89,8 +90,10 @@ export function ProductPanel({
 
             {uploadState.status === "uploading" && (
               <div className="flex flex-col gap-1.5">
-                <UploadStep label="Vorschau-PNG" done={uploadState.step === "json"} active={uploadState.step === "preview"} />
-                <UploadStep label="Canvas-JSON"  done={false}                        active={uploadState.step === "json"} />
+                <UploadStep label="Seite A — Vorschau" done={["json-a","preview-b","json-b"].includes(uploadState.step)} active={uploadState.step === "preview-a"} />
+                <UploadStep label="Seite A — JSON"     done={["preview-b","json-b"].includes(uploadState.step)}          active={uploadState.step === "json-a"} />
+                <UploadStep label="Seite B — Vorschau" done={uploadState.step === "json-b"}                               active={uploadState.step === "preview-b"} />
+                <UploadStep label="Seite B — JSON"     done={false}                                                       active={uploadState.step === "json-b"} />
               </div>
             )}
 
@@ -118,7 +121,7 @@ export function ProductPanel({
           </div>
         ) : (
           <SaveResultPanel
-            result={(uploadState as { status: "success"; result: DesignUploadResult }).result}
+            result={(uploadState as { status: "success"; result: DualDesignUploadResult }).result}
             variantId={selectedProduct?.variantId ?? null}
             onAddToCart={onAddToCart}
             onReset={onResetUpload}

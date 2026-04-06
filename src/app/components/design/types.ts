@@ -1,6 +1,7 @@
 export type ProductOption = {
   id:             string;
   label:          string;
+  description:    string;
   backgroundUrl:  string | null;
   variantId:      string | null;
   price:          string;

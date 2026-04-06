@@ -28,10 +28,16 @@ export type DesignUploadResult = {
   jsonUrl:    string;
 };
 
+export type DualDesignUploadResult = {
+  designId: string;
+  sideA: { previewUrl: string; jsonUrl: string };
+  sideB?: { previewUrl: string; jsonUrl: string };
+};
+
 export type UploadState =
   | { status: "idle" }
-  | { status: "uploading"; step: "preview" | "json" }
-  | { status: "success"; result: DesignUploadResult }
+  | { status: "uploading"; step: "preview-a" | "json-a" | "preview-b" | "json-b" }
+  | { status: "success"; result: DualDesignUploadResult }
   | { status: "error"; message: string };
 
 /* ------------------------------------------------------------------ */
@@ -66,41 +72,64 @@ async function uploadToCloudinary(
 /*  Public API                                                          */
 /* ------------------------------------------------------------------ */
 
+export type DualDesignPayload = {
+  productId: string;
+  sideA: { canvasJson: object; previewDataUrl: string };
+  sideB?: { canvasJson: object; previewDataUrl: string };
+};
+
 /**
- * Lädt PNG-Vorschau und Fabric-JSON zu Cloudinary hoch.
- * Gibt echte secure_url Werte zurück.
- *
- * @param onStep  - Callback für Live-Statusanzeige im UI ("preview" | "json")
+ * Lädt Seite A (+ optional Seite B) zu Cloudinary hoch.
+ * Gibt DualDesignUploadResult zurück.
  */
-export async function uploadDesign(
-  payload: DesignPayload,
-  onStep?: (step: "preview" | "json") => void,
-): Promise<DesignUploadResult> {
+export async function uploadDualDesign(
+  payload: DualDesignPayload,
+  onStep?: (step: "preview-a" | "json-a" | "preview-b" | "json-b") => void,
+): Promise<DualDesignUploadResult> {
   const ts = Date.now();
   const id = `design_${ts}_${Math.random().toString(36).slice(2, 7)}`;
 
-  // 1. PNG-Vorschau hochladen
-  onStep?.("preview");
-  const previewBlob = dataURLtoBlob(payload.previewDataUrl);
-  const previewUrl  = await uploadToCloudinary(
-    previewBlob,
-    `preview_${payload.productId}_${ts}.png`,
+  // ── Seite A ────────────────────────────────────────────────────
+  onStep?.("preview-a");
+  const previewABlob = dataURLtoBlob(payload.sideA.previewDataUrl);
+  const previewAUrl  = await uploadToCloudinary(
+    previewABlob,
+    `preview_${payload.productId}_${ts}_a.png`,
     "designs/previews",
   );
 
-  // 2. Fabric-Canvas-JSON hochladen
-  onStep?.("json");
-  const jsonBlob = new Blob(
-    [JSON.stringify(payload.canvasJson)],
-    { type: "application/json" },
-  );
-  const jsonUrl = await uploadToCloudinary(
-    jsonBlob,
-    `canvas_${payload.productId}_${ts}.json`,
+  onStep?.("json-a");
+  const jsonAUrl = await uploadToCloudinary(
+    new Blob([JSON.stringify(payload.sideA.canvasJson)], { type: "application/json" }),
+    `canvas_${payload.productId}_${ts}_a.json`,
     "designs/json",
   );
 
-  return { designId: id, previewUrl, jsonUrl };
+  if (!payload.sideB) {
+    return { designId: id, sideA: { previewUrl: previewAUrl, jsonUrl: jsonAUrl } };
+  }
+
+  // ── Seite B ────────────────────────────────────────────────────
+  onStep?.("preview-b");
+  const previewBBlob = dataURLtoBlob(payload.sideB.previewDataUrl);
+  const previewBUrl  = await uploadToCloudinary(
+    previewBBlob,
+    `preview_${payload.productId}_${ts}_b.png`,
+    "designs/previews",
+  );
+
+  onStep?.("json-b");
+  const jsonBUrl = await uploadToCloudinary(
+    new Blob([JSON.stringify(payload.sideB.canvasJson)], { type: "application/json" }),
+    `canvas_${payload.productId}_${ts}_b.json`,
+    "designs/json",
+  );
+
+  return {
+    designId: id,
+    sideA: { previewUrl: previewAUrl, jsonUrl: jsonAUrl },
+    sideB: { previewUrl: previewBUrl, jsonUrl: jsonBUrl },
+  };
 }
 
 /* ------------------------------------------------------------------ */

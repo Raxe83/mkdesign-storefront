@@ -1,10 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Hand, Loader2, Monitor } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Hand, HelpCircle, Info, Loader2, Monitor, X } from "lucide-react";
 import { cn } from "@/app/utils/utils";
 import { useCart } from "@/app/context/CartContext";
-import PageHeader from "@/app/components/PageHeader";
 import { getPresetForTitle } from "./constants";
 import { getBarrelEntry, type BarrelFit } from "./barrel";
 import { useDesignCanvas } from "./hooks/useDesignCanvas";
@@ -79,10 +78,41 @@ export default function DesignEditor() {
     selectedProduct?.id,
   );
 
+  /* ── Dual canvas (Seite A / B) ─────────────────────────────────── */
+  const [activeSide, setActiveSide] = useState<"A" | "B">("A");
+  const sideAJsonRef = useRef<object | null>(null);
+  const sideBJsonRef = useRef<object | null>(null);
+  const [sideBCount, setSideBCount] = useState(0);
+
+  const switchSide = useCallback(async (to: "A" | "B") => {
+    if (to === activeSide) return;
+    const currentJson  = canvas.getCanvasJSON();
+    const currentCount = canvas.objectCount;
+
+    if (activeSide === "A") {
+      // Seite A verlassen → A-State sichern, B laden
+      sideAJsonRef.current = currentJson;
+      await canvas.loadCanvasJSON(sideBJsonRef.current);
+    } else {
+      // Seite B verlassen → B-State sichern, A laden
+      sideBJsonRef.current = currentJson;
+      setSideBCount(currentCount);
+      await canvas.loadCanvasJSON(sideAJsonRef.current);
+    }
+
+    setActiveSide(to);
+  }, [activeSide, canvas]); // eslint-disable-line react-hooks/exhaustive-deps
+
   /* ── Sidebar state ─────────────────────────────────────────────── */
   const [activeTab, setActiveTab] = useState<SidebarTab>("shapes");
   const [shapeCat,  setShapeCat]  = useState("Alle");
   const [shapePage, setShapePage] = useState(0);
+
+  /* ── Save — übergibt die andere Seite für Dual-Upload ─────────── */
+  const handleSave = useCallback(() => {
+    const otherSide = activeSide === "A" ? sideBJsonRef.current : sideAJsonRef.current;
+    canvas.saveDesign(otherSide);
+  }, [activeSide, canvas]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── Cart action ───────────────────────────────────────────────── */
   const handleAddToCart = useCallback(async () => {
@@ -91,23 +121,38 @@ export default function DesignEditor() {
       typeof canvas.uploadState,
       { status: "success" }
     >;
-    await addItem(selectedProduct.variantId, 1, [
-      { key: "Design-Vorschau", value: result.previewUrl },
-      { key: "_design_id",      value: result.designId },
-      { key: "_design_json",    value: result.jsonUrl },
-    ]);
+    const attrs: { key: string; value: string }[] = [
+      { key: "Design-Vorschau",   value: result.sideA.previewUrl },
+      { key: "_design_id",        value: result.designId },
+      { key: "_design_json",      value: result.sideA.jsonUrl },
+    ];
+    if (result.sideB) {
+      attrs.push({ key: "Design-Vorschau-B", value: result.sideB.previewUrl });
+      attrs.push({ key: "_design_json_b",    value: result.sideB.jsonUrl });
+    }
+    await addItem(selectedProduct.variantId, 1, attrs);
   }, [addItem, selectedProduct?.variantId, canvas.uploadState]);
+
+  const [showHelp, setShowHelp] = useState(false);
 
   return (
     <div className="pb-24">
-      <PageHeader
-        title="Gestalte dein Unikat"
-        eyebrow="Design Editor"
-        breadcrumbs={[{ label: "Start", href: "/" }, { label: "Design Editor" }]}
-      />
+      {/* Minimal Editor-Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <p className="text-[10px] font-medium text-muted uppercase tracking-[0.12em]">Design Editor</p>
+          <h1 className="text-xl font-semibold text-primary dark:text-cream leading-tight">Gestalte dein Unikat</h1>
+        </div>
+        <button
+          onClick={() => setShowHelp(true)}
+          className="flex items-center gap-1.5 px-3 py-2 rounded border border-stone-200/80 dark:border-zinc-700 text-muted hover:text-primary dark:hover:text-cream hover:bg-stone-50 dark:hover:bg-zinc-800 text-[11px] font-medium transition-colors duration-200 cursor-pointer"
+        >
+          <HelpCircle size={14} /> Bedienung
+        </button>
+      </div>
 
       {/* Desktop hint for small screens */}
-      <div className="md:hidden mt-4 mb-2 flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-800/50 rounded-sm">
+      <div className="md:hidden mb-2 flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-800/50 rounded-sm">
         <Monitor size={17} className="shrink-0 mt-0.5 text-amber-700 dark:text-amber-400" />
         <div>
           <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Desktop empfohlen</p>
@@ -125,20 +170,25 @@ export default function DesignEditor() {
             isTextSelected={canvas.isTextSelected}
             strokeWidth={canvas.strokeWidth}
             fillColor={canvas.fillColor}
-            opacity={canvas.opacity}
             textAlign={canvas.textAlign}
             isBold={canvas.isBold}
             isItalic={canvas.isItalic}
+            isUnderline={canvas.isUnderline}
+            fontFamily={canvas.fontFamily}
+            fontSize={canvas.fontSize}
             applyStrokeWidth={canvas.applyStrokeWidth}
             applyFillColor={canvas.applyFillColor}
-            applyOpacity={canvas.applyOpacity}
             applyTextAlign={canvas.applyTextAlign}
             applyBold={canvas.applyBold}
             applyItalic={canvas.applyItalic}
+            applyUnderline={canvas.applyUnderline}
+            applyFontFamily={canvas.applyFontFamily}
+            applyFontSize={canvas.applyFontSize}
             bringForward={canvas.bringForward}
             sendBackward={canvas.sendBackward}
             duplicate={canvas.duplicate}
             deleteSelected={canvas.deleteSelected}
+            onAddText={() => { canvas.addText(); setActiveTab("text"); }}
           />
         </div>
 
@@ -174,12 +224,7 @@ export default function DesignEditor() {
                 )}
                 {activeTab === "text" && (
                   <TextPanel
-                    isTextSelected={canvas.isTextSelected}
-                    fontFamily={canvas.fontFamily}
-                    fontSize={canvas.fontSize}
                     onAddText={() => { canvas.addText(); setActiveTab("text"); }}
-                    applyFontFamily={canvas.applyFontFamily}
-                    applyFontSize={canvas.applyFontSize}
                   />
                 )}
                 {activeTab === "image" && (
@@ -194,13 +239,40 @@ export default function DesignEditor() {
 
           {/* Middle: Canvas */}
           <div className="w-full lg:flex-1 flex flex-col gap-4">
+
+            {/* ── Side A / B Tabs ──────────────────────────────── */}
+            <div className="flex items-center gap-2" data-no-deselect>
+              {(["A", "B"] as const).map((side) => (
+                <button
+                  key={side}
+                  onClick={() => switchSide(side)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3.5 py-1.5 rounded border text-[11px] font-medium transition-all duration-200 cursor-pointer",
+                    activeSide === side
+                      ? "border-rust bg-rustLight dark:bg-rustLight/20 text-rust"
+                      : "border-stone-200/80 dark:border-zinc-700 text-muted hover:text-primary hover:border-rust/40 dark:hover:text-cream hover:bg-stone-50 dark:hover:bg-zinc-800",
+                  )}
+                >
+                  Seite {side}
+                  {side === "B" && sideBCount > 0 && (
+                    <span className="ml-1 px-1.5 py-0.5 rounded-sm bg-rust/15 text-rust text-[9px] font-semibold">+5 €</span>
+                  )}
+                </button>
+              ))}
+              {sideBCount > 0 && (
+                <span className="text-[11px] text-muted ml-1">
+                  Beide Seiten bedruckt — Aufpreis wird beim Speichern berechnet
+                </span>
+              )}
+            </div>
+
             <div
               ref={canvas.wrapperRef}
               className="w-full relative overflow-hidden rounded-sm bg-cream"
               style={{ height: svgH }}
             >
               {zoom.midPanning && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50">
+                <div className="absolute inset-0 flex items-center justify-center cursor-move pointer-events-none z-50">
                   <div className="flex items-center gap-2 bg-black/60 text-white/90 text-xs px-3 py-1.5 rounded-sm backdrop-blur-sm select-none">
                     <Hand size={13} /> Verschieben
                   </div>
@@ -215,7 +287,7 @@ export default function DesignEditor() {
                   cursor: zoom.panMode ? "grab" : "default",
                 }}
               >
-                <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
+                <div style={{ position: "absolute", inset: 0, pointerEvents: "none", transform: activeSide === "B" ? "scaleX(-1)" : undefined }}>
                   <BarrelIllustration showBackground={false} showFloorShadow={false} />
                 </div>
                 <div
@@ -265,6 +337,14 @@ export default function DesignEditor() {
               />
             )}
 
+            {/* ── Produktbeschreibung-Hinweis ──────────────────── */}
+            {selectedProduct?.description && (
+              <div className="flex items-start gap-2.5 p-3 rounded border border-amber-200/70 dark:border-amber-800/40 bg-amber-50/80 dark:bg-amber-950/20 text-amber-900 dark:text-amber-300">
+                <Info size={14} className="shrink-0 mt-0.5" />
+                <p className="text-[12px] leading-relaxed">{selectedProduct.description}</p>
+              </div>
+            )}
+
             <div className="lg:hidden" data-no-deselect>
               <MobileToolbar
                 imageUploading={canvas.imageUploading}
@@ -286,7 +366,7 @@ export default function DesignEditor() {
               objectCount={canvas.objectCount}
               uploadState={canvas.uploadState}
               onSelectProduct={(p) => { setSelectedProduct(p); canvas.resetUploadState(); }}
-              onSave={canvas.saveDesign}
+              onSave={handleSave}
               onResetUpload={canvas.resetUploadState}
               onAddToCart={handleAddToCart}
             />
@@ -309,6 +389,89 @@ export default function DesignEditor() {
           onChange={canvas.handleImageUpload}
         />
       </div>
+
+      {/* ── Help Modal ──────────────────────────────────────────────── */}
+      {showHelp && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={() => setShowHelp(false)}
+        >
+          <div
+            className="relative w-full max-w-lg rounded bg-surface dark:bg-zinc-900 border border-stone-200/60 dark:border-zinc-700/60 shadow-2xl p-6 max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+            data-no-deselect
+          >
+            <button
+              onClick={() => setShowHelp(false)}
+              className="absolute top-3 right-3 text-muted hover:text-primary dark:hover:text-cream cursor-pointer transition-colors"
+            >
+              <X size={16} />
+            </button>
+            <h2 className="text-base font-semibold text-primary dark:text-cream mb-4">Bedienungsanleitung</h2>
+
+            <div className="flex flex-col gap-4 text-[13px] text-stone dark:text-muted leading-relaxed">
+              <section>
+                <h3 className="text-[11px] font-medium text-rust uppercase tracking-[0.08em] mb-1.5">Produkt wählen</h3>
+                <p>Wähle rechts im Panel das gewünschte Produkt aus. Der Canvas passt sich automatisch an die Gravurfläche des Produkts an.</p>
+              </section>
+
+              <section>
+                <h3 className="text-[11px] font-medium text-rust uppercase tracking-[0.08em] mb-1.5">Text hinzufügen</h3>
+                <p>Klicke links auf den Tab <strong className="text-primary dark:text-cream">Text</strong> und dann auf <em>„Text hinzufügen"</em>. Der Text erscheint mittig auf der Leinwand. Doppelklicke auf ihn, um ihn direkt zu bearbeiten. Mit den Schriftart-Buttons kannst du die Schrift wechseln.</p>
+                <p className="mt-1">Für <strong className="text-primary dark:text-cream">gebogenen Text</strong>: Klicke auf <em>„Gebogener Text"</em>, gib deinen Text ein, stelle den Radius ein und füge ihn ein.</p>
+              </section>
+
+              <section>
+                <h3 className="text-[11px] font-medium text-rust uppercase tracking-[0.08em] mb-1.5">Formen hinzufügen</h3>
+                <p>Im Tab <strong className="text-primary dark:text-cream">Formen</strong> findest du vorgefertigte Symbole und Formen. Klicke auf ein Symbol um es auf die Leinwand zu fügen.</p>
+              </section>
+
+              <section>
+                <h3 className="text-[11px] font-medium text-rust uppercase tracking-[0.08em] mb-1.5">Element bearbeiten</h3>
+                <p>Klicke auf ein Element auf der Leinwand, um es auszuwählen. Die Toolbar oben zeigt dann alle verfügbaren Optionen:</p>
+                <ul className="mt-1.5 flex flex-col gap-1 pl-3">
+                  <li>• <strong className="text-primary dark:text-cream">B / I / U</strong> — Fett, Kursiv, Unterstrichen (nur Text)</li>
+                  <li>• <strong className="text-primary dark:text-cream">Ausrichtung</strong> — Links / Mitte / Rechts (positioniert den Text auf der Fläche)</li>
+                  <li>• <strong className="text-primary dark:text-cream">Kontur-Slider</strong> — Randstärke des Elements</li>
+                  <li>• <strong className="text-primary dark:text-cream">↑ / ↓ Pfeile</strong> — Ebene nach vorne oder hinten</li>
+                  <li>• <strong className="text-primary dark:text-cream">Kopieren / Löschen</strong> — Element duplizieren oder entfernen</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="text-[11px] font-medium text-rust uppercase tracking-[0.08em] mb-1.5">Verschieben & Zoomen</h3>
+                <p>Nutze den <strong className="text-primary dark:text-cream">Zoom</strong> (+ / −) und den <strong className="text-primary dark:text-cream">Verschieben-Modus</strong> unterhalb der Leinwand, um genauer zu arbeiten. Mittlere Maustaste gedrückt halten verschiebt ebenfalls die Ansicht.</p>
+              </section>
+
+              <section>
+                <h3 className="text-[11px] font-medium text-rust uppercase tracking-[0.08em] mb-1.5">Bild hochladen</h3>
+                <p>Im Tab <strong className="text-primary dark:text-cream">Bild</strong> kannst du eigene Bilder oder Logos hochladen. Diese werden auf dem Canvas platziert und können skaliert und verschoben werden.</p>
+              </section>
+
+              <section>
+                <h3 className="text-[11px] font-medium text-rust uppercase tracking-[0.08em] mb-1.5">Design speichern & bestellen</h3>
+                <p>Wenn du mit dem Design zufrieden bist, klicke rechts auf <em>„Design speichern"</em>. Danach erscheint eine Vorschau und du kannst das Produkt mit deinem Design in den Warenkorb legen.</p>
+                <p className="mt-1 text-amber-700 dark:text-amber-400">Hinweis: Das Design wird exakt wie auf der Leinwand gelasert. Farben werden nicht berücksichtigt — nur die Konturen und Flächen zählen.</p>
+              </section>
+
+              <section>
+                <h3 className="text-[11px] font-medium text-rust uppercase tracking-[0.08em] mb-1.5">Tastenkürzel</h3>
+                <ul className="flex flex-col gap-1 pl-3">
+                  <li>• <strong className="text-primary dark:text-cream">Entf / Backspace</strong> — Ausgewähltes Element löschen</li>
+                  <li>• <strong className="text-primary dark:text-cream">Klick auf leere Fläche</strong> — Auswahl aufheben</li>
+                </ul>
+              </section>
+            </div>
+
+            <button
+              onClick={() => setShowHelp(false)}
+              className="mt-5 w-full py-2.5 rounded bg-rust text-white text-sm font-medium hover:bg-rustMid transition-colors cursor-pointer"
+            >
+              Verstanden
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

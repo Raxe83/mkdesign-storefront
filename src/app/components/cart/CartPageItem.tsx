@@ -45,8 +45,9 @@ const CartPageItem = ({ node, linkedItems, index }: CartPageItemProps) => {
 
   const lineTotal = (parseFloat(node.merchandise.price?.amount ?? "0") * localQty).toString();
   const isCustomDesign = node.attributes?.some((a) => a.key === "_design_json");
-  const previewUrl = node.attributes?.find((a) => a.key === "Design-Vorschau")?.value;
-  const visibleAttrs = node.attributes?.filter((a) => !a.key.startsWith("_")) ?? [];
+  const previewUrl  = node.attributes?.find((a) => a.key === "Design-Vorschau")?.value;
+  const previewUrlB = node.attributes?.find((a) => a.key === "Design-Vorschau-B")?.value;
+  const visibleAttrs = node.attributes?.filter((a) => !a.key.startsWith("_") && a.key !== "Design-Vorschau" && a.key !== "Design-Vorschau-B") ?? [];
 
   return (
     <div
@@ -55,8 +56,15 @@ const CartPageItem = ({ node, linkedItems, index }: CartPageItemProps) => {
     >
       {/* Thumbnail */}
       {isCustomDesign && previewUrl ? (
-        <div className="relative h-20 w-20 shrink-0 rounded-sm border border-rust/30 overflow-hidden bg-charcoal">
-          <Image src={previewUrl} alt="Dein Design" fill className="object-contain p-1" />
+        <div className="flex gap-1.5 shrink-0">
+          <div className="relative h-20 w-20 rounded-sm border border-rust/30 overflow-hidden bg-charcoal">
+            <Image src={previewUrl} alt="Seite A" fill className="object-contain p-1" />
+          </div>
+          {previewUrlB && (
+            <div className="relative h-20 w-20 rounded-sm border border-rust/30 overflow-hidden bg-charcoal">
+              <Image src={previewUrlB} alt="Seite B" fill className="object-contain p-1" />
+            </div>
+          )}
         </div>
       ) : (
         <Link

@@ -16,10 +16,13 @@
       "Bash(node scripts/create-nachtlicht-extra-info.mjs)",
       "Bash(node scripts/create-nachtlicht-faq.mjs)",
       "Bash(node scripts/update-nachtlichter.mjs)",
-      "Bash(node scripts/update-schieferuntersetzer.mjs --dry)"
+      "Bash(node scripts/update-schieferuntersetzer.mjs --dry)",
+      "Read(//c/Users/ewilh/blvckray-studios/Raxe_Dev_Brain/**)"
     ],
     "additionalDirectories": [
-      "C:\\Users\\ewilh\\blvckray-studios\\Raxe_Dev_Brain\\01_Shopify_Ecosystem\\Produkte\\Nachtlichter"
+      "C:\\Users\\ewilh\\blvckray-studios\\Raxe_Dev_Brain\\01_Shopify_Ecosystem\\Produkte\\Nachtlichter",
+      "C:\\Users\\ewilh\\blvckray-studios\\Raxe_Dev_Brain\\04_Mobile_Apps\\GalleryReels",
+      "C:\\Users\\ewilh\\blvckray-studios\\Raxe_Dev_Brain\\01_Shopify_Ecosystem"
     ]
   }
 }
