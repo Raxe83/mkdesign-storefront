@@ -28,8 +28,8 @@ export interface CmsAnnouncement {
   id: string;
   title: string;
   content: string;
-  /** "sticky" = always-visible bar, "important" = one-time modal */
-  messageType: "sticky" | "important" | "promo";
+  /** "sticky" = always-visible bar, "important" = modal every load, "popup" = modal once per browser (localStorage) */
+  messageType: "sticky" | "important" | "promo" | "popup";
   isActive: boolean;
 }
 
