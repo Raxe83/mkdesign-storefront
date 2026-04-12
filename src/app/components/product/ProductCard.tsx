@@ -10,6 +10,7 @@ import { useToast } from "@/app/context/ToastContext";
 import Price from "@/app/components/ui/Price";
 import Skeleton from "@/app/components/ui/Skeleton";
 import { shopifyImageUrl } from "@/app/utils/shopifyImage";
+import { WishlistButton } from "@/app/components/ui/WishlistButton";
 
 export interface ProductCardProps {
   product: Product;
@@ -73,6 +74,14 @@ const ProductCard = ({ product, isLoading = false, priority = false }: ProductCa
   const currency     = product.priceRange.minVariantPrice.currencyCode;
   const hasMultipleVariants = product.variants.edges.length > 1;
 
+  const wishlistItem = {
+    handle: product.handle,
+    title: product.title,
+    imageUrl: product.featuredImage?.url,
+    price,
+    currencyCode: currency,
+  };
+
   // Pick a tag badge: first meaningful tag or productType
   const badgeTag = product.tags?.find(
     (t) => !t.toLowerCase().includes("hidden") && t.length < 20,
@@ -110,6 +119,13 @@ const ProductCard = ({ product, isLoading = false, priority = false }: ProductCa
             {badge}
           </span>
         )}
+
+        {/* Wishlist button — bottom right */}
+        <WishlistButton
+          product={wishlistItem}
+          size={15}
+          className="absolute bottom-2.5 right-2.5 z-10 p-1.5 rounded-full bg-white/85 dark:bg-zinc-800/85 backdrop-blur-sm shadow-sm"
+        />
 
         {/* Unavailable top-right */}
         {!available && (

@@ -20,6 +20,21 @@
     --color-rust-light: #edd2b7;
     --color-rust-mid: #d4652b;
 
+    /* ── Design Editor: Barrel swatch colors ── */
+    /* ── Social Share: Brand colors ── */
+    --share-whatsapp:  #25D366;
+    --share-facebook:  #1877F2;
+    --share-pinterest: #E60023;
+
+    --barrel-schwarz:        #1a1a18;
+    --barrel-schwarz-border: #444444;
+    --barrel-grau:           #888886;
+    --barrel-grau-border:    #aaaaaa;
+    --barrel-silber:         #d0d0d0;
+    --barrel-silber-border:  #bbbbbb;
+    --barrel-gold:           #c8a020;
+    --barrel-gold-border:    #a07818;
+
     --serif: var(--font-display), Georgia, serif;
     --sans: var(--font-sans), system-ui, sans-serif;
   }

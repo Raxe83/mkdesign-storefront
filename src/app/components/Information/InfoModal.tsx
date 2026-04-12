@@ -14,8 +14,11 @@ const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose, title, message }
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" aria-hidden="true">
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="info-modal-title"
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
@@ -28,7 +31,7 @@ const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose, title, message }
             >
               <X className="h-5 w-5" />
             </button>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{title}</h2>
+            <h2 id="info-modal-title" className="text-xl font-semibold text-gray-900 dark:text-white">{title}</h2>
             <p className="mt-4 text-gray-700 dark:text-gray-300">{message}</p>
             <div className="mt-6 flex justify-end">
               <button

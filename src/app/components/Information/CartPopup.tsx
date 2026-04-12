@@ -46,7 +46,12 @@ const CartPopup = () => {
         aria-hidden="true"
       />
 
-      <div className="fixed top-20 right-4 sm:right-8 w-[calc(100vw-2rem)] max-w-sm bg-cream dark:bg-zinc-900 border border-sand/50 dark:border-zinc-800 rounded-sm shadow-md z-[9998]">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Warenkorb"
+        className="fixed top-20 right-4 sm:right-8 w-[calc(100vw-2rem)] max-w-sm bg-cream dark:bg-zinc-900 border border-sand/50 dark:border-zinc-800 rounded-sm shadow-md z-[9998]"
+      >
 
       {/* Header */}
       <div className="px-4 py-3 border-b border-sand/40 dark:border-zinc-800 flex items-center justify-between">

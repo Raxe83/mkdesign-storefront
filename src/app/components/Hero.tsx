@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "../utils/utils";
+import { sanitizeInlineHtml } from "../utils/sanitizeHtml";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -47,7 +48,7 @@ function HeroTitle({ html }: { html: string }) {
         "text-[clamp(2.6rem,5vw,4.2rem)] text-white mb-6",
         "[&_em]:text-gold [&_em]:italic",
       )}
-      dangerouslySetInnerHTML={{ __html: rest + " <em>" + last + "</em>" }}
+      dangerouslySetInnerHTML={{ __html: sanitizeInlineHtml(rest + " <em>" + last + "</em>") }}
     />
   );
 }

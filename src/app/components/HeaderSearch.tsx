@@ -210,7 +210,12 @@ const HeaderSearch = ({ isOpen, onClose }: HeaderSearchProps) => {
       />
 
       {/* Modal */}
-      <div className="absolute top-[72px] left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-2xl">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Suche"
+        className="absolute top-[72px] left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-2xl"
+      >
         <div className="bg-cream dark:bg-zinc-900 rounded border border-border shadow-md flex flex-col">
           {/* Input row */}
           <div className="flex items-center gap-3 px-4 py-3 border-b border-border">

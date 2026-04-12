@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { cn } from "../utils/utils";
+import { sanitizeInlineHtml } from "../utils/sanitizeHtml";
 import type { JudgemeReview } from "../services/judgeme";
 import { ReviewLightbox } from "./ui/ReviewLightbox";
 import { useCookieConsent } from "../hooks/useCookieConsent";
@@ -202,7 +203,7 @@ export function Reviews({
                 "text-[clamp(1.75rem,3.5vw,2.6rem)] text-white",
                 "[&_em]:italic [&_em]:text-rust-mid",
               )}
-              dangerouslySetInnerHTML={{ __html: displayTitle }}
+              dangerouslySetInnerHTML={{ __html: sanitizeInlineHtml(displayTitle) }}
             />
           </div>
 

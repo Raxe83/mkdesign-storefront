@@ -34,6 +34,9 @@ export function ReviewLightbox({
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Bildvorschau"
       className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
       onClick={onClose}
     >

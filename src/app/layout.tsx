@@ -19,6 +19,7 @@ const dmSans = DM_Sans({
 });
 import { CartProvider } from "./context/CartContext";
 import { ToastProvider } from "./context/ToastContext";
+import { WishlistProvider } from "./context/WishlistContext";
 import ScrollToTop from "./utils/ScrollToTop";
 import ImportantMessage from "./components/ImportantMessages";
 import CookieConsent from "./components/cookie-consent";
@@ -82,18 +83,26 @@ export default async function RootLayout({
   return (
     <html className={`${playfairDisplay.variable} ${dmSans.variable}`}>
       <body className="bg-background font-sans leading-relaxed">
+        <WishlistProvider>
         <CartProvider>
           <ToastProvider>
             {/* <AgeVerification /> */}
             <ScrollToTop />
             <ImportantMessage announcements={announcements} />
+            <a
+              href="#main-content"
+              className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[99999] focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-charcoal focus:shadow-md focus:outline-none"
+            >
+              Zum Inhalt springen
+            </a>
             <Header customer={customer} />
             {/* Main Content */}
-            <div className="pt-16 min-h-screen">{children}</div>
+            <div id="main-content" className="pt-16 min-h-screen">{children}</div>
             <Footer />
             <CookieConsent />
           </ToastProvider>
         </CartProvider>
+        </WishlistProvider>
       </body>
     </html>
   );

@@ -118,6 +118,7 @@ const CartPopupItem = ({ node, linkedItems }: CartPopupItemProps) => {
                 {!isSideBItem && (
                   <button
                     onClick={() => removeItem(child.id)}
+                    aria-label="Artikel entfernen"
                     className="text-muted hover:text-rust transition-colors duration-150 shrink-0"
                   >
                     <X className="h-3 w-3" />

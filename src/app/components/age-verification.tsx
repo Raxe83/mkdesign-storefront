@@ -34,9 +34,14 @@ export default function AgeVerification() {
   if (!isVisible) return null
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full text-center">
-        <h2 className="text-xl font-bold">Altersverifikation</h2>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" aria-hidden="true">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="age-verify-title"
+        className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full text-center"
+      >
+        <h2 id="age-verify-title" className="text-xl font-bold">Altersverifikation</h2>
         <p className="text-gray-600 mt-2">
         Bist du 18 Jahre oder älter?
         </p>

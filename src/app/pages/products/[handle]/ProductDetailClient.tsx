@@ -2,12 +2,14 @@
 
 import { useState, useMemo } from "react";
 import { parseProductDescription } from "@/app/utils/parseProductDescription";
+import { sanitizeRichHtml } from "@/app/utils/sanitizeHtml";
 import { TechnicalSpecsModal } from "@/app/components/product/TechnicalSpecsModal";
 import { ArrowLeft, Minus, Plus, Truck, RotateCcw, Palette } from "lucide-react";
 import Link from "next/link";
 import type { Product, CmsShippingOption } from "../../../types/shopify";
 import type { HeroCard } from "@/app/components/product/product-category";
 import { formatPrice } from "../../../utils/formatPrice";
+import { calculateDisplayPrice } from "../../../utils/calculateDisplayPrice";
 import AddToCartButton from "../../../components/ui/AddToCartButton";
 import { ProductExtras, type ProductExtrasValues } from "@/app/components/product/ProductExtras";
 import { ProductReviews } from "@/app/components/product/product-reviews";
@@ -17,6 +19,8 @@ import { Personalization } from "@/app/components/Personalization";
 import type { BarrelVariant } from "@/app/components/PersonalizationVisual";
 import ImageGallery from "./ImageGallery";
 import Button from "@/app/components/ui/Button";
+import { ShareButtons } from "@/app/components/product/ShareButtons";
+import { WishlistButton } from "@/app/components/ui/WishlistButton";
 
 /** Maps product tags + title to the matching barrel illustration variant. */
 function variantFromProduct(tags: string[], title: string): BarrelVariant {
@@ -92,13 +96,10 @@ export default function ProductDetailClient({
     farbe: "",
   });
 
-  const displayPrice = useMemo(() => {
-    const selected = extrasValues.zusatzprodukte;
-    if (selected.length === 0) return { amount: price, currencyCode };
-    const basePrice = parseFloat(price);
-    const addonsTotal = selected.reduce((sum, v) => sum + parseFloat(v.price.amount), 0);
-    return { amount: (basePrice + addonsTotal).toFixed(2), currencyCode: selected[0].price.currencyCode };
-  }, [extrasValues.zusatzprodukte, price, currencyCode]);
+  const displayPrice = useMemo(
+    () => calculateDisplayPrice(price, currencyCode, extrasValues.zusatzprodukte),
+    [extrasValues.zusatzprodukte, price, currencyCode],
+  );
 
   const { mainHtml, specs } = useMemo(
     () => parseProductDescription(product.descriptionHtml || `<p>${product.description}</p>`),
@@ -135,9 +136,22 @@ export default function ProductDetailClient({
 
         {/* Product info */}
         <div className="flex flex-col gap-6">
-          <h1 className="font-display text-3xl lg:text-4xl font-medium text-primary dark:text-neutral-100 leading-tight">
-            {product.title}
-          </h1>
+          <div className="flex items-start gap-3">
+            <h1 className="font-display text-3xl lg:text-4xl font-medium text-primary dark:text-neutral-100 leading-tight flex-1">
+              {product.title}
+            </h1>
+            <WishlistButton
+              product={{
+                handle: product.handle,
+                title: product.title,
+                imageUrl: product.featuredImage?.url,
+                price,
+                currencyCode,
+              }}
+              size={22}
+              className="mt-1 shrink-0 p-1.5"
+            />
+          </div>
 
           {process.env.NODE_ENV === "development" && (
             <div className="text-[10px] font-mono bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700 rounded px-2 py-1.5 space-y-0.5">
@@ -162,7 +176,7 @@ export default function ProductDetailClient({
           {mainHtml && (
             <div
               className="prose prose-sm prose-zinc dark:prose-invert max-w-none text-muted leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: mainHtml }}
+              dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(mainHtml) }}
             />
           )}
 
@@ -259,6 +273,8 @@ export default function ProductDetailClient({
               <span>30 Tage kostenlose Rückgabe</span>
             </div>
           </div>
+
+          <ShareButtons title={product.title} imageUrl={product.featuredImage?.url} />
         </div>
       </div>
 

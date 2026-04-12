@@ -146,13 +146,17 @@ export default async function ProductDetailPage({ params }: Props) {
   const heroCards     = HERO_CARDS[category];
   const metaType      = findMetaType(product.tags ?? []);
 
-  // ── 3. Related-Produkte & Versanddaten laden ──────────────────────────────
-  const [rawRelated, allProducts] = await Promise.all([
-    getProducts(5, undefined, relatedConfig.tag),
-    getProducts(20),
-  ]);
+  // ── 3. Alle sichtbaren Produkte in einem einzigen API-Call laden ─────────
+  const allProducts = await getProducts(30);
   const shippingOptions = getShippingOptions(product.tags ?? [], product.productType ?? "");
-  const relatedProducts = rawRelated.filter((p: Product) => p.id !== product.id).slice(0, 4);
+
+  // Related: passende Tag-Kategorie, aktuelles Produkt ausschließen
+  const relatedProducts = allProducts
+    .filter((p: Product) =>
+      p.id !== product.id &&
+      (relatedConfig.tag ? (p.tags ?? []).includes(relatedConfig.tag) : true)
+    )
+    .slice(0, 4);
 
   // ── 4. Random-Füller: alle Produkte minus aktuelles + bereits verwandte ──
   const relatedIds = new Set([product.id, ...relatedProducts.map((p: Product) => p.id)]);

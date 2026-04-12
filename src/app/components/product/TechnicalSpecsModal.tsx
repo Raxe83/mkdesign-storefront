@@ -49,12 +49,16 @@ export function TechnicalSpecsModal({ specs }: Props) {
             className="fixed inset-0 flex items-end sm:items-center justify-center p-4"
             style={{ zIndex: 99999 }}
             onClick={() => setOpen(false)}
+            aria-hidden="true"
           >
             {/* Backdrop */}
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
             {/* Panel */}
             <div
+              role="dialog"
+              aria-modal="true"
+              aria-label="Technische Details"
               className="relative z-10 w-full max-w-2xl max-h-[85vh] overflow-y-auto bg-white dark:bg-zinc-950 rounded-t-2xl sm:rounded-2xl shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >

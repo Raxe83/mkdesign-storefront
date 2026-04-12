@@ -156,6 +156,7 @@ export async function getProducts(
       },
       locale,
       revalidate: 3600,
+      tags: ["shopify-products"],
     });
 
     const edges = response.products.edges;
@@ -288,6 +289,7 @@ async function _getProductByHandle(
     variables: { handle },
     locale,
     revalidate: 3600,
+    tags: ["shopify-products"],
   });
 
   const product = response.productByHandle;
@@ -361,6 +363,7 @@ export async function getDesignProducts(
     variables: { first: 50, query: "tag:CustomDesign" },
     locale,
     revalidate: 3600,
+    tags: ["shopify-products"],
   });
 
   return response.products.edges.map(({ node: product }) => {
@@ -374,7 +377,7 @@ export async function getDesignProducts(
 export const getProductByHandle = unstable_cache(
   _getProductByHandle,
   ["product-by-handle"],
-  { revalidate: 3600, tags: ["product"] },
+  { revalidate: 3600, tags: ["shopify-products"] },
 );
 
 export async function getFeaturedProducts(
@@ -488,7 +491,7 @@ export async function getProductsPage(params: {
 
   const res = await shopifyFetch<{
     products: { pageInfo: { hasNextPage: boolean }; edges: { node: Product }[] };
-  }>({ query: PRODUCTS_LIST_QUERY, variables: { first: pageSize, after: cursor, query, sortKey, reverse }, locale, revalidate: 3600 });
+  }>({ query: PRODUCTS_LIST_QUERY, variables: { first: pageSize, after: cursor, query, sortKey, reverse }, locale, revalidate: 3600, tags: ["shopify-products"] });
 
   const totalPages = Math.max(1, Math.ceil(filteredCount / pageSize));
   return {
@@ -505,6 +508,7 @@ export async function getProductTypes(locale?: string): Promise<string[]> {
     query: PRODUCT_TYPES_QUERY,
     locale,
     revalidate: 86400,
+    tags: ["shopify-products"],
   });
   return res.productTypes.edges.map((e) => e.node).filter((t) => t && t !== "CustomDesign");
 }

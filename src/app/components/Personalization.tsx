@@ -4,6 +4,7 @@ import Link from "next/link";
 import { cn } from "../utils/utils";
 import { PersonalizationVisual } from "./PersonalizationVisual";
 import type { BarrelVariant } from "./PersonalizationVisual";
+import { sanitizeInlineHtml } from "../utils/sanitizeHtml";
 
 export interface PersonalizationStep {
   step: number;
@@ -71,7 +72,7 @@ export function Personalization({
                 "text-[clamp(1.75rem,3.5vw,2.6rem)] text-charcoal dark:text-primary",
                 "[&_em]:italic [&_em]:text-rust",
               )}
-              dangerouslySetInnerHTML={{ __html: title }}
+              dangerouslySetInnerHTML={{ __html: sanitizeInlineHtml(title) }}
             />
             {description && (
               <p className="text-stone dark:text-muted text-sm leading-[1.85] mb-10 max-w-[44ch]">

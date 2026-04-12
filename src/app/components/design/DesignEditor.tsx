@@ -38,10 +38,10 @@ const SWATCH_META: Record<
   BarrelColor,
   { label: string; bg: string; border: string }
 > = {
-  schwarz: { label: "Schwarz", bg: "#1a1a18", border: "#444" },
-  grau: { label: "Unlackiert", bg: "#888886", border: "#aaa" },
-  silber: { label: "Silber", bg: "#d0d0d0", border: "#bbb" },
-  gold: { label: "Gold", bg: "#c8a020", border: "#a07818" },
+  schwarz: { label: "Schwarz", bg: "var(--barrel-schwarz)", border: "var(--barrel-schwarz-border)" },
+  grau:    { label: "Unlackiert", bg: "var(--barrel-grau)", border: "var(--barrel-grau-border)" },
+  silber:  { label: "Silber", bg: "var(--barrel-silber)", border: "var(--barrel-silber-border)" },
+  gold:    { label: "Gold", bg: "var(--barrel-gold)", border: "var(--barrel-gold-border)" },
 };
 
 const TAB_LABELS: Record<SidebarTab, string> = {
@@ -636,19 +636,24 @@ export default function DesignEditor() {
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           onClick={() => setShowHelp(false)}
+          aria-hidden="true"
         >
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="help-modal-title"
             className="relative w-full max-w-lg rounded bg-surface dark:bg-zinc-900 border border-stone-200/60 dark:border-zinc-700/60 shadow-2xl p-6 max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
             data-no-deselect
           >
             <button
               onClick={() => setShowHelp(false)}
+              aria-label="Hilfe schließen"
               className="absolute top-3 right-3 text-muted hover:text-primary dark:hover:text-cream cursor-pointer transition-colors"
             >
               <X size={16} />
             </button>
-            <h2 className="text-base font-semibold text-primary dark:text-cream mb-4">
+            <h2 id="help-modal-title" className="text-base font-semibold text-primary dark:text-cream mb-4">
               Bedienungsanleitung
             </h2>
 

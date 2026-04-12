@@ -171,6 +171,7 @@ export default function FilterDropdown({
         {search && (
           <button
             onClick={() => setSearch("")}
+            aria-label="Suche leeren"
             className={`absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors ${dark ? "text-white/35 hover:text-white/70" : "text-muted hover:text-primary"}`}
           >
             <X size={13} />

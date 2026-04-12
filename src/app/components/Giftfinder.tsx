@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { cn } from "../utils/utils";
+import { sanitizeInlineHtml } from "../utils/sanitizeHtml";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -247,7 +248,7 @@ export function GiftFinder({
         </span>
         <h2
           className="font-display font-medium leading-tight tracking-tight text-[clamp(1.75rem,3.5vw,2.5rem)] text-charcoal dark:text-primary [&_em]:italic [&_em]:text-rust"
-          dangerouslySetInnerHTML={{ __html: title }}
+          dangerouslySetInnerHTML={{ __html: sanitizeInlineHtml(title) }}
         />
         {description && (
           <p className="mt-3 text-stone dark:text-muted text-sm leading-relaxed max-w-prose">

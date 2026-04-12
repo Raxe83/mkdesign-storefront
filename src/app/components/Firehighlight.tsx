@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "../utils/utils";
+import { sanitizeInlineHtml } from "../utils/sanitizeHtml";
 
 export interface FireHighlightFeature { text: string }
 
@@ -77,7 +78,7 @@ export function FireHighlight({
               "text-[clamp(2rem,4vw,3rem)] text-white mb-5",
               "[&_em]:italic [&_em]:text-rust-mid",
             )}
-            dangerouslySetInnerHTML={{ __html: title }}
+            dangerouslySetInnerHTML={{ __html: sanitizeInlineHtml(title) }}
           />
           {description && (
             <p className="text-white/60 text-sm leading-[1.85] mb-8 max-w-[44ch]">{description}</p>

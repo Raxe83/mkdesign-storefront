@@ -2,9 +2,10 @@
 
 import type React from "react";
 import { useState, useRef } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
 import Image from "next/image";
 import type { Image as ShopifyImage } from "../../../types/shopify";
+import { ReviewLightbox } from "../../../components/ui/ReviewLightbox";
 
 interface Props {
   images: ShopifyImage[];
@@ -16,7 +17,10 @@ export default function ImageGallery({ images, productTitle, initialImage }: Pro
   const [selectedImage, setSelectedImage] = useState(initialImage);
   const [currentIndex, setCurrentIndex]   = useState(0);
   const [imgLoaded, setImgLoaded]         = useState(false);
+  const [lightboxOpen, setLightboxOpen]   = useState(false);
   const touchStartX = useRef<number | null>(null);
+
+  const imageUrls = images.map((img) => img.url);
 
   const goTo = (index: number) => {
     const next = (index + images.length) % images.length;
@@ -42,6 +46,14 @@ export default function ImageGallery({ images, productTitle, initialImage }: Pro
   };
 
   return (
+    <>
+    {lightboxOpen && (
+      <ReviewLightbox
+        images={imageUrls}
+        startIndex={currentIndex}
+        onClose={() => setLightboxOpen(false)}
+      />
+    )}
     <div
       className="flex flex-col gap-3 md:sticky md:top-8"
       tabIndex={0}
@@ -66,6 +78,14 @@ export default function ImageGallery({ images, productTitle, initialImage }: Pro
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-muted">Kein Bild</div>
         )}
+
+        <button
+          onClick={() => setLightboxOpen(true)}
+          aria-label="Bild vergrößern"
+          className="absolute top-3 right-3 p-2 rounded-full bg-white/90 dark:bg-zinc-800/90 shadow-sm text-zinc-600 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-700 transition-colors duration-200"
+        >
+          <ZoomIn size={16} />
+        </button>
 
         {images.length > 1 && (
           <>
@@ -95,5 +115,6 @@ export default function ImageGallery({ images, productTitle, initialImage }: Pro
         </div>
       )}
     </div>
+    </>
   );
 }

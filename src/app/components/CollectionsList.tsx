@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "../utils/utils";
 import { shopifyImageUrl } from "../utils/shopifyImage";
+import { sanitizeInlineHtml } from "../utils/sanitizeHtml";
 
 // ─── Shopify Types ─────────────────────────────────────────────────────────────
 // Spiegelt die Storefront API Collection-Felder wider.
@@ -227,7 +228,7 @@ export function CategoryGrid({
               "text-[clamp(1.75rem,3.5vw,2.6rem)] text-charcoal",
               "[&_em]:italic [&_em]:text-accent",
             )}
-            dangerouslySetInnerHTML={{ __html: title }}
+            dangerouslySetInnerHTML={{ __html: sanitizeInlineHtml(title) }}
           />
           {description && (
             <p className="mt-3 text-stone text-sm leading-relaxed">

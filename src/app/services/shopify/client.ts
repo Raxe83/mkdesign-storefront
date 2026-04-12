@@ -7,12 +7,15 @@ export async function shopifyFetch<T>({
   variables = {},
   locale,
   revalidate,
+  tags,
 }: {
   query: string;
   variables?: Record<string, unknown>;
   locale?: string;
   /** Next.js ISR revalidation in seconds. Omit for no caching. */
   revalidate?: number | false;
+  /** Next.js cache tags for on-demand revalidation via revalidateTag(). */
+  tags?: string[];
 }): Promise<T> {
   const variablesWithLocale = locale ? { ...variables, locale } : variables;
 
@@ -29,7 +32,9 @@ export async function shopifyFetch<T>({
       method: "POST",
       headers,
       body: JSON.stringify({ query, variables: variablesWithLocale }),
-      ...(revalidate !== undefined && { next: { revalidate } }),
+      ...(revalidate !== undefined || tags !== undefined
+        ? { next: { ...(revalidate !== undefined && { revalidate }), ...(tags && { tags }) } }
+        : {}),
     },
   );
 

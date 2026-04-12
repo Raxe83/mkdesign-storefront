@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@neondatabase/serverless": "latest",
-    "@types/node": "^16.18.126",
     "@types/react-dom": "^19.0.4",
     "class-variance-authority": "^0.7.1",
     "cloudinary": "^2.9.0",
@@ -22,7 +20,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "eslintConfig": {
     "extends": [
@@ -44,11 +44,13 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.4",
+    "@types/node": "^20.19.39",
     "@types/react": "^19.0.10",
     "autoprefixer": "^10.4.21",
     "eslint-plugin-react-hooks": "^5.2.0",
     "postcss": "^8.5.3",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.4"
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Heart,
   House,
   Instagram,
   LayoutGrid,
@@ -19,10 +20,12 @@ import { usePathname } from "next/navigation";
 import NavLink from "./NavLink";
 import CartPopup from "./Information/CartPopup";
 import HeaderSearch from "./HeaderSearch";
+import { WishlistDrawer } from "./ui/WishlistDrawer";
 import Link from "next/link";
 import { shopDetails } from "../global";
 import { cn } from "../utils/utils";
 import Image from "next/image";
+import { useWishlist } from "../context/WishlistContext";
 
 // ─── Typen ────────────────────────────────────────────────────────────────────
 
@@ -73,7 +76,9 @@ const useNavItems = () => {
 
 const Header = ({ customer = null }: { customer?: HeaderCustomer | null }) => {
   const { itemCount, showCartPopup, setShowCartPopup } = useCart();
+  const { count: wishlistCount } = useWishlist();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showWishlist, setShowWishlist] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const pathname = usePathname();
@@ -167,6 +172,19 @@ const Header = ({ customer = null }: { customer?: HeaderCustomer | null }) => {
             >
               <Search size={22} />
             </button>
+            {/* Wishlist — mobile */}
+            <button
+              onClick={() => setShowWishlist(true)}
+              className="md:hidden relative p-2.5 text-muted hover:text-rust transition-colors duration-200"
+              aria-label="Merkliste öffnen"
+            >
+              <Heart size={22} fill={wishlistCount > 0 ? "currentColor" : "none"} className={wishlistCount > 0 ? "text-rust" : ""} />
+              {wishlistCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 bg-rust text-white text-[9px] font-medium rounded-full h-4 w-4 flex items-center justify-center leading-none">
+                  {wishlistCount}
+                </span>
+              )}
+            </button>
             <Link
               href="/pages/cart"
               className="md:hidden relative p-2.5 text-muted hover:text-primary transition-colors duration-200"
@@ -189,6 +207,19 @@ const Header = ({ customer = null }: { customer?: HeaderCustomer | null }) => {
               className="hidden md:flex relative p-2.5 text-muted hover:text-primary transition-colors duration-200"
             >
               <Search size={20} />
+            </button>
+            {/* Wishlist — desktop */}
+            <button
+              onClick={() => setShowWishlist(true)}
+              aria-label="Merkliste öffnen"
+              className="hidden md:flex relative p-2.5 text-muted hover:text-rust transition-colors duration-200"
+            >
+              <Heart size={20} fill={wishlistCount > 0 ? "currentColor" : "none"} className={wishlistCount > 0 ? "text-rust" : ""} />
+              {wishlistCount > 0 && (
+                <span className="absolute top-1 right-1 bg-rust text-white text-[10px] font-medium rounded-full h-4 w-4 flex items-center justify-center leading-none">
+                  {wishlistCount}
+                </span>
+              )}
             </button>
             {/* User — desktop */}
             <Link
@@ -395,6 +426,7 @@ const Header = ({ customer = null }: { customer?: HeaderCustomer | null }) => {
 
       <CartPopup />
       <HeaderSearch isOpen={showSearch} onClose={() => setShowSearch(false)} />
+      <WishlistDrawer isOpen={showWishlist} onClose={() => setShowWishlist(false)} />
     </>
   );
 };
