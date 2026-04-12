@@ -120,10 +120,11 @@ const ProductCard = ({ product, isLoading = false, priority = false }: ProductCa
           </span>
         )}
 
-        {/* Wishlist button — bottom right */}
+        {/* Wishlist button — bottom right, only visible on hover (always visible when saved) */}
         <WishlistButton
           product={wishlistItem}
           size={15}
+          hideWhenUnsaved
           className="absolute bottom-2.5 right-2.5 z-10 p-1.5 rounded-full bg-white/85 dark:bg-zinc-800/85 backdrop-blur-sm shadow-sm"
         />
 

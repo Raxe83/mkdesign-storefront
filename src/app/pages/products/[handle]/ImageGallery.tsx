@@ -67,14 +67,20 @@ export default function ImageGallery({ images, productTitle, initialImage }: Pro
         onTouchEnd={handleTouchEnd}
       >
         {selectedImage ? (
-          <Image
-            src={selectedImage}
-            alt={images[currentIndex]?.altText ?? `${productTitle} – Bild ${currentIndex + 1}`}
-            fill priority
-            onLoad={() => setImgLoaded(true)}
-            className={`object-cover transition-all duration-500 ease-out ${imgLoaded ? "opacity-100 blur-0" : "opacity-0 blur-sm"}`}
-            sizes="(max-width: 768px) 100vw, 50vw"
-          />
+          <button
+            onClick={() => setLightboxOpen(true)}
+            aria-label="Bild vergrößern"
+            className="absolute inset-0 w-full h-full cursor-zoom-in"
+          >
+            <Image
+              src={selectedImage}
+              alt={images[currentIndex]?.altText ?? `${productTitle} – Bild ${currentIndex + 1}`}
+              fill priority
+              onLoad={() => setImgLoaded(true)}
+              className={`object-cover transition-all duration-500 ease-out ${imgLoaded ? "opacity-100 blur-0" : "opacity-0 blur-sm"}`}
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          </button>
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-muted">Kein Bild</div>
         )}

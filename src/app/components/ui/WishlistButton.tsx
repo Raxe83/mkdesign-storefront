@@ -8,9 +8,11 @@ interface WishlistButtonProps {
   product: WishlistItem;
   className?: string;
   size?: number;
+  /** Versteckt den Button via opacity wenn nicht gespeichert — sichtbar per group-hover */
+  hideWhenUnsaved?: boolean;
 }
 
-export function WishlistButton({ product, className, size = 16 }: WishlistButtonProps) {
+export function WishlistButton({ product, className, size = 16, hideWhenUnsaved = false }: WishlistButtonProps) {
   const { toggle, isInWishlist } = useWishlist();
   const saved = isInWishlist(product.handle);
 
@@ -22,6 +24,7 @@ export function WishlistButton({ product, className, size = 16 }: WishlistButton
       className={cn(
         "transition-all duration-150",
         saved ? "text-rust" : "text-muted hover:text-rust",
+        hideWhenUnsaved && !saved && "opacity-0 group-hover:opacity-100",
         className,
       )}
     >

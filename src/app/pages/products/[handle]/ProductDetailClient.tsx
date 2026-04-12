@@ -4,14 +4,24 @@ import { useState, useMemo } from "react";
 import { parseProductDescription } from "@/app/utils/parseProductDescription";
 import { sanitizeRichHtml } from "@/app/utils/sanitizeHtml";
 import { TechnicalSpecsModal } from "@/app/components/product/TechnicalSpecsModal";
-import { ArrowLeft, Minus, Plus, Truck, RotateCcw, Palette } from "lucide-react";
+import {
+  ArrowLeft,
+  Minus,
+  Plus,
+  Truck,
+  RotateCcw,
+  Palette,
+} from "lucide-react";
 import Link from "next/link";
 import type { Product, CmsShippingOption } from "../../../types/shopify";
 import type { HeroCard } from "@/app/components/product/product-category";
 import { formatPrice } from "../../../utils/formatPrice";
 import { calculateDisplayPrice } from "../../../utils/calculateDisplayPrice";
 import AddToCartButton from "../../../components/ui/AddToCartButton";
-import { ProductExtras, type ProductExtrasValues } from "@/app/components/product/ProductExtras";
+import {
+  ProductExtras,
+  type ProductExtrasValues,
+} from "@/app/components/product/ProductExtras";
 import { ProductReviews } from "@/app/components/product/product-reviews";
 import { ProductHeroCards } from "@/app/components/product/ProductHeroCards";
 import { RelatedProducts } from "@/app/components/product/RelatedProducts";
@@ -50,7 +60,16 @@ function variantFromProduct(tags: string[], title: string): BarrelVariant {
   return "full";
 }
 
-const FALLBACK_STANDARD: CmsShippingOption = { zone: "Deutschland", method: "Standard", days: "2–4 Werktage", price: "5,90 €", freeFrom: "250,00 €", isStandard: true, isExpress: false, sortOrder: 0 };
+const FALLBACK_STANDARD: CmsShippingOption = {
+  zone: "Deutschland",
+  method: "Standard",
+  days: "2–4 Werktage",
+  price: "5,90 €",
+  freeFrom: "250,00 €",
+  isStandard: true,
+  isExpress: false,
+  sortOrder: 0,
+};
 
 interface Props {
   product: Product;
@@ -75,7 +94,8 @@ export default function ProductDetailClient({
   extraContentSlot,
   faqSlot,
 }: Props) {
-  const standardShipping = shippingOptions?.find((o) => o.isStandard) ?? FALLBACK_STANDARD;
+  const standardShipping =
+    shippingOptions?.find((o) => o.isStandard) ?? FALLBACK_STANDARD;
   const barrelVariant = variantFromProduct(product.tags, product.title);
   const images = (product.images?.edges ?? []).map((e) => e.node);
   const firstVariant = product.variants.edges[0]?.node;
@@ -97,21 +117,29 @@ export default function ProductDetailClient({
   });
 
   const displayPrice = useMemo(
-    () => calculateDisplayPrice(price, currencyCode, extrasValues.zusatzprodukte),
+    () =>
+      calculateDisplayPrice(price, currencyCode, extrasValues.zusatzprodukte),
     [extrasValues.zusatzprodukte, price, currencyCode],
   );
 
   const { mainHtml, specs } = useMemo(
-    () => parseProductDescription(product.descriptionHtml || `<p>${product.description}</p>`),
-    [product.descriptionHtml, product.description]
+    () =>
+      parseProductDescription(
+        product.descriptionHtml || `<p>${product.description}</p>`,
+      ),
+    [product.descriptionHtml, product.description],
   );
 
   const extrasValid = useMemo(() => {
     const cfg = product.zusatzoptionen;
     if (!cfg) return true;
-    const textsOk     = cfg.textfelder.every((_, i) => extrasValues.textfelder[i]?.trim());
-    const optionenOk  = cfg.optionen.length === 0 || extrasValues.optionen.length > 0;
-    const entscheidOk = cfg.entscheide.length === 0 || extrasValues.entscheid.trim() !== "";
+    const textsOk = cfg.textfelder.every((_, i) =>
+      extrasValues.textfelder[i]?.trim(),
+    );
+    const optionenOk =
+      cfg.optionen.length === 0 || extrasValues.optionen.length > 0;
+    const entscheidOk =
+      cfg.entscheide.length === 0 || extrasValues.entscheid.trim() !== "";
     return textsOk && optionenOk && entscheidOk;
   }, [product.zusatzoptionen, extrasValues]);
 
@@ -155,9 +183,20 @@ export default function ProductDetailClient({
 
           {process.env.NODE_ENV === "development" && (
             <div className="text-[10px] font-mono bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700 rounded px-2 py-1.5 space-y-0.5">
-              <p><span className="font-bold">productType:</span> {product.productType || "—"}</p>
-              <p><span className="font-bold">tags:</span> {product.tags?.join(", ") || "—"}</p>
-              <p><span className="font-bold">Profil:</span> {shippingOptions == null ? "❌ kein Match" : "✅ " + (shippingOptions[0]?.method ?? "")}</p>
+              <p>
+                <span className="font-bold">productType:</span>{" "}
+                {product.productType || "—"}
+              </p>
+              <p>
+                <span className="font-bold">tags:</span>{" "}
+                {product.tags?.join(", ") || "—"}
+              </p>
+              <p>
+                <span className="font-bold">Profil:</span>{" "}
+                {shippingOptions == null
+                  ? "❌ kein Match"
+                  : "✅ " + (shippingOptions[0]?.method ?? "")}
+              </p>
             </div>
           )}
 
@@ -225,13 +264,28 @@ export default function ProductDetailClient({
               metaZusatzprodukte={extrasValues.zusatzprodukte}
               customAttributes={[
                 ...(product.zusatzoptionen?.textfelder ?? [])
-                  .map((label, i) => ({ key: label, value: extrasValues.textfelder[i] ?? "" }))
+                  .map((label, i) => ({
+                    key: label,
+                    value: extrasValues.textfelder[i] ?? "",
+                  }))
                   .filter((a) => a.value.trim() !== ""),
                 ...(extrasValues.zusatzprodukte.length > 0
-                  ? [{ key: "_zusatzprodukte", value: extrasValues.zusatzprodukte.map((v) => v.title).join(", ") }]
+                  ? [
+                      {
+                        key: "_zusatzprodukte",
+                        value: extrasValues.zusatzprodukte
+                          .map((v) => v.title)
+                          .join(", "),
+                      },
+                    ]
                   : []),
                 ...(extrasValues.optionen.length > 0
-                  ? [{ key: "Optionen", value: extrasValues.optionen.join(", ") }]
+                  ? [
+                      {
+                        key: "Optionen",
+                        value: extrasValues.optionen.join(", "),
+                      },
+                    ]
                   : []),
                 ...(extrasValues.entscheid
                   ? [{ key: "Auswahl", value: extrasValues.entscheid }]
@@ -245,7 +299,10 @@ export default function ProductDetailClient({
             </p>
           )}
           <Button variant={"outline"}>
-            <Link href={`/pages/design?product=${encodeURIComponent(product.id)}`} className="flex flow-row items-center">
+            <Link
+              href={`/pages/design?product=${encodeURIComponent(product.id)}`}
+              className="flex flow-row items-center"
+            >
               <Palette size={15} className="shrink-0" />
               <span className="ml-2">Eigenes Design</span>
             </Link>
@@ -261,25 +318,28 @@ export default function ProductDetailClient({
               <div className="flex items-center gap-2.5 text-sm text-muted dark:text-neutral-400">
                 <Truck size={15} className="shrink-0" />
                 <span>
-                  {standardShipping.method}: {standardShipping.days} — {standardShipping.price}
+                  {standardShipping.method}: {standardShipping.days} —{" "}
+                  {standardShipping.price}
                   {standardShipping.freeFrom && (
-                    <span className="ml-1 text-xs opacity-70">(ab {standardShipping.freeFrom} kostenlos)</span>
+                    <span className="ml-1 text-xs opacity-70">
+                      (ab {standardShipping.freeFrom} kostenlos)
+                    </span>
                   )}
                 </span>
               </div>
             )}
-            <div className="flex items-center gap-2.5 text-sm text-muted dark:text-neutral-400">
-              <RotateCcw size={15} className="shrink-0" />
-              <span>30 Tage kostenlose Rückgabe</span>
-            </div>
           </div>
 
-          <ShareButtons title={product.title} imageUrl={product.featuredImage?.url} />
+          <ShareButtons
+            title={product.title}
+            imageUrl={product.featuredImage?.url}
+          />
         </div>
       </div>
 
       {/* ── Technische Details (CMS-Metaobject, Fallback: geparste Beschreibung) ── */}
-      {technicalSpecsSlot ?? (specs.length > 0 && <TechnicalSpecsModal specs={specs} />)}
+      {technicalSpecsSlot ??
+        (specs.length > 0 && <TechnicalSpecsModal specs={specs} />)}
 
       {/* ── Extra Content (RSC-Slot mit Suspense-Skeleton aus page.tsx) ── */}
       {extraContentSlot}
@@ -331,7 +391,10 @@ export default function ProductDetailClient({
           <h2 className="font-display text-xl font-medium text-primary dark:text-neutral-100 mb-5">
             {relatedLabel}
           </h2>
-          <RelatedProducts products={relatedProducts} randomProducts={randomProducts} />
+          <RelatedProducts
+            products={relatedProducts}
+            randomProducts={randomProducts}
+          />
         </div>
       )}
 

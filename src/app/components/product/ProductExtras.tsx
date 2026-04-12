@@ -5,6 +5,30 @@ import Image from "next/image";
 import type { ProductZusatzoptionen, ZusatzproduktOption } from "@/app/types/shopify";
 import { formatPrice } from "@/app/utils/formatPrice";
 
+/** Mapping: Shopify-Farbname (lowercase) → CSS-Farbe.
+ *  Nutzt die barrel-CSS-Variablen wo passend, sonst Standard-CSS-Farben. */
+const COLOR_MAP: Record<string, string> = {
+  schwarz:  "var(--barrel-schwarz)",
+  grau:     "var(--barrel-grau)",
+  silber:   "var(--barrel-silber)",
+  gold:     "var(--barrel-gold)",
+  weiß:     "#ffffff",
+  weiss:    "#ffffff",
+  weis:     "#ffffff",
+  braun:    "#8B5E3C",
+  kupfer:   "#B87333",
+  bronze:   "#CD7F32",
+  rot:      "#C0392B",
+  blau:     "#2980B9",
+  grün:     "#27AE60",
+  natur:    "#D4C5A9",
+  edelstahl:"#b0b8c1",
+};
+
+function colorSwatch(name: string): string | null {
+  return COLOR_MAP[name.toLowerCase().trim()] ?? null;
+}
+
 export interface ProductExtrasValues {
   textfelder: string[];
   zusatzprodukte: ZusatzproduktOption[];
@@ -236,21 +260,32 @@ export function ProductExtras({ config, onChange }: Props) {
             Farbe{farbe ? <> &mdash; <span className="normal-case tracking-normal">{farbe}</span></> : ""}
           </p>
           <div className="flex flex-wrap gap-2">
-            {config.farben.map((color) => (
-              <button
-                key={color}
-                type="button"
-                onClick={() => setFarbe(color)}
-                className={[
-                  "px-3 py-1.5 text-xs font-medium rounded border transition-colors duration-150",
-                  farbe === color
-                    ? "bg-primary text-white dark:bg-neutral-100 dark:text-neutral-900 border-primary dark:border-neutral-100"
-                    : "bg-transparent text-muted dark:text-neutral-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500 hover:text-primary dark:hover:text-neutral-200",
-                ].join(" ")}
-              >
-                {color}
-              </button>
-            ))}
+            {config.farben.map((color) => {
+              const swatch = colorSwatch(color);
+              const isSelected = farbe === color;
+              return (
+                <button
+                  key={color}
+                  type="button"
+                  onClick={() => setFarbe(color)}
+                  className={[
+                    "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded border transition-colors duration-150",
+                    isSelected
+                      ? "bg-transparent text-accent dark:bg-neutral-100 dark:text-neutral-900 border-accent dark:border-accent"
+                      : "bg-transparent text-muted dark:text-neutral-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500 hover:text-primary dark:hover:text-neutral-200",
+                  ].join(" ")}
+                >
+                  {swatch && (
+                    <span
+                      className="shrink-0 w-3.5 h-3.5 rounded-sm border border-black/10 dark:border-white/10"
+                      style={{ background: swatch }}
+                      aria-hidden="true"
+                    />
+                  )}
+                  {color}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
