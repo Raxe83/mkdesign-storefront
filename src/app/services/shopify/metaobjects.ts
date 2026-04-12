@@ -5,6 +5,7 @@ import type {
   CmsSectionText,
   Metaobject,
 } from "../../types/shopify";
+import type { SpecRow } from "../../utils/parseProductDescription";
 
 // ─── Generic Metaobject query (used by getExtraInfoByType) ────────────────────
 
@@ -55,6 +56,31 @@ export async function getExtraInfoByType(
       revalidate: 3600,
     });
     return data.metaobjects.edges.map((e) => e.node);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Fetch category-level technical specs from a Shopify Metaobject.
+ * Builds the type as `{category}_technical_specs` (hyphens → underscores).
+ * Each entry must have `label` and `value` fields (one row = one Metaobject).
+ * Returns [] when no Metaobject of that type exists (section hidden).
+ */
+export async function getTechnicalSpecsByType(category: string): Promise<SpecRow[]> {
+  const metaobjectType = `${category.replace(/-/g, "_")}_technical_specs`;
+  try {
+    const data = await shopifyFetch<MetaobjectResponse>({
+      query: METAOBJECT_QUERY,
+      variables: { type: metaobjectType },
+      revalidate: 3600,
+    });
+    return data.metaobjects.edges
+      .map(({ node }) => ({
+        label: node.fields.find((f) => f.key === "label")?.value ?? "",
+        value: node.fields.find((f) => f.key === "value")?.value ?? "",
+      }))
+      .filter((r): r is SpecRow => Boolean(r.label && r.value));
   } catch {
     return [];
   }

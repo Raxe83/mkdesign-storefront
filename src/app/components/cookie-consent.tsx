@@ -1,60 +1,75 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import Button from "./ui/Button";
+import { useState, useEffect } from "react";
 import { setCookie, getCookie } from "../lib/cookies";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import type { CookiePreferences } from "../hooks/useCookieConsent";
+
+const REJECTED: CookiePreferences = {
+  essential: true,
+  functional: false,
+  analytics: false,
+  marketing: false,
+};
+
+const ACCEPTED_ALL: CookiePreferences = {
+  essential: true,
+  functional: true,
+  analytics: true,
+  marketing: true,
+};
+
+const TAB_LABELS: Record<keyof CookiePreferences, string> = {
+  essential: "Notwendig",
+  functional: "Funktional",
+  analytics: "Analyse",
+  marketing: "Marketing",
+};
+
+const TAB_INFO: Record<keyof CookiePreferences, { title: string; description: string }> = {
+  essential: {
+    title: "Notwendige Cookies",
+    description: "Für den Betrieb der Website zwingend erforderlich (Warenkorb, Session, Sicherheit).",
+  },
+  functional: {
+    title: "Funktionale Cookies",
+    description:
+      "Erweiterte Funktionen wie Kundenbewertungen (Judge.me) und gespeicherte Einstellungen.",
+  },
+  analytics: {
+    title: "Analyse-Cookies",
+    description: "Helfen uns zu verstehen, wie Besucher die Website nutzen.",
+  },
+  marketing: {
+    title: "Marketing-Cookies",
+    description: "Werden für personalisierte Werbung und Tracking verwendet.",
+  },
+};
 
 export default function CookieConsent() {
   const [isVisible, setIsVisible] = useState(false);
-  const [activeTab, setActiveTab] =
-    useState<keyof typeof cookiePreferences>("essential");
-  const [cookiePreferences, setCookiePreferences] = useState({
-    essential: true,
-    functional: false,
-    analytics: false,
-    marketing: false,
-  });
+  const [activeTab, setActiveTab] = useState<keyof CookiePreferences>("essential");
+  const [preferences, setPreferences] = useState<CookiePreferences>(REJECTED);
+
   useEffect(() => {
-    const cookieConsent = getCookie("cookie-consent");
-    if (!cookieConsent) {
+    const saved = getCookie("cookie-consent");
+    if (!saved) {
       setIsVisible(true);
     } else {
       try {
-        const savedPreferences = JSON.parse(cookieConsent);
-        setCookiePreferences(savedPreferences);
-      } catch (e) {
+        setPreferences(JSON.parse(saved));
+      } catch {
         setIsVisible(true);
       }
     }
   }, []);
 
-  const handleAcceptAll = () => {
-    const allAccepted = {
-      essential: true,
-      functional: true,
-      analytics: true,
-      marketing: true,
-    };
-    setCookiePreferences(allAccepted);
-    saveCookiePreferences(allAccepted);
-  };
-
-  const handleAcceptSelected = () => {
-    saveCookiePreferences(cookiePreferences);
-  };
-
-  const saveCookiePreferences = (preferences: typeof cookiePreferences) => {
-    setCookie("cookie-consent", JSON.stringify(preferences), 180);
+  const save = (prefs: CookiePreferences) => {
+    setCookie("cookie-consent", JSON.stringify(prefs), 180);
+    setPreferences(prefs);
     setIsVisible(false);
-  };
-
-  const handleToggle = (category: keyof typeof cookiePreferences) => {
-    setCookiePreferences((prev) => ({
-      ...prev,
-      [category]: !prev[category],
-    }));
+    window.dispatchEvent(new Event("cookie-consent-updated"));
   };
 
   if (!isVisible) return null;
@@ -65,92 +80,75 @@ export default function CookieConsent() {
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: 100, opacity: 0 }}
       transition={{ type: "spring", stiffness: 100, damping: 15 }}
-      className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-40 p-4 md:p-6 rounded-t-xl"
+      className="fixed bottom-0 left-0 right-0 bg-background border-t border-border shadow-lg dark:shadow-black/30 z-40 p-4 md:p-6 rounded-t-xl"
     >
       <div className="container mx-auto max-w-4xl px-4">
         <div className="grid gap-4 md:grid-cols-[2fr_1fr]">
           <div>
-            <h3 className="text-lg font-semibold mb-2 text-gray-900">
-              Wir verwenden Cookies
-            </h3>
-            <p className="text-sm text-gray-600 mb-4">
+            <h3 className="text-base font-semibold mb-1.5 text-primary">Wir verwenden Cookies</h3>
+            <p className="text-sm text-muted">
               Wir nutzen Cookies, um dir die bestmögliche Erfahrung zu bieten.{" "}
-              <Link
-                href="/privacy"
-                className="underline font-medium text-blue-600"
-              >
+              <Link href="/pages/privacy" className="underline font-medium text-accent hover:text-rustMid transition-colors duration-200">
                 Datenschutz
               </Link>
-              .
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 items-center justify-end">
-            <Button color="outline_weed" onClick={() => setIsVisible(false)}>
+            <button
+              onClick={() => save(REJECTED)}
+              className="w-full sm:w-auto px-4 py-2 rounded border border-border text-sm text-muted hover:text-primary hover:border-muted transition-colors duration-200"
+            >
               Ablehnen
-            </Button>
-            <Button color="outline_weed" onClick={handleAcceptSelected}>
-              Auswahl akzeptieren
-            </Button>
-            <Button color="earthy" onClick={handleAcceptAll}>
-              Akzeptieren
-            </Button>
+            </button>
+            <button
+              onClick={() => save(preferences)}
+              className="w-full sm:w-auto px-4 py-2 rounded border border-border text-sm text-muted hover:text-primary hover:border-muted transition-colors duration-200"
+            >
+              Auswahl speichern
+            </button>
+            <button
+              onClick={() => save(ACCEPTED_ALL)}
+              className="w-full sm:w-auto px-4 py-2 rounded bg-accent hover:bg-rustMid text-white text-sm font-medium transition-colors duration-200"
+            >
+              Alle akzeptieren
+            </button>
           </div>
         </div>
 
         <div className="mt-4">
-          <div className="flex flex-wrap space-x-2 sm:space-x-4 border-b pb-2 overflow-x-auto">
-            {Object.keys(cookiePreferences).map((key) => (
+          <div className="flex flex-wrap gap-1 border-b border-border pb-2">
+            {(Object.keys(TAB_LABELS) as Array<keyof CookiePreferences>).map((key) => (
               <button
                 key={key}
-                className={`px-3 py-2 rounded-t-md mt-2 text-sm sm:text-base flex-1 sm:flex-none text-center transition-colors ${
+                onClick={() => setActiveTab(key)}
+                className={`px-3 py-1.5 rounded-t text-sm transition-colors duration-150 ${
                   activeTab === key
-                    ? "bg-blue-100 text-blue-600"
-                    : "bg-gray-100 text-gray-600"
+                    ? "bg-accent/10 text-accent border border-accent/20 border-b-transparent"
+                    : "text-muted hover:text-primary"
                 }`}
-                onClick={() =>
-                  setActiveTab(key as keyof typeof cookiePreferences)
-                }
               >
-                {key.charAt(0).toUpperCase() + key.slice(1)}
+                {TAB_LABELS[key]}
               </button>
             ))}
           </div>
-          <div className="p-4 border rounded-md mt-2 bg-gray-50">
-            {activeTab === "essential" ? (
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="font-medium text-gray-900">
-                    Notwendige Cookies
-                  </h4>
-                  <p className="text-sm text-gray-600">
-                    Diese Cookies sind für die Grundfunktionen der Website erforderlich.
-                  </p>
-                </div>
-                <input
-                  type="checkbox"
-                  checked
-                  disabled
-                  className="cursor-not-allowed"
-                />
+
+          <div className="p-4 border border-border border-t-0 rounded-b bg-surface">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h4 className="text-sm font-medium text-primary mb-0.5">{TAB_INFO[activeTab].title}</h4>
+                <p className="text-xs text-muted">{TAB_INFO[activeTab].description}</p>
               </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="font-medium text-gray-900">
-                    {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}{" "}
-                    Cookies
-                  </h4>
-                  <p className="text-sm text-gray-600">
-                    Diese Cookies verbessern die Funktionalität der Website.
-                  </p>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={cookiePreferences[activeTab]}
-                  onChange={() => handleToggle(activeTab)}
-                />
-              </div>
-            )}
+              <input
+                type="checkbox"
+                checked={preferences[activeTab]}
+                disabled={activeTab === "essential"}
+                className="mt-0.5 w-4 h-4 shrink-0 accent-accent disabled:cursor-not-allowed"
+                onChange={() => {
+                  if (activeTab === "essential") return;
+                  setPreferences((prev) => ({ ...prev, [activeTab]: !prev[activeTab] }));
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>

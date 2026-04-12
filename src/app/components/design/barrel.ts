@@ -3,9 +3,12 @@ import {
   BarrelSchale,
   BarrelSchaleXL,
   BarrelStehtisch,
+  type BarrelColor,
 } from "@/app/components/illustrations/FireBarrels";
 import type { ComponentType } from "react";
 import { ZippoLighter } from "../illustrations/Zippolighter";
+
+export type { BarrelColor };
 
 export interface BarrelFit {
   /** Canvas display width as fraction of SVG display width. */
@@ -20,7 +23,7 @@ export interface BarrelFit {
 
 export interface BarrelEntry {
   keywords: string[];
-  Component: ComponentType<{ showBackground?: boolean; showFloorShadow?: boolean }>;
+  Component: ComponentType<{ showBackground?: boolean; showFloorShadow?: boolean; color?: BarrelColor }>;
   fit: BarrelFit;
 }
 

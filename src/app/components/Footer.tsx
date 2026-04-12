@@ -43,7 +43,7 @@ const Footer = () => {
                   href="/pages/categories"
                   className="text-sm hover:text-white transition-colors duration-150"
                 >
-                  Kategorien
+                  Kollektionen
                 </Link>
               </li>
               <li>

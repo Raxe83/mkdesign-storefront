@@ -55,6 +55,7 @@ interface Props {
   randomProducts?: Product[];
   relatedLabel: string;
   shippingOptions?: CmsShippingOption[] | null;
+  technicalSpecsSlot?: React.ReactNode;
   extraContentSlot?: React.ReactNode;
   faqSlot?: React.ReactNode;
 }
@@ -66,6 +67,7 @@ export default function ProductDetailClient({
   randomProducts,
   relatedLabel,
   shippingOptions,
+  technicalSpecsSlot,
   extraContentSlot,
   faqSlot,
 }: Props) {
@@ -260,8 +262,8 @@ export default function ProductDetailClient({
         </div>
       </div>
 
-      {/* ── Technische Details (aus Beschreibungstabelle gefiltert) ── */}
-      <TechnicalSpecsModal specs={specs} />
+      {/* ── Technische Details (CMS-Metaobject, Fallback: geparste Beschreibung) ── */}
+      {technicalSpecsSlot ?? (specs.length > 0 && <TechnicalSpecsModal specs={specs} />)}
 
       {/* ── Extra Content (RSC-Slot mit Suspense-Skeleton aus page.tsx) ── */}
       {extraContentSlot}

@@ -2,12 +2,13 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import type { Product } from "../../../types/shopify";
-import { getProductByHandle, getExtraInfoByType, getFaqByType, getProducts } from "../../../services/shopify";
+import { getProductByHandle, getExtraInfoByType, getFaqByType, getTechnicalSpecsByType, getProducts } from "../../../services/shopify";
 import { getShippingOptions } from "../../../services/shopify/shipping";
 import { detectCategory, findMetaType, RELATED_CONFIG, type ProductCategory } from "@/app/components/product/product-category";
 import { HERO_CARDS } from "@/app/components/product/hero-cards-data";
 import { ProductExtraContent } from "@/app/components/product/ProductExtraContent";
 import { ProductFaq } from "@/app/components/product/ProductFaq";
+import { TechnicalSpecs } from "@/app/components/product/TechnicalSpecs";
 import ProductDetailClient from "./ProductDetailClient";
 
 interface Props {
@@ -42,6 +43,30 @@ function ExtraContentSkeleton() {
                 <div className="h-3 w-4/6 rounded bg-zinc-300 dark:bg-zinc-700" />
               </div>
             </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Streaming-Sektion für Technische Details ────────────────────────────────
+
+async function TechnicalSpecsSection({ metaType }: { metaType: ProductCategory | null }) {
+  const specs = metaType ? await getTechnicalSpecsByType(metaType) : [];
+  if (specs.length === 0) return null;
+  return <TechnicalSpecs specs={specs} />;
+}
+
+function TechnicalSpecsSkeleton() {
+  return (
+    <div className="mt-12 pt-10 border-t border-zinc-200/60 dark:border-zinc-800 animate-pulse">
+      <div className="h-3 w-32 rounded bg-zinc-200 dark:bg-zinc-800 mb-5" />
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-px bg-zinc-200/60 dark:bg-zinc-800 rounded overflow-hidden border border-zinc-200/60 dark:border-zinc-800">
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="flex flex-col gap-1.5 px-5 py-4 bg-white dark:bg-zinc-950">
+            <div className="h-2 w-16 rounded bg-zinc-300 dark:bg-zinc-700" />
+            <div className="h-4 w-24 rounded bg-zinc-300 dark:bg-zinc-700" />
           </div>
         ))}
       </div>
@@ -144,6 +169,11 @@ export default async function ProductDetailPage({ params }: Props) {
       randomProducts={randomProducts}
       relatedLabel={relatedConfig.label}
       shippingOptions={shippingOptions}
+      technicalSpecsSlot={
+        <Suspense fallback={<TechnicalSpecsSkeleton />}>
+          <TechnicalSpecsSection metaType={metaType} />
+        </Suspense>
+      }
       extraContentSlot={
         <Suspense fallback={<ExtraContentSkeleton />}>
           <ExtraContentSection metaType={metaType} />

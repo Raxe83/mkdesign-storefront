@@ -16,6 +16,50 @@
  *   BarrelStehtisch  — Tonne mit Holz-Tischplatte oben
  */
 
+// ─── Farb-System ──────────────────────────────────────────────────────────────
+
+export type BarrelColor = "schwarz" | "silber" | "grau" | "gold";
+
+type ColorStops = {
+  /** Barrel-Körper-Gradient: 0% · 28% · 60% · 82% · 100% */
+  barrel: [string, string, string, string, string];
+  /** Reif-Gradient: 0% · 40% · 100% */
+  ring: [string, string, string];
+  /** Boden-Cap Füllfarbe */
+  cap: string;
+  /** Bein-Füllfarbe */
+  legs: string;
+};
+
+const COLOR_PALETTE: Record<BarrelColor, ColorStops> = {
+  schwarz: {
+    barrel: ["#161412", "#3c3836", "#252220", "#38342f", "#161412"],
+    ring:   ["#292522", "#6b6460", "#292522"],
+    cap:    "#1a1815",
+    legs:   "#3a3532",
+  },
+  grau: {
+    barrel: ["#484644", "#949290", "#5e5c5a", "#787674", "#484644"],
+    ring:   ["#525050", "#a8a6a4", "#525050"],
+    cap:    "#464442",
+    legs:   "#686664",
+  },
+  silber: {
+    barrel: ["#484848", "#d4d4d4", "#909090", "#c4c4c4", "#484848"],
+    ring:   ["#686868", "#e8e8e6", "#686868"],
+    cap:    "#484848",
+    legs:   "#787878",
+  },
+  gold: {
+    barrel: ["#5c3a0a", "#d4a820", "#8c6010", "#c09018", "#5c3a0a"],
+    ring:   ["#704a0c", "#e0b824", "#704a0c"],
+    cap:    "#5a3808",
+    legs:   "#7a5010",
+  },
+};
+
+// ─── SVG Base attrs ───────────────────────────────────────────────────────────
+
 const SVG_BASE = {
   width: "100%",
   height: "100%",
@@ -26,7 +70,8 @@ const SVG_BASE = {
 
 // ─── Defs ─────────────────────────────────────────────────────────────────────
 
-function Defs({ id }: { id: string }) {
+function Defs({ id, color = "grau" }: { id: string; color?: BarrelColor }) {
+  const p = COLOR_PALETTE[color];
   return (
     <defs>
       <radialGradient id={`${id}Bg`} cx="50%" cy="35%" r="75%">
@@ -34,16 +79,16 @@ function Defs({ id }: { id: string }) {
         <stop offset="100%" stopColor="#0c0a09" />
       </radialGradient>
       <linearGradient id={`${id}Barrel`} x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%"   stopColor="#161412" />
-        <stop offset="28%"  stopColor="#3c3836" />
-        <stop offset="60%"  stopColor="#252220" />
-        <stop offset="82%"  stopColor="#38342f" />
-        <stop offset="100%" stopColor="#161412" />
+        <stop offset="0%"   stopColor={p.barrel[0]} />
+        <stop offset="28%"  stopColor={p.barrel[1]} />
+        <stop offset="60%"  stopColor={p.barrel[2]} />
+        <stop offset="82%"  stopColor={p.barrel[3]} />
+        <stop offset="100%" stopColor={p.barrel[4]} />
       </linearGradient>
       <linearGradient id={`${id}Ring`} x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%"   stopColor="#292522" />
-        <stop offset="40%"  stopColor="#6b6460" />
-        <stop offset="100%" stopColor="#292522" />
+        <stop offset="0%"   stopColor={p.ring[0]} />
+        <stop offset="40%"  stopColor={p.ring[1]} />
+        <stop offset="100%" stopColor={p.ring[2]} />
       </linearGradient>
 
       {/* Wood grain gradients for tabletop */}
@@ -120,16 +165,19 @@ function TopRim({ id }: { id: string }) {
   );
 }
 
-function BottomCap() {
-  return <ellipse cx="150" cy="335" rx="82" ry="6" fill="#1a1815" stroke="#3c3836" strokeWidth="1.5" />;
+function BottomCap({ color = "grau" }: { color?: BarrelColor }) {
+  const cap = COLOR_PALETTE[color].cap;
+  return <ellipse cx="150" cy="335" rx="82" ry="6" fill={cap} stroke="#3c3836" strokeWidth="1.5" />;
 }
 
-function Legs() {
+function Legs({ color = "grau" }: { color?: BarrelColor }) {
+  const legs = COLOR_PALETTE[color].legs;
+  const legsDark = color === "schwarz" ? "#302d2a" : legs;
   return (
     <>
-      <path d="M 108,335 L 104,362 Q 103,366 108,366 L 114,366 Q 119,365 118,361 L 113,335 Z" fill="#3a3532" />
-      <path d="M 192,335 L 188,361 Q 187,365 193,366 L 199,366 Q 204,365 203,361 L 200,335 Z" fill="#3a3532" />
-      <path d="M 147,335 L 145,361 Q 144,365 149,366 L 155,366 Q 160,365 158,361 L 156,335 Z" fill="#302d2a" />
+      <path d="M 108,335 L 104,362 Q 103,366 108,366 L 114,366 Q 119,365 118,361 L 113,335 Z" fill={legs} />
+      <path d="M 192,335 L 188,361 Q 187,365 193,366 L 199,366 Q 204,365 203,361 L 200,335 Z" fill={legs} />
+      <path d="M 147,335 L 145,361 Q 144,365 149,366 L 155,366 Q 160,365 158,361 L 156,335 Z" fill={legsDark} />
     </>
   );
 }
@@ -140,8 +188,6 @@ function FloorShadow({ cy = 372 }: { cy?: number }) {
 
 /**
  * Rand an der Schnittlinie — soll den Body-Clip natürlich abschließen.
- * Der clipRect muss bei cy+ry beginnen (unterhalb der Ellipse-Mitte),
- * damit der Rim die Schnittkante vollständig überlagert.
  */
 function CutRim({ id, cy, rx = 86, ry = 6 }: { id: string; cy: number; rx?: number; ry?: number }) {
   return (
@@ -161,14 +207,9 @@ function CutRim({ id, cy, rx = 86, ry = 6 }: { id: string; cy: number; rx?: numb
 // ─── Holz-Tischplatte ─────────────────────────────────────────────────────────
 
 function WoodTabletop({ id }: { id: string }) {
-  // Platte: cy=12 (Oberfläche), cy=20 (Kante unten) → Unterseite bei y≈29
-  // Halter: von y=30 bis y=46 (Barrel-Rim-Top), x=108 und x=186
-  // Abstand zur Tonne: ~16px
   return (
     <>
       {/* ── Halter (kein Sockel) ───────────────────────────── */}
-      {/* Tabletop-Unterseite y=66, Halter bis y=76 (tief im Barrel-Rim) */}
-
       {/* Halter links */}
       <rect x="107" y="50" width="9" height="14" rx="1.5"
         fill="#3a3532" stroke="#57534e" strokeWidth="0.6" />
@@ -181,10 +222,8 @@ function WoodTabletop({ id }: { id: string }) {
       <rect x="186" y="51" width="3" height="12" rx="1"
         fill="#5a5450" opacity="0.35" />
 
-      {/* ── Tischplatte (Unterseite bei y=50) ─────────────── */}
-      {/* Kante — cy leicht nach oben gesetzt damit kein Gap zum Top entsteht */}
+      {/* ── Tischplatte ─────────────────────────────────────── */}
       <ellipse cx="150" cy="39" rx="187" ry="13" fill={`url(#${id}WoodEdge)`} stroke="#3d2812" strokeWidth="1" />
-      {/* Oberfläche */}
       <ellipse cx="150" cy="32" rx="185" ry="11" fill={`url(#${id}WoodTop)`} stroke="#7a5228" strokeWidth="1" />
 
       {/* Holzmaserung */}
@@ -206,16 +245,10 @@ function WoodTabletop({ id }: { id: string }) {
   );
 }
 
-// ─── Varianten ────────────────────────────────────────────────────────────────
-
 // ─── Seitengriffe ─────────────────────────────────────────────────────────────
 
-/**
- * Schlichte flache Metallösen direkt unterhalb des Schnittrand-cy.
- * `rimCy` = cy des CutRim (z. B. 247 oder 155).
- */
 function SideHandles({ rimCy }: { rimCy: number }) {
-  const y = rimCy + 5;   // knapp unter dem Rand
+  const y = rimCy + 5;
   const h = 10;
   const w = 26;
   return (
@@ -223,7 +256,6 @@ function SideHandles({ rimCy }: { rimCy: number }) {
       {/* Linker Tab */}
       <rect x={44} y={y} width={w} height={h} rx="2.5"
         fill="#3c3835" stroke="#5a5450" strokeWidth="0.8" />
-      {/* Glanzstreifen oben */}
       <rect x={45} y={y + 1} width={w - 2} height="2.5" rx="1"
         fill="#7a7470" opacity="0.28" />
 
@@ -236,24 +268,28 @@ function SideHandles({ rimCy }: { rimCy: number }) {
   );
 }
 
-// ─── Varianten ────────────────────────────────────────────────────────────────
+// ─── Props ────────────────────────────────────────────────────────────────────
 
 interface BarrelProps {
   /** Render the dark background rect. Default: true. Set false in the design editor. */
   showBackground?: boolean;
   /** Render the floor shadow ellipse. Default: true. */
   showFloorShadow?: boolean;
+  /** Barrel-Farbe. Default: "grau" (Sandstrahl-Look). */
+  color?: BarrelColor;
 }
 
-export function BarrelFull({ showBackground = true, showFloorShadow = true }: BarrelProps) {
+// ─── Varianten ────────────────────────────────────────────────────────────────
+
+export function BarrelFull({ showBackground = true, showFloorShadow = true, color = "grau" }: BarrelProps) {
   const id = "pvFull";
   return (
     <svg viewBox="0 0 300 400" {...SVG_BASE}>
-      <Defs id={id} />
+      <Defs id={id} color={color} />
       {showBackground   && <rect width="300" height="400" fill={`url(#${id}Bg)`} />}
       {showFloorShadow  && <FloorShadow />}
-      <Legs />
-      <BottomCap />
+      <Legs color={color} />
+      <BottomCap color={color} />
       <BarrelBody id={id} />
       <Ring1 id={id} />
       <Ring2 id={id} />
@@ -262,14 +298,14 @@ export function BarrelFull({ showBackground = true, showFloorShadow = true }: Ba
   );
 }
 
-export function BarrelNoLegs({ showBackground = true, showFloorShadow = true }: BarrelProps) {
+export function BarrelNoLegs({ showBackground = true, showFloorShadow = true, color = "grau" }: BarrelProps) {
   const id = "pvNoLegs";
   return (
     <svg viewBox="0 0 300 355" {...SVG_BASE}>
-      <Defs id={id} />
+      <Defs id={id} color={color} />
       {showBackground   && <rect width="300" height="355" fill={`url(#${id}Bg)`} />}
       {showFloorShadow  && <FloorShadow cy={348} />}
-      <BottomCap />
+      <BottomCap color={color} />
       <BarrelBody id={id} />
       <Ring1 id={id} />
       <Ring2 id={id} />
@@ -278,11 +314,11 @@ export function BarrelNoLegs({ showBackground = true, showFloorShadow = true }: 
   );
 }
 
-export function BarrelSchaleXL({ showBackground = true, showFloorShadow = true }: BarrelProps) {
+export function BarrelSchaleXL({ showBackground = true, showFloorShadow = true, color = "grau" }: BarrelProps) {
   const id = "pvSchaleXL";
   return (
     <svg viewBox="0 138 300 262" {...SVG_BASE}>
-      <Defs id={id} />
+      <Defs id={id} color={color} />
       <defs>
         <clipPath id={`${id}Clip`}>
           <rect x="0" y="155" width="300" height="220" />
@@ -290,8 +326,8 @@ export function BarrelSchaleXL({ showBackground = true, showFloorShadow = true }
       </defs>
       {showBackground   && <rect x="0" y="138" width="300" height="262" fill={`url(#${id}Bg)`} />}
       {showFloorShadow  && <FloorShadow cy={372} />}
-      <Legs />
-      <BottomCap />
+      <Legs color={color} />
+      <BottomCap color={color} />
       <BarrelBody id={id} clipId={`${id}Clip`} />
       <Ring2 id={id} />
       <SideHandles rimCy={155} />
@@ -300,11 +336,11 @@ export function BarrelSchaleXL({ showBackground = true, showFloorShadow = true }
   );
 }
 
-export function BarrelSchale({ showBackground = true, showFloorShadow = true }: BarrelProps) {
+export function BarrelSchale({ showBackground = true, showFloorShadow = true, color = "grau" }: BarrelProps) {
   const id = "pvSchale";
   return (
     <svg viewBox="0 230 300 170" {...SVG_BASE}>
-      <Defs id={id} />
+      <Defs id={id} color={color} />
       <defs>
         <clipPath id={`${id}Clip`}>
           <rect x="0" y="247" width="300" height="130" />
@@ -312,8 +348,8 @@ export function BarrelSchale({ showBackground = true, showFloorShadow = true }: 
       </defs>
       {showBackground   && <rect x="0" y="230" width="300" height="170" fill={`url(#${id}Bg)`} />}
       {showFloorShadow  && <FloorShadow cy={372} />}
-      <Legs />
-      <BottomCap />
+      <Legs color={color} />
+      <BottomCap color={color} />
       <BarrelBody id={id} clipId={`${id}Clip`} />
       <SideHandles rimCy={247} />
       <CutRim id={id} cy={247} rx={86} ry={6} />
@@ -321,15 +357,15 @@ export function BarrelSchale({ showBackground = true, showFloorShadow = true }: 
   );
 }
 
-export function BarrelStehtisch({ showBackground = true, showFloorShadow = true }: BarrelProps) {
+export function BarrelStehtisch({ showBackground = true, showFloorShadow = true, color = "grau" }: BarrelProps) {
   const id = "pvStehtisch";
   return (
     <svg viewBox="0 -10 300 410" {...SVG_BASE}>
-      <Defs id={id} />
+      <Defs id={id} color={color} />
       {showBackground   && <rect x="0" y="-10" width="300" height="410" fill={`url(#${id}Bg)`} />}
       {showFloorShadow  && <FloorShadow />}
-      <Legs />
-      <BottomCap />
+      <Legs color={color} />
+      <BottomCap color={color} />
       <BarrelBody id={id} />
       <Ring1 id={id} />
       <Ring2 id={id} />

@@ -29,6 +29,7 @@ export function useEditorProducts() {
               ? `${parseFloat(variant.price.amount).toFixed(2)} ${variant.price.currencyCode}`
               : "",
             canvasPresetId: getPresetForTitle(p.title).id,
+            farben: p.zusatzoptionen?.farben ?? [],
             sideBZusatzprodukt: firstZusatz
               ? {
                   variantId: firstZusatz.defaultVariantId,

@@ -6,6 +6,7 @@ import { ArrowRight } from "lucide-react";
 import { cn } from "../utils/utils";
 import type { JudgemeReview } from "../services/judgeme";
 import { ReviewLightbox } from "./ui/ReviewLightbox";
+import { useCookieConsent } from "../hooks/useCookieConsent";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -136,6 +137,7 @@ export function Reviews({
   className,
   reviewStats,
 }: ReviewsProps) {
+  const consent = useCookieConsent();
   const [reviews, setReviews] = useState<JudgemeReview[]>([]);
   const [average, setAverage] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -144,6 +146,10 @@ export function Reviews({
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
 
   useEffect(() => {
+    if (!consent.functional) {
+      setLoading(false);
+      return;
+    }
     const load = async () => {
       try {
         const res = await fetch("/api/judgeme/reviews?page=1&perPage=12");
@@ -163,7 +169,7 @@ export function Reviews({
       }
     };
     load();
-  }, []);
+  }, [consent.functional]);
 
   const visible = reviews.slice(0, visibleCount);
   const hasMore = visibleCount < reviews.length;
@@ -219,11 +225,13 @@ export function Reviews({
           <div className="flex gap-3">
             {loading
               ? Array.from({ length: 1 }).map((_, i) => <ReviewCardSkeleton key={i} />)
-              : reviews.length === 0
-                ? <p className="text-white/40 text-sm py-10">Noch keine Bewertungen.</p>
-                : reviews.map((review, index) => (
-                    <ReviewCard key={review.id} review={review} index={index} onImageClick={(urls, i) => setLightbox({ images: urls, index: i })} />
-                  ))
+              : !consent.functional
+                ? <p className="text-white/40 text-sm py-10">Bewertungen benötigen funktionale Cookies.</p>
+                : reviews.length === 0
+                  ? <p className="text-white/40 text-sm py-10">Noch keine Bewertungen.</p>
+                  : reviews.map((review, index) => (
+                      <ReviewCard key={review.id} review={review} index={index} onImageClick={(urls, i) => setLightbox({ images: urls, index: i })} />
+                    ))
             }
           </div>
         </div>
@@ -234,6 +242,10 @@ export function Reviews({
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.from({ length: 3 }).map((_, i) => <ReviewCardSkeleton key={i} />)}
             </div>
+          ) : !consent.functional ? (
+            <p className="text-white/40 text-sm text-center py-12">
+              Bewertungen benötigen funktionale Cookies.
+            </p>
           ) : reviews.length === 0 ? (
             <p className="text-white/40 text-sm text-center py-12">Noch keine Bewertungen vorhanden.</p>
           ) : (
