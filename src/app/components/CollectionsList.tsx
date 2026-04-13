@@ -63,21 +63,23 @@ export interface CategoryGridProps {
   columns?: 2 | 3 | 4;
   /** Überschreibt die Card-Größe aller Einträge (nützlich für gleichmäßige Grids). */
   forceCardSize?: CardSize;
+  /** Begrenzt die Anzahl dargestellter Cards. */
+  maxItems?: number;
 }
 
 // ─── Default Layout Config ─────────────────────────────────────────────────────
 // Entspricht dem MK-Design Redesign-Grid.
 
 const DEFAULT_LAYOUT: CategoryCardConfig[] = [
-  { handle: "feuertonne", size: "wide", tag: "Bestseller" },
-  { handle: "gravit-uhren", size: "wide" },
-  { handle: "schlusselanhanger", size: "wide", tag: "Neu" },
-  { handle: "schiefer-untersetzer", size: "wide" },
-  { handle: "beheizbarer-stehtisch", size: "wide" },
-  { handle: "zippo-original", size: "wide" },
-  { handle: "nachtlicht", size: "wide" },
-  { handle: "3-d-druck-produkte", size: "wide", tag: "Nachhaltig" },
-  { handle: "gartenartikel", size: "wide" },
+  { handle: "outdoor-und-feuer",           size: "wide", tag: "Bestseller" },
+  { handle: "nachtlichter-und-beleuchtung", size: "wide" },
+  { handle: "mannerwelt-bier",             size: "wide", tag: "Männerwelt" },
+  { handle: "untersetzer-tischdeko",       size: "wide" },
+  { handle: "geschenke-und-anlaesse",      size: "wide", tag: "Geschenke" },
+  { handle: "3d-druck-und-laser-gravur",   size: "wide", tag: "Neu" },
+  { handle: "wohnen-und-deko",             size: "wide" },
+  { handle: "gravur-und-personalisierung", size: "wide", tag: "Personalisiert" },
+  { handle: "zubehoer-fuer-stehtische",    size: "wide" },
 ];
 
 // ─── Grid Cell Tailwind Classes ────────────────────────────────────────────────
@@ -180,6 +182,7 @@ export function CategoryGrid({
   showHeader = true,
   columns = 4,
   forceCardSize,
+  maxItems,
 }: CategoryGridProps) {
   // Collections nach Layout-Reihenfolge sortieren
   const collectionMap = new Map(collections.map((c) => [c.handle, c]));
@@ -207,6 +210,7 @@ export function CategoryGrid({
   }
 
   if (orderedCards.length === 0) return null;
+  const visibleCards = maxItems ? orderedCards.slice(0, maxItems) : orderedCards;
 
   const colsClass =
     columns === 2 ? "sm:grid-cols-2" :
@@ -246,7 +250,7 @@ export function CategoryGrid({
           "auto-rows-[240px]",
         )}
       >
-        {orderedCards.map(({ collection, config }) => (
+        {visibleCards.map(({ collection, config }) => (
           <CategoryCard
             key={collection.id}
             collection={collection}
@@ -254,6 +258,26 @@ export function CategoryGrid({
           />
         ))}
       </div>
+
+      {/* Link zu allen Kollektionen */}
+      {maxItems && (
+        <div className="mt-8 flex justify-center">
+          <Link
+            href="/pages/categories"
+            className={cn(
+              "inline-flex items-center gap-2",
+              "text-sm font-medium text-charcoal dark:text-primary",
+              "border border-sand/60 dark:border-zinc-700 rounded",
+              "px-6 py-3",
+              "hover:border-rust hover:text-rust dark:hover:border-rust dark:hover:text-rust",
+              "transition-colors duration-200",
+            )}
+          >
+            Alle Kollektionen ansehen
+            <span aria-hidden>→</span>
+          </Link>
+        </div>
+      )}
     </div>
     </div>
   );

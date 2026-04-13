@@ -4,7 +4,7 @@ import { ShopifyCollection } from "../../components/CollectionsList";
 import { filterHiddenProducts } from "../../utils/productVisibility";
 
 export async function getCollections(
-  first = 6,
+  first = 20,
   locale?: string,
 ): Promise<ShopifyCollection[]> {
   const query = `

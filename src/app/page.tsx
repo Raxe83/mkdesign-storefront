@@ -21,7 +21,7 @@ export default async function HomePage() {
   const [featuredProducts, collections, reviewData, heroCms, fireCms, printCms] =
     await Promise.all([
       getFeaturedProducts(8, "de"),
-      getCollections(6, "de"),
+      getCollections(20, "de"),
       getAllReviewsCached().catch(() => null),
       getHomepageHero().catch(() => null),
       getSectionText("fire-highlight").catch(() => null),
@@ -83,7 +83,7 @@ export default async function HomePage() {
       />
       <HeroHighlight reviewStats={reviewStats} />
 
-      <CollectionsList collections={collections} />
+      <CollectionsList collections={collections} maxItems={6} />
 
       <ProductsList
         featuredProducts={featuredProducts}
