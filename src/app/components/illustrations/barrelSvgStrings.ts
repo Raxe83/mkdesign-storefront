@@ -110,9 +110,9 @@ function woodTabletop(id: string) {
   <rect x="184" y="50" width="9" height="14" rx="1.5" fill="#3a3532" stroke="#57534e" stroke-width="0.6"/>
   <rect x="186" y="51" width="3" height="12" rx="1" fill="#5a5450" opacity="0.35"/>
   <!-- Tischplatte Kante -->
-  <ellipse cx="150" cy="42" rx="185" ry="10" fill="url(#${id}WoodEdge)" stroke="#3d2812" stroke-width="1"/>
+  <ellipse cx="150" cy="42" rx="148" ry="10" fill="url(#${id}WoodEdge)" stroke="#3d2812" stroke-width="1"/>
   <!-- Tischplatte Oberfläche -->
-  <ellipse cx="150" cy="32" rx="185" ry="10" fill="url(#${id}WoodTop)" stroke="#7a5228" stroke-width="1"/>
+  <ellipse cx="150" cy="32" rx="146" ry="10" fill="url(#${id}WoodTop)" stroke="#7a5228" stroke-width="1"/>
   <!-- Maserung -->
   <g stroke="#c07a38" stroke-width="1" fill="none" opacity="0.22">
     <path d="M -22,29 Q 150,23 322,29"/>

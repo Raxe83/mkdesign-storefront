@@ -20,6 +20,19 @@ import { ShapesPanel } from "./panels/ShapesPanel";
 import { TextPanel } from "./panels/TextPanel";
 import { DevPanel } from "./panels/DevPanel";
 import type { FitState } from "./panels/DevPanel";
+import {
+  ProductExtras,
+  type ProductExtrasValues,
+} from "@/app/components/product/ProductExtras";
+import { ProductExtraContent } from "@/app/components/product/ProductExtraContent";
+import type { Metaobject } from "@/app/types/shopify";
+
+const SEITE_B_KEYWORDS = ["zweite seite", "seite b", "seite-b", "2. seite", "rückseite", "rueckseite", "beidseitig"];
+
+function isSeiteBProduct(title: string): boolean {
+  const lower = title.toLowerCase();
+  return SEITE_B_KEYWORDS.some((kw) => lower.includes(kw));
+}
 
 const IS_DEV = process.env.NODE_ENV === "development";
 
@@ -221,6 +234,19 @@ export default function DesignEditor() {
     canvas.saveDesign(otherSide);
   }, [activeSide, canvas]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  /* ── Extras-Werte (Textfelder, Optionen etc.) ─────────────────── */
+  const [extrasValues, setExtrasValues] = useState<ProductExtrasValues>({
+    textfelder: [],
+    zusatzprodukte: [],
+    optionen: [],
+    entscheid: "",
+    farbe: "",
+  });
+  // Reset bei Produktwechsel
+  useEffect(() => {
+    setExtrasValues({ textfelder: [], zusatzprodukte: [], optionen: [], entscheid: "", farbe: "" });
+  }, [selectedProduct?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
   /* ── Cart action ───────────────────────────────────────────────── */
   const handleAddToCart = useCallback(async () => {
     if (!selectedProduct?.variantId || canvas.uploadState.status !== "success")
@@ -233,6 +259,18 @@ export default function DesignEditor() {
       { key: "Design-Vorschau", value: result.sideA.previewUrl },
       { key: "_design_id", value: result.designId },
       { key: "_design_json", value: result.sideA.jsonUrl },
+      // Zusatzoptionen aus ProductExtras
+      ...(selectedProduct.zusatzoptionen?.textfelder ?? [])
+        .map((label, i) => ({ key: label, value: extrasValues.textfelder[i] ?? "" }))
+        .filter((a) => a.value.trim() !== ""),
+      ...(extrasValues.zusatzprodukte.length > 0
+        ? [{ key: "_zusatzprodukte", value: extrasValues.zusatzprodukte.map((v) => v.title).join(", ") }]
+        : []),
+      ...(extrasValues.optionen.length > 0
+        ? [{ key: "Optionen", value: extrasValues.optionen.join(", ") }]
+        : []),
+      ...(extrasValues.entscheid ? [{ key: "Auswahl", value: extrasValues.entscheid }] : []),
+      ...(extrasValues.farbe ? [{ key: "Farbe", value: extrasValues.farbe }] : []),
     ];
     if (result.sideB) {
       attrs.push({ key: "Design-Vorschau-B", value: result.sideB.previewUrl });
@@ -254,9 +292,37 @@ export default function DesignEditor() {
         : undefined;
 
     await addItem(selectedProduct.variantId, 1, attrs, additionalLines);
-  }, [addItem, selectedProduct, canvas.uploadState]);
+  }, [addItem, selectedProduct, canvas.uploadState, extrasValues]);
 
   const [showHelp, setShowHelp] = useState(false);
+
+  /* ── Extra-Info (Metaobjects) für das gewählte Produkt ─────────── */
+  const [extraInfoItems, setExtraInfoItems] = useState<Metaobject[]>([]);
+  useEffect(() => {
+    if (!selectedProduct?.category) { setExtraInfoItems([]); return; }
+    fetch(`/api/extra-info?category=${encodeURIComponent(selectedProduct.category)}`)
+      .then((r) => r.json())
+      .then((data: Metaobject[]) => setExtraInfoItems(data))
+      .catch(() => setExtraInfoItems([]));
+  }, [selectedProduct?.category]);
+
+  /* ── gefilterte Zusatzoptionen (ohne "Zweite Seite"-Produkte + keine Farben) ── */
+  const filteredZusatzoptionen = useMemo(() => {
+    if (!selectedProduct?.zusatzoptionen) return null;
+    const cfg = {
+      ...selectedProduct.zusatzoptionen,
+      zusatzprodukte: selectedProduct.zusatzoptionen.zusatzprodukte.filter(
+        (p) => !isSeiteBProduct(p.title),
+      ),
+      farben: [], // Farbwahl läuft über die Canvas-Swatches oberhalb
+    };
+    const hasFields =
+      cfg.textfelder.length > 0 ||
+      cfg.zusatzprodukte.length > 0 ||
+      cfg.optionen.length > 0 ||
+      cfg.entscheide.length > 0;
+    return hasFields ? cfg : null;
+  }, [selectedProduct?.zusatzoptionen]);
 
   return (
     <div className="pb-24">
@@ -573,6 +639,19 @@ export default function DesignEditor() {
               </div>
             )}
 
+            {/* ── Produktspezifische Zusatzoptionen (unter Canvas) ── */}
+            {filteredZusatzoptionen && (
+              <div
+                className="rounded border border-stone-200/60 dark:border-zinc-700/60 bg-surface dark:bg-zinc-900 shadow-sm p-4"
+                data-no-deselect
+              >
+                <ProductExtras
+                  config={filteredZusatzoptionen}
+                  onChange={setExtrasValues}
+                />
+              </div>
+            )}
+
             <div className="lg:hidden" data-no-deselect>
               <MobileToolbar
                 imageUploading={canvas.imageUploading}
@@ -609,6 +688,7 @@ export default function DesignEditor() {
               onResetUpload={canvas.resetUploadState}
               onAddToCart={handleAddToCart}
             />
+
             {IS_DEV && (
               <DevPanel
                 canvasWidth={customWidth}
@@ -630,6 +710,13 @@ export default function DesignEditor() {
           onChange={canvas.handleImageUpload}
         />
       </div>
+
+      {/* ── Extra-Info für das gewählte Produkt ────────────────────── */}
+      {extraInfoItems.length > 0 && (
+        <div className="mt-16 pt-10 border-t border-zinc-200/60 dark:border-zinc-800">
+          <ProductExtraContent metaobjects={extraInfoItems} />
+        </div>
+      )}
 
       {/* ── Help Modal ──────────────────────────────────────────────── */}
       {showHelp && (

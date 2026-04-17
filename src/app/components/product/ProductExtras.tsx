@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import type { ProductZusatzoptionen, ZusatzproduktOption } from "@/app/types/shopify";
-import { formatPrice } from "@/app/utils/formatPrice";
+import { ZusatzprodukteGrid } from "./ZusatzprodukteGrid";
 
 /** Mapping: Shopify-Farbname (lowercase) → CSS-Farbe.
  *  Nutzt die barrel-CSS-Variablen wo passend, sonst Standard-CSS-Farben. */
@@ -115,70 +114,15 @@ export function ProductExtras({ config, onChange }: Props) {
         );
       })}
 
-      {/* ── Zusatzprodukte (Mehrfachauswahl als Produktkarten) ── */}
+      {/* ── Zusatzprodukte ── */}
       {config.zusatzprodukte.length > 0 && (
         <div>
           <p className={LABEL_CLS}>Zusatzprodukte</p>
-          <div className="flex flex-col gap-2">
-            {config.zusatzprodukte.map((opt) => {
-              const checked = zusatzprodukte.some((v) => v.id === opt.id);
-              return (
-                <label
-                  key={opt.id}
-                  className={[
-                    "flex items-center gap-3 cursor-pointer rounded border p-3 transition-colors duration-150",
-                    checked
-                      ? "border-primary dark:border-neutral-400 bg-zinc-50 dark:bg-zinc-800/60"
-                      : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500",
-                  ].join(" ")}
-                >
-                  {/* Checkbox */}
-                  <span className={[
-                    "flex-shrink-0 w-4 h-4 rounded border transition-colors duration-150",
-                    "flex items-center justify-center",
-                    checked
-                      ? "bg-primary border-primary dark:bg-neutral-100 dark:border-neutral-100"
-                      : "border-zinc-300 dark:border-zinc-600",
-                  ].join(" ")}>
-                    {checked && (
-                      <svg width="9" height="7" viewBox="0 0 9 7" fill="none" aria-hidden>
-                        <path d="M1 3.5L3.5 6L8 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-                          className="dark:stroke-neutral-900" />
-                      </svg>
-                    )}
-                  </span>
-                  <input type="checkbox" className="sr-only"
-                    checked={checked}
-                    onChange={(e) => toggleZusatzprodukt(opt, e.target.checked)} />
-
-                  {/* Produktbild */}
-                  {opt.featuredImage ? (
-                    <div className="flex-shrink-0 w-10 h-10 rounded overflow-hidden border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800">
-                      <Image
-                        src={opt.featuredImage.url}
-                        alt={opt.featuredImage.altText ?? opt.title}
-                        width={40}
-                        height={40}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ) : (
-                    <div className="flex-shrink-0 w-10 h-10 rounded border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800" />
-                  )}
-
-                  {/* Titel */}
-                  <span className="flex-1 text-sm text-primary dark:text-neutral-200 leading-snug">
-                    {opt.title}
-                  </span>
-
-                  {/* Preis */}
-                  <span className="flex-shrink-0 text-sm font-medium text-primary dark:text-neutral-200">
-                    {formatPrice(opt.price.amount, opt.price.currencyCode)}
-                  </span>
-                </label>
-              );
-            })}
-          </div>
+          <ZusatzprodukteGrid
+            options={config.zusatzprodukte}
+            selected={zusatzprodukte}
+            onToggle={toggleZusatzprodukt}
+          />
         </div>
       )}
 

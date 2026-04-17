@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { getDesignProducts } from "@/app/services/shopify/products";
 import { getPresetForTitle } from "../constants";
 import type { ProductOption } from "../types";
+import { findMetaType } from "@/app/components/product/product-category";
 
 export function useEditorProducts() {
   const [products, setProducts]             = useState<ProductOption[]>([]);
@@ -30,6 +31,12 @@ export function useEditorProducts() {
               : "",
             canvasPresetId: getPresetForTitle(p.title).id,
             farben: p.zusatzoptionen?.farben ?? [],
+            zusatzoptionen: p.zusatzoptionen ?? null,
+            category: findMetaType(
+              (p.tags ?? []).filter(
+                (t) => !["customdesign", "custom-design", "custom design", "wunschdruck"].includes(t.toLowerCase()),
+              ),
+            ),
             sideBZusatzprodukt: firstZusatz
               ? {
                   variantId: firstZusatz.defaultVariantId,

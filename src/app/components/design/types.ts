@@ -1,3 +1,6 @@
+import type { ProductZusatzoptionen } from "@/app/types/shopify";
+import type { ProductCategory } from "@/app/components/product/product-category";
+
 export type ProductOption = {
   id:             string;
   label:          string;
@@ -10,6 +13,10 @@ export type ProductOption = {
   sideBZusatzprodukt: { variantId: string; price: string } | null;
   /** Verfügbare Farboptionen aus Zusatzoptionen (z. B. ["Schwarz", "Silber", "Gold"]). */
   farben: string[];
+  /** Vollständige Zusatzoptionen für ProductExtras (Textfelder, Optionen, etc.). */
+  zusatzoptionen: ProductZusatzoptionen | null;
+  /** Kategorie des Produkts, z. B. "feuertonne" oder "nachtlicht". */
+  category: ProductCategory | null;
 };
 
 export type SidebarTab = "shapes" | "text" | "image";
