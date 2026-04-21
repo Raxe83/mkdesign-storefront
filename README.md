@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MK-Design Shopify Storefront 🚀
 
-## Getting Started
+Eine hochperformante, **Headless Shopify Storefront** für [M.K.Design](https://mkdesign.rayden-studio.com/) – spezialisiert auf personalisierte Werkstatt-Produkte wie Feuertonnen, Nachtlichter und Gravuren.
 
-First, run the development server:
+[![Tech Stack](https://img.shields.io/badge/Stack-Next.js%20|%20TS%20|%20Tailwind-blue)](https://nextjs.org/)
+[![Performance](https://img.shields.io/badge/Lighthouse-95%2B-green)](#)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+> **Case Study: Solo-Entwicklung eines Fullstack-Systems.** Dieses Projekt demonstriert die Umsetzung einer komplexen E-Commerce-Architektur im Alleingang – von der API-Integration bis hin zum kundenspezifischen Design-Editor. Der Fokus liegt auf **Pragmatismus, Wartbarkeit und exzellenter User Experience**.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠 Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Ebene | Technologien |
+| :--- | :--- |
+| **Framework** | **Next.js 15** (App Router), TypeScript 5 (Strict Mode) |
+| **Styling** | Tailwind CSS 3, Framer Motion (Animationen) |
+| **Backend** | Shopify Storefront & Admin API (Headless CMS) |
+| **Editor** | **Fabric.js 7** (Canvas-basierter Produkt-Konfigurator) |
+| **Services** | Resend (Mail), Cloudinary (Assets), Judge.me (Reviews) |
+| **Quality** | Vitest (Unit Testing), Lucide React (Icons) |
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🌟 Highlights & Features
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+* **Custom Design Editor:** Ein mächtiger, Fabric.js-basierter Konfigurator, der es Kunden ermöglicht, Gravuren und Nachtlichter direkt im Browser zu gestalten.
+* **Headless Commerce:** Vollständige Integration der Shopify-Logik (Cart, Checkout, Customer Auth) über eine entkoppelte Frontend-Architektur.
+* **Data-driven CMS:** Dynamische Steuerung von Inhalten und Lieferzeiten über **Shopify Metaobjects**, wodurch der Shop ohne Code-Änderungen durch den Betreiber gepflegt werden kann.
+* **Performance-Optimiert:** Serverseitiges Daten-Fetching, optimierte Image-Pipelines via Cloudinary und minimales Client-seitiges JavaScript.
+* **Responsive & Accessibility:** Konsequenter Mobile-First-Ansatz und Unterstützung für Dark Mode.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 📂 Architektur & Struktur
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Das Projekt folgt einer modularen Struktur, um Logik und Darstellung strikt zu trennen:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```text
+src/
+├── app/
+│   ├── actions/        # Type-safe Server Actions (Auth, Form-Handling)
+│   ├── api/            # Route Handler für Webhooks & externe Services
+│   ├── components/     # Modulare UI-Komponenten (Atomic Design Ansatz)
+│   │   └── design/     # Komplexe Editor-Logik & Fabric.js Hooks
+│   ├── hooks/          # Domain-spezifische Custom Hooks
+│   ├── services/       # Abstraktionsschicht für Shopify API & Queries
+│   ├── types/          # Zentrale TypeScript-Definitionen
+│   └── utils/          # Pure Functions & Hilfslogik (Unit-tested)
+└── middleware.ts       # Edge-Runtime Auth-Guard & Session-Handling
