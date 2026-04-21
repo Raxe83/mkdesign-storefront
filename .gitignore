@@ -19,6 +19,7 @@
 
 # AI Assistant Rules
 claude.md
+.claude/
 
 # Scripts
 *.js
