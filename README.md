@@ -1,4 +1,4 @@
-# MK-Design Shopify Storefront 🚀
+# MK-Design Shopify Storefront 
 
 Eine hochperformante, **Headless Shopify Storefront** für [M.K.Design](https://mkdesign.rayden-studio.com/) – spezialisiert auf personalisierte Werkstatt-Produkte wie Feuertonnen, Nachtlichter und Gravuren.
 
@@ -22,7 +22,7 @@ Eine hochperformante, **Headless Shopify Storefront** für [M.K.Design](https://
 
 ---
 
-## 🌟 Highlights & Features
+##  Highlights & Features
 
 * **Custom Design Editor:** Ein mächtiger, Fabric.js-basierter Konfigurator, der es Kunden ermöglicht, Gravuren und Nachtlichter direkt im Browser zu gestalten.
 * **Headless Commerce:** Vollständige Integration der Shopify-Logik (Cart, Checkout, Customer Auth) über eine entkoppelte Frontend-Architektur.
@@ -32,7 +32,7 @@ Eine hochperformante, **Headless Shopify Storefront** für [M.K.Design](https://
 
 ---
 
-## 📂 Architektur & Struktur
+##  Architektur & Struktur
 
 Das Projekt folgt einer modularen Struktur, um Logik und Darstellung strikt zu trennen:
 
