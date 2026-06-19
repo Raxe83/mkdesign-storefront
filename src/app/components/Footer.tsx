@@ -1,10 +1,18 @@
-"use client";
-
-import { Phone, MapPin, Mail } from "lucide-react";
+import { Phone, MapPin, Mail, Clock } from "lucide-react";
 import Link from "next/link";
 import { shopDetails } from "../global";
+import { getOpeningHours } from "../services/shopify/metaobjects";
+import type { CmsOpeningHoursEntry } from "../types/shopify";
 
-const Footer = () => {
+const FALLBACK_HOURS: CmsOpeningHoursEntry[] = [
+  { label: "Mo – Fr", hours: "12:00 – 17:00 Uhr" },
+  { label: "Sa", hours: "11:00 – 15:00 Uhr" },
+];
+
+const Footer = async () => {
+  const openingHours = await getOpeningHours().catch(() => []);
+  const hours = openingHours.length > 0 ? openingHours : FALLBACK_HOURS;
+
   return (
     <footer className="bg-[#18181b] border-t border-zinc-800 text-zinc-400">
       <div className="max-w-screen-xl mx-auto px-6 py-14">
@@ -87,6 +95,14 @@ const Footer = () => {
                   Kontakt
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/pages/return-request"
+                  className="text-sm hover:text-white transition-colors duration-150"
+                >
+                  Widerruf & Rücksendung
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -120,6 +136,17 @@ const Footer = () => {
                 >
                   {shopDetails.contact.phone}
                 </a>
+              </div>
+              <div className="flex items-start gap-2.5 text-sm">
+                <Clock size={15} className="text-zinc-600 shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  {hours.map((entry) => (
+                    <p key={entry.label}>
+                      <span className="text-zinc-300">{entry.label}:</span>{" "}
+                      {entry.hours}
+                    </p>
+                  ))}
+                </div>
               </div>
             </address>
           </div>

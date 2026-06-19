@@ -19,7 +19,7 @@ export interface FireHighlightProps {
 const DEFAULT_FEATURES: FireHighlightFeature[] = [
   { text: "Handarbeit aus gebrauchten Stahlblechtonnen – jedes Stück ein Unikat" },
   { text: "Beheizbare Stehtische für warme Abende auf Terrasse & Garten" },
-  { text: "Individuelle Motive auf Wunsch eingestanzt oder graviert" },
+  { text: "Individuelle Motive auf Wunsch per Plasmaschnitt" },
   { text: "Feuerschalen in Klein und XL – faszinierendes Flammenspiel" },
 ];
 

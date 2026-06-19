@@ -2,6 +2,7 @@ import { shopifyFetch } from "./client";
 import type {
   CmsAnnouncement,
   CmsHomepageHero,
+  CmsOpeningHoursEntry,
   CmsSectionText,
   Metaobject,
 } from "../../types/shopify";
@@ -152,6 +153,50 @@ const FIELDS_FRAGMENT = `
     }
   }
 `;
+
+// ─── Opening Hours ───────────────────────────────────────────────────────────
+//
+// Shopify MetaObject type:  cmsopeninghours
+// Fields:
+//   label   single_line_text_field   (e.g. "Mo – Fr")
+//   hours   single_line_text_field   (e.g. "12:00 – 17:00 Uhr")
+
+const OPENING_HOURS_QUERY = `
+  query getCmsOpeningHours {
+    metaobjects(type: "cmsopeninghours", first: 10) {
+      edges {
+        node {
+          id
+          fields { key value }
+        }
+      }
+    }
+  }
+`;
+
+interface OpeningHoursResponse {
+  metaobjects: {
+    edges: Array<{ node: { id: string; fields: RawField[] } }>;
+  };
+}
+
+/** Returns all opening-hours rows. ISR: 1h cache. */
+export async function getOpeningHours(): Promise<CmsOpeningHoursEntry[]> {
+  try {
+    const data = await shopifyFetch<OpeningHoursResponse>({
+      query: OPENING_HOURS_QUERY,
+      revalidate: 3600,
+    });
+    return data.metaobjects.edges
+      .map(({ node }) => ({
+        label: fieldValue(node.fields, "label") ?? "",
+        hours: fieldValue(node.fields, "hours") ?? "",
+      }))
+      .filter((e) => Boolean(e.label && e.hours));
+  } catch {
+    return [];
+  }
+}
 
 // ─── Announcement Bar ─────────────────────────────────────────────────────────
 //

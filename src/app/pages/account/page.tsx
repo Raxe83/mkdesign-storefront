@@ -107,7 +107,7 @@ export default async function AccountPage() {
             {orders.length} {orders.length === 1 ? "Bestellung" : "Bestellungen"}
           </span>
         </div>
-        <OrderHistory orders={orders} />
+        <OrderHistory orders={orders} customerName={fullName} customerEmail={customer.email} />
       </div>
 
     </div>

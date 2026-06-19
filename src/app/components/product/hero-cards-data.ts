@@ -31,9 +31,9 @@ export const HERO_CARDS: Record<ProductCategory, HeroCard[]> = {
 
   feuerschale: [
     { imageIndex: 0, accentBg: "bg-zinc-900",  title: "Lebensmittelstahl, kein Öltonnen-Blech", body: "1,2 mm Stahlblech aus der Lebensmittelindustrie – sauber, robust, langlebig. Ein anderes Kaliber als die dünnen Billigschalen, die nach einem Winter rosten." },
-    { imageIndex: 1, accentBg: "bg-stone-600", title: "Motiv leuchtet im Feuer",                body: "Per Laser präzise eingeschnitten, nicht aufgeklebt. Wenn das Feuer brennt, leuchtet das Motiv von innen durch den Stahl – jede Schale wird zum Lichtobjekt." },
-    { imageIndex: 0, accentBg: "bg-rust",      title: "Klein oder XL",                          body: "48 cm hoch für Balkon und Terrasse, 78 cm hoch für den Garten. Beide Varianten gibt es einseitig oder zweiseitig graviert – dein Motiv, deine Wahl." },
-    { imageIndex: 1, accentBg: "bg-teal-700",  title: "Jedes Stück ein Unikat",                 body: "Sandgestrahlt, lackiert, graviert – einzeln, nicht vom Band. Wer ein eigenes Motiv möchte, schickt eine Nachricht. Wir setzen es um." },
+    { imageIndex: 1, accentBg: "bg-stone-600", title: "Motiv leuchtet im Feuer",                body: "Per Plasmaschnitt präzise in den Stahl geschnitten, nicht aufgeklebt. Wenn das Feuer brennt, leuchtet das Motiv von innen durch den Stahl – jede Schale wird zum Lichtobjekt." },
+    { imageIndex: 0, accentBg: "bg-rust",      title: "Klein oder XL",                          body: "48 cm hoch für Balkon und Terrasse, 78 cm hoch für den Garten. Beide Varianten gibt es einseitig oder zweiseitig geschnitten – dein Motiv, deine Wahl." },
+    { imageIndex: 1, accentBg: "bg-teal-700",  title: "Jedes Stück ein Unikat",                 body: "Sandgestrahlt, lackiert, plasmageschnitten – einzeln, nicht vom Band. Wer ein eigenes Motiv möchte, schickt eine Nachricht. Wir setzen es um." },
   ],
 
   feuertonne: [

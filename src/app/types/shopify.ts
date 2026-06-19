@@ -70,6 +70,12 @@ export interface CmsSectionText {
   imageAlt: string | null;
 }
 
+/** One opening-hours row. MetaObject type: `cms_opening_hours` */
+export interface CmsOpeningHoursEntry {
+  label: string;
+  hours: string;
+}
+
 // ─── Metaobjects ─────────────────────────────────────────────────────────────
 
 export interface MetaobjectField {

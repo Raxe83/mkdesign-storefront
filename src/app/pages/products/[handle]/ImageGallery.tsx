@@ -55,14 +55,14 @@ export default function ImageGallery({ images, productTitle, initialImage }: Pro
       />
     )}
     <div
-      className="flex flex-col gap-3 md:sticky md:top-8"
+      className="flex flex-col gap-3 md:sticky md:top-20 md:h-[calc(100vh-6rem)]"
       tabIndex={0}
       onKeyDown={handleKeyDown}
       aria-label="Bilder-Galerie"
     >
       {/* Main image */}
       <div
-        className="relative aspect-[3/4] overflow-hidden rounded bg-zinc-100 dark:bg-zinc-800"
+        className="relative aspect-[3/4] md:aspect-auto md:flex-1 md:min-h-0 overflow-hidden rounded bg-zinc-100 dark:bg-zinc-800"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
@@ -109,7 +109,7 @@ export default function ImageGallery({ images, productTitle, initialImage }: Pro
 
       {/* Thumbnails */}
       {images.length > 1 && (
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid grid-cols-5 gap-2 shrink-0">
           {images.map((img, i) => (
             <button key={i} onClick={() => goTo(i)} aria-label={`${productTitle} – Bild ${i + 1}`}
               className={`relative aspect-square overflow-hidden rounded border-2 transition-all duration-200 ${

@@ -721,7 +721,7 @@ export default function DesignEditor() {
       {/* ── Help Modal ──────────────────────────────────────────────── */}
       {showHelp && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          className="fixed isolate inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           onClick={() => setShowHelp(false)}
           aria-hidden="true"
         >
@@ -751,7 +751,7 @@ export default function DesignEditor() {
                 </h3>
                 <p>
                   Wähle rechts im Panel das gewünschte Produkt aus. Der Canvas
-                  passt sich automatisch an die Gravurfläche des Produkts an.
+                  passt sich automatisch an die Designfläche des Produkts an.
                 </p>
               </section>
 
@@ -879,7 +879,7 @@ export default function DesignEditor() {
                   legen.
                 </p>
                 <p className="mt-1 text-amber-700 dark:text-amber-400">
-                  Hinweis: Das Design wird exakt wie auf der Leinwand gelasert.
+                  Hinweis: Das Design wird exakt wie auf der Leinwand umgesetzt.
                   Farben werden nicht berücksichtigt — nur die Konturen und
                   Flächen zählen.
                 </p>

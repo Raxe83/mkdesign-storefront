@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Package, Truck, Calendar, ShoppingBag } from "lucide-react";
 import { cn } from "../../utils/utils";
 import type { Order, OrderFulfillmentStatus, OrderFinancialStatus } from "../../types/shopify";
+import { ReturnButton } from "./ReturnButton";
 
 // ─── Status-Konfiguration ─────────────────────────────────────────────────────
 
@@ -39,7 +40,7 @@ export function StatusBadge({ label, className }: { label: string; className: st
   );
 }
 
-function OrderRow({ order }: { order: Order }) {
+function OrderRow({ order, customerName, customerEmail }: { order: Order; customerName: string; customerEmail: string }) {
   const items = order.lineItems.edges.map((e) => e.node);
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
   const firstName = items[0]?.title ?? "—";
@@ -82,6 +83,12 @@ function OrderRow({ order }: { order: Order }) {
           </span>
           <StatusBadge {...fulfillment} />
           <StatusBadge {...financial} />
+          <ReturnButton
+            orderNumber={order.orderNumber}
+            financialStatus={order.financialStatus}
+            customerName={customerName}
+            customerEmail={customerEmail}
+          />
         </div>
         <p className="text-xs text-stone dark:text-muted line-clamp-1">
           {firstName}{hasMore ? ` +${items.length - 1} weitere` : ""} · {itemCount} Artikel
@@ -129,9 +136,11 @@ export function OrderHistorySkeleton() {
 
 interface OrderHistoryProps {
   orders: Order[];
+  customerName: string;
+  customerEmail: string;
 }
 
-export function OrderHistory({ orders }: OrderHistoryProps) {
+export function OrderHistory({ orders, customerName, customerEmail }: OrderHistoryProps) {
   if (orders.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center rounded-sm border border-dashed border-zinc-300 dark:border-zinc-700">
@@ -145,7 +154,7 @@ export function OrderHistory({ orders }: OrderHistoryProps) {
   return (
     <ul className="rounded-sm border border-zinc-200/60 dark:border-zinc-800 overflow-hidden divide-y-0">
       {orders.map((order) => (
-        <OrderRow key={order.id} order={order} />
+        <OrderRow key={order.id} order={order} customerName={customerName} customerEmail={customerEmail} />
       ))}
     </ul>
   );
