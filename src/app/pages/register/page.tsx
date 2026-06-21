@@ -1,18 +1,13 @@
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 import type { Metadata } from "next";
-import { RegisterForm } from "../../components/auth/RegisterForm";
-import { decryptToken } from "../../lib/session";
+import { RegisterAuthTabs } from "../../components/auth/RegisterAuthTabs";
+import { getSession } from "../../lib/session";
 
 export const metadata: Metadata = { title: "Registrieren · M.K. Design" };
 
 export default async function RegisterPage() {
-  // Bereits eingeloggt? → direkt weiterleiten
-  const cookieStore = await cookies();
-  const session = cookieStore.get("mk_session");
-  if (session && decryptToken(session.value)) {
-    redirect("/pages/account");
-  }
+  const session = await getSession();
+  if (session) redirect("/pages/account");
 
   return (
     <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center pb-12">
@@ -33,7 +28,7 @@ export default async function RegisterPage() {
 
         {/* Card */}
         <div className="rounded-sm border border-zinc-200/60 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-6 py-8 shadow-sm">
-          <RegisterForm />
+          <RegisterAuthTabs />
         </div>
 
       </div>

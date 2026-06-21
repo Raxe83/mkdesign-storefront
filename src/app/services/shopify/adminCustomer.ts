@@ -79,6 +79,37 @@ interface RawAdminOrder {
   };
 }
 
+// ─── Customer Create (passwordless) ─────────────────────────────────────────
+
+export async function adminCreateCustomer(
+  firstName: string,
+  lastName: string,
+  email: string,
+): Promise<{ id: string; email: string }> {
+  const query = `
+    mutation customerCreate($input: CustomerInput!) {
+      customerCreate(input: $input) {
+        customer { id email }
+        userErrors { field message }
+      }
+    }
+  `;
+  const data = await adminFetch<{
+    customerCreate: {
+      customer: { id: string; email: string } | null;
+      userErrors: Array<{ field: string[]; message: string }>;
+    };
+  }>(query, { input: { firstName, lastName, email, emailMarketingConsent: { marketingState: "NOT_SUBSCRIBED" } } }, { noCache: true });
+
+  if (data.customerCreate.userErrors.length > 0) {
+    throw new Error(data.customerCreate.userErrors[0].message);
+  }
+  if (!data.customerCreate.customer) {
+    throw new Error("Kundenerstellung fehlgeschlagen.");
+  }
+  return data.customerCreate.customer;
+}
+
 // ─── Customer Lookup ─────────────────────────────────────────────────────────
 
 const CUSTOMER_BY_EMAIL = `

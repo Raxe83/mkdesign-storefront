@@ -30,8 +30,7 @@ export async function sendContactEmail(
 
   try {
     await resend.emails.send({
-      // Replace with your verified Resend domain, e.g. "Kontakt <kontakt@mkdesign.de>"
-      from: 'Kontaktformular <onboarding@resend.dev>',
+      from: 'M.K. Design <noreply@mkdesignweb.de>',
       to: 'MKDesignbyMarkusKlement@web.de',
       replyTo: email,
       subject: subject ? `[Anfrage] ${subject}` : `Neue Kontaktanfrage von ${name}`,

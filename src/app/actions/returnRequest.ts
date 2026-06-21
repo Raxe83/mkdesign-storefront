@@ -48,7 +48,7 @@ export async function sendReturnRequest(
 
   try {
     await resend.emails.send({
-      from: "Rücksendeanfrage <onboarding@resend.dev>",
+      from: "M.K. Design <noreply@mkdesignweb.de>",
       to: "MKDesignbyMarkusKlement@web.de",
       replyTo: customerEmail,
       subject: `[Rücksendung] Bestellung #${orderNumber}`,

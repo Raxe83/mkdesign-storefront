@@ -3,23 +3,25 @@
 import { useActionState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { AlertCircle, Mail, ArrowLeft } from "lucide-react";
-import { sendEmailCode, verifyEmailCode, type EmailCodeState } from "../../actions/emailCode";
+import { sendRegisterCode, verifyRegisterCode, type RegisterCodeState } from "../../actions/emailCode";
 import { FormField } from "./FormField";
 import { SubmitButton } from "./SubmitButton";
 
-const INITIAL: EmailCodeState = { step: "email" };
+const INITIAL: RegisterCodeState = { step: "info" };
 
-export function EmailCodeForm() {
-  const [sendState, sendAction] = useActionState(sendEmailCode, INITIAL);
-  const [verifyState, verifyAction] = useActionState(verifyEmailCode, INITIAL);
+export function EmailCodeRegisterForm() {
+  const [sendState, sendAction] = useActionState(sendRegisterCode, INITIAL);
+  const [verifyState, verifyAction] = useActionState(verifyRegisterCode, INITIAL);
   const codeRef = useRef<HTMLInputElement>(null);
 
-  const step = verifyState.step === "email" && verifyState.error
-    ? "email"
+  const step = verifyState.step === "info" && verifyState.error
+    ? "info"
     : sendState.step === "code"
       ? "code"
-      : "email";
+      : "info";
 
+  const firstName = sendState.firstName ?? verifyState.firstName ?? "";
+  const lastName = sendState.lastName ?? verifyState.lastName ?? "";
   const email = sendState.email ?? verifyState.email ?? "";
   const error = step === "code" ? verifyState.error : (verifyState.error ?? sendState.error);
 
@@ -27,13 +29,34 @@ export function EmailCodeForm() {
     if (step === "code") codeRef.current?.focus();
   }, [step]);
 
-  if (step === "email") {
+  if (step === "info") {
     return (
       <form action={sendAction} className="flex flex-col gap-5">
         {error && <ErrorBanner message={error} />}
 
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <FormField
+            id="regFirstName"
+            name="firstName"
+            label="Vorname"
+            autoComplete="given-name"
+            placeholder="Max"
+            defaultValue={firstName}
+            required
+          />
+          <FormField
+            id="regLastName"
+            name="lastName"
+            label="Nachname"
+            autoComplete="family-name"
+            placeholder="Mustermann"
+            defaultValue={lastName}
+            required
+          />
+        </div>
+
         <FormField
-          id="codeEmail"
+          id="regCodeEmail"
           name="email"
           label="E-Mail-Adresse"
           type="email"
@@ -43,16 +66,16 @@ export function EmailCodeForm() {
           required
         />
 
-        <SubmitButton label="Anmeldecode senden" pendingLabel="Code wird gesendet..." />
+        <SubmitButton label="Registrierungscode senden" pendingLabel="Code wird gesendet..." />
 
         <p className="text-center text-xs text-muted">
-          Wir senden dir einen 6-stelligen Code per E-Mail.
+          Kein Passwort nötig — wir senden dir einen Code per E-Mail.
         </p>
 
         <p className="text-center text-xs text-muted">
-          Noch kein Konto?{" "}
-          <Link href="/pages/register" className="text-rust hover:underline font-medium">
-            Jetzt registrieren
+          Bereits registriert?{" "}
+          <Link href="/pages/login" className="text-rust hover:underline font-medium">
+            Zum Login
           </Link>
         </p>
       </form>
@@ -70,17 +93,19 @@ export function EmailCodeForm() {
         {error && <ErrorBanner message={error} />}
 
         <input type="hidden" name="email" value={email} />
+        <input type="hidden" name="firstName" value={firstName} />
+        <input type="hidden" name="lastName" value={lastName} />
 
         <div className="flex flex-col gap-1.5">
           <label
-            htmlFor="verifyCode"
+            htmlFor="regVerifyCode"
             className="text-xs font-medium text-charcoal dark:text-primary tracking-wide"
           >
-            Anmeldecode <span className="ml-0.5 text-rust">*</span>
+            Registrierungscode <span className="ml-0.5 text-rust">*</span>
           </label>
           <input
             ref={codeRef}
-            id="verifyCode"
+            id="regVerifyCode"
             name="code"
             type="text"
             inputMode="numeric"
@@ -93,11 +118,13 @@ export function EmailCodeForm() {
           />
         </div>
 
-        <SubmitButton label="Anmelden" pendingLabel="Wird geprüft..." />
+        <SubmitButton label="Konto erstellen" pendingLabel="Wird erstellt..." />
       </form>
 
       <div className="flex items-center justify-between">
         <form action={sendAction}>
+          <input type="hidden" name="firstName" value={firstName} />
+          <input type="hidden" name="lastName" value={lastName} />
           <input type="hidden" name="email" value={email} />
           <button
             type="submit"
@@ -111,9 +138,17 @@ export function EmailCodeForm() {
           onClick={() => window.location.reload()}
           className="flex items-center gap-1 text-xs text-muted hover:text-rust transition-colors duration-150"
         >
-          <ArrowLeft size={11} /> Andere E-Mail
+          <ArrowLeft size={11} /> Zurück
         </button>
       </div>
+
+      <p className="text-center text-[10px] text-muted leading-relaxed">
+        Mit der Registrierung stimmst du unseren{" "}
+        <Link href="/pages/tos" className="underline hover:text-rust">AGB</Link>{" "}
+        und der{" "}
+        <Link href="/pages/privacy" className="underline hover:text-rust">Datenschutzerklärung</Link>{" "}
+        zu.
+      </p>
     </div>
   );
 }
