@@ -111,8 +111,10 @@ export async function verifyEmailCode(
   let customer;
   try {
     customer = await adminLookupCustomerByEmail(email);
-  } catch {
-    return { step: "email", error: "Server nicht erreichbar. Bitte versuche es später." };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[verifyEmailCode] Admin API Fehler:", msg);
+    return { step: "email", error: `Serverfehler: ${msg}` };
   }
 
   if (!customer) {
