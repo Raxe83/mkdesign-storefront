@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { parseProductDescription } from "@/app/utils/parseProductDescription";
 import { sanitizeRichHtml } from "@/app/utils/sanitizeHtml";
 import { TechnicalSpecsModal } from "@/app/components/product/TechnicalSpecsModal";
@@ -107,6 +108,16 @@ export default function ProductDetailClient({
   const isAvailable = firstVariant?.availableForSale ?? false;
   const initialImage = product.featuredImage?.url ?? images[0]?.url ?? "";
 
+  const router = useRouter();
+
+  const handleBack = useCallback(() => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/pages/products");
+    }
+  }, [router]);
+
   const [quantity, setQuantity] = useState(1);
   const [extrasValues, setExtrasValues] = useState<ProductExtrasValues>({
     textfelder: [],
@@ -146,13 +157,14 @@ export default function ProductDetailClient({
   return (
     <div className="pb-8 -mt-8">
       {/* Back */}
-      <Link
-        href="/pages/products"
+      <button
+        type="button"
+        onClick={handleBack}
         className="inline-flex items-center gap-1.5 text-muted hover:text-primary transition-colors duration-200 mb-10 text-sm"
       >
         <ArrowLeft size={14} />
         Zurück zu den Produkten
-      </Link>
+      </button>
 
       {/* ── Two-column layout ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-20 items-start">
