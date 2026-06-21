@@ -14,7 +14,7 @@ import {
   createCart,
   addToCart,
   updateCartItem,
-  removeCartItem,
+  removeCartItems,
   getCart,
   updateCartBuyerIdentity,
 } from "../services/shopify";
@@ -206,30 +206,46 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     if (!cart) return;
     const cartId = cart.id;
 
-    // Cancel any pending debounced update for this line
-    const pending = pendingUpdates.current.get(lineId);
-    if (pending) {
-      clearTimeout(pending.timeoutId);
-      pendingUpdates.current.delete(lineId);
+    const targetEdge = cart.lines.edges.find((e) => e.node.id === lineId);
+    if (!targetEdge) return;
+
+    // Find linked Zusatzprodukte that point to this item's variant
+    const targetVariantId = targetEdge.node.merchandise.id;
+    const linkedLineIds = cart.lines.edges
+      .filter(({ node }) =>
+        node.id !== lineId &&
+        node.attributes?.some((a) => a.key === "_linkedTo" && a.value === targetVariantId),
+      )
+      .map(({ node }) => node.id);
+
+    const allLineIds = [lineId, ...linkedLineIds];
+
+    // Cancel any pending debounced updates for all affected lines
+    for (const id of allLineIds) {
+      const pending = pendingUpdates.current.get(id);
+      if (pending) {
+        clearTimeout(pending.timeoutId);
+        pendingUpdates.current.delete(id);
+      }
     }
 
-    // Optimistic update — remove instantly
+    // Optimistic update — remove all at once
+    const idsToRemove = new Set(allLineIds);
     setCart((prev) => {
       if (!prev) return prev;
       return {
         ...prev,
         lines: {
           ...prev.lines,
-          edges: prev.lines.edges.filter((edge) => edge.node.id !== lineId),
+          edges: prev.lines.edges.filter((edge) => !idsToRemove.has(edge.node.id)),
         },
       };
     });
 
     try {
-      const updatedCart = await removeCartItem(cartId, lineId);
+      const updatedCart = await removeCartItems(cartId, allLineIds);
       setCart(updatedCart);
     } catch (error) {
-      // Re-fetch to recover correct state
       try {
         const recovered = await getCart(cartId, shopifyLocale);
         if (recovered) setCart(recovered);

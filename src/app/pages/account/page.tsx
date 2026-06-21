@@ -1,33 +1,42 @@
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 import { Mail, User, LogOut } from "lucide-react";
 import type { Metadata } from "next";
 
-import { decryptToken } from "../../lib/session";
-import { getCustomerData } from "../../services/shopifyCustomer";
-import { getCustomerOrders } from "../../services/shopifyCustomer";
+import { getSession } from "../../lib/session";
+import { getCustomerData, getCustomerOrders } from "../../services/shopifyCustomer";
+import { adminGetCustomerById, adminGetCustomerOrders } from "../../services/shopify/adminCustomer";
 import { logoutAction } from "../../actions/auth";
 import { OrderHistory } from "../../components/account/OrderHistory";
 import { AddressManager } from "../../components/account/AddressManager";
+import type { Customer, Order } from "../../types/shopify";
 
 export const metadata: Metadata = { title: "Mein Konto · M.K. Design" };
 
 // ─── Server Component ─────────────────────────────────────────────────────────
 
 export default async function AccountPage() {
-  // ── Session prüfen ──────────────────────────────────────────────
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("mk_session");
-  if (!sessionCookie) redirect("/pages/login?from=/pages/account");
+  const session = await getSession();
+  if (!session) redirect("/pages/login?from=/pages/account");
 
-  const accessToken = decryptToken(sessionCookie.value);
-  if (!accessToken) redirect("/pages/login?from=/pages/account");
+  let customer: Customer | null = null;
+  let orders: Order[] = [];
+  const isEmailSession = session.type === "email";
 
-  // ── Daten parallel laden ────────────────────────────────────────
-  const [{ customer }, { orders }] = await Promise.all([
-    getCustomerData(accessToken),
-    getCustomerOrders(accessToken, 10),
-  ]);
+  if (session.type === "token") {
+    const [custData, ordData] = await Promise.all([
+      getCustomerData(session.accessToken),
+      getCustomerOrders(session.accessToken, 10),
+    ]);
+    customer = custData.customer;
+    orders = ordData.orders;
+  } else {
+    const [custData, ordData] = await Promise.all([
+      adminGetCustomerById(session.customerId),
+      adminGetCustomerOrders(session.customerId, 10),
+    ]);
+    customer = custData;
+    orders = ordData;
+  }
 
   if (!customer) redirect("/pages/login?from=/pages/account");
 
@@ -95,7 +104,15 @@ export default async function AccountPage() {
       </div>
 
       {/* ── Adressverwaltung ── */}
-      <AddressManager addresses={addresses} />
+      {isEmailSession ? (
+        <div className="rounded-sm border border-dashed border-zinc-300 dark:border-zinc-700 p-5 text-center">
+          <p className="text-xs text-muted">
+            Die Adressverwaltung ist nur mit Passwort-Login verfügbar.
+          </p>
+        </div>
+      ) : (
+        <AddressManager addresses={addresses} />
+      )}
 
       {/* ── Bestellverlauf ── */}
       <div>

@@ -1,12 +1,12 @@
-import { cookies } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, MapPin, Package, Truck, ExternalLink, ShoppingBag } from "lucide-react";
 import type { Metadata } from "next";
 
-import { decryptToken } from "@/app/lib/session";
+import { getSession } from "@/app/lib/session";
 import { getOrderDetail } from "@/app/services/shopifyCustomer";
+import { adminGetOrderDetail } from "@/app/services/shopify/adminCustomer";
 import { FULFILLMENT, FINANCIAL, StatusBadge } from "@/app/components/account/OrderHistory";
 import type { OrderDetailLineItem } from "@/app/types/shopify";
 
@@ -57,13 +57,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function OrderDetailPage({ params }: Props) {
   const { id } = await params;
 
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("mk_session");
-  if (!sessionCookie) redirect(`/pages/login?from=/pages/account/orders/${id}`);
-  const accessToken = decryptToken(sessionCookie.value);
-  if (!accessToken) redirect(`/pages/login?from=/pages/account/orders/${id}`);
+  const session = await getSession();
+  if (!session) redirect(`/pages/login?from=/pages/account/orders/${id}`);
 
-  const order = await getOrderDetail(id, accessToken);
+  const order = session.type === "token"
+    ? await getOrderDetail(id, session.accessToken)
+    : await adminGetOrderDetail(id);
   if (!order) notFound();
 
   const items = order.lineItems.edges.map((e) => e.node);

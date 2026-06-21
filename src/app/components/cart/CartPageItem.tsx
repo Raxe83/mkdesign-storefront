@@ -40,7 +40,6 @@ const CartPageItem = ({ node, linkedItems, index }: CartPageItemProps) => {
 
   const handleRemove = () => {
     removeItem(node.id);
-    for (const child of linkedItems) removeItem(child.id);
   };
 
   const baseAmount   = parseFloat(node.merchandise.price?.amount ?? "0") * localQty;

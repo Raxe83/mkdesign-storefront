@@ -38,7 +38,6 @@ const CartPopupItem = ({ node, linkedItems }: CartPopupItemProps) => {
 
   const handleRemove = () => {
     removeItem(node.id);
-    for (const child of linkedItems) removeItem(child.id);
   };
 
   const isCustomDesign = node.attributes?.some((a) => a.key === "_design_json");

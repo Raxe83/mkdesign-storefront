@@ -8,6 +8,7 @@ const ADMIN_API_URL = `https://${process.env.SHOPIFY_ADMIN_DOMAIN}/admin/api/202
 export async function adminFetch<T>(
   query: string,
   variables: Record<string, unknown> = {},
+  options?: { noCache?: boolean },
 ): Promise<T> {
   const token = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
 
@@ -22,7 +23,9 @@ export async function adminFetch<T>(
       "X-Shopify-Access-Token": token,
     },
     body: JSON.stringify({ query, variables }),
-    next: { revalidate: 3600 }, // 1h Cache — Versandprofile ändern sich selten
+    ...(options?.noCache
+      ? { cache: "no-store" as const }
+      : { next: { revalidate: 3600 } }),
   });
 
   if (!res.ok) {

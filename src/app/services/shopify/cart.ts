@@ -162,9 +162,9 @@ export async function updateCartItem(
   return response.cartLinesUpdate.cart;
 }
 
-export async function removeCartItem(
+export async function removeCartItems(
   cartId: string,
-  lineId: string,
+  lineIds: string[],
   locale?: string,
 ): Promise<Cart> {
   const query = `
@@ -177,7 +177,7 @@ export async function removeCartItem(
 
   const response = await shopifyFetch<{ cartLinesRemove: { cart: Cart } }>({
     query,
-    variables: { cartId, lineIds: [lineId] },
+    variables: { cartId, lineIds },
     locale,
   });
   return response.cartLinesRemove.cart;

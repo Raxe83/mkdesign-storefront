@@ -1,20 +1,13 @@
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
-import { Suspense } from "react";
 import type { Metadata } from "next";
-import { LoginForm } from "../../components/auth/LoginForm";
-import { ResetSuccessBanner } from "../../components/auth/ResetSuccessBanner";
-import { decryptToken } from "../../lib/session";
+import { AuthTabs } from "../../components/auth/AuthTabs";
+import { getSession } from "../../lib/session";
 
 export const metadata: Metadata = { title: "Anmelden · M.K. Design" };
 
 export default async function LoginPage() {
-  // Bereits eingeloggt? → direkt weiterleiten
-  const cookieStore = await cookies();
-  const session = cookieStore.get("mk_session");
-  if (session && decryptToken(session.value)) {
-    redirect("/pages/account");
-  }
+  const session = await getSession();
+  if (session) redirect("/pages/account");
 
   return (
     <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center pb-12">
@@ -33,14 +26,9 @@ export default async function LoginPage() {
           </p>
         </div>
 
-        {/* Reset-Erfolg Banner */}
-        <Suspense>
-          <ResetSuccessBanner />
-        </Suspense>
-
         {/* Card */}
         <div className="mt-4 rounded-sm border border-zinc-200/60 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-6 py-8 shadow-sm">
-          <LoginForm />
+          <AuthTabs />
         </div>
 
       </div>
