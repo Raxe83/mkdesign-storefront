@@ -24,6 +24,7 @@ export function useCanvasInit(canvasPreset: CanvasPreset) {
   const fileInputRef    = useRef<HTMLInputElement>(null);
   const wrapperRef      = useRef<HTMLDivElement>(null);
   const canvasPresetRef = useRef<CanvasPreset>(canvasPreset);
+  const clipboardRef    = useRef<FabricObject | null>(null);
 
   const [canvasReady,   setCanvasReady]   = useState(false);
   const [objectCount,   setObjectCount]   = useState(0);
@@ -68,14 +69,52 @@ export function useCanvasInit(canvasPreset: CanvasPreset) {
     let canvas: Canvas | undefined;
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== "Delete" && e.key !== "Backspace") return;
       const tag = (document.activeElement as HTMLElement)?.tagName;
-      if (
+      const isInput =
         tag === "INPUT" ||
         tag === "TEXTAREA" ||
-        (document.activeElement as HTMLElement)?.isContentEditable
-      )
+        (document.activeElement as HTMLElement)?.isContentEditable;
+
+      const mod = e.ctrlKey || e.metaKey;
+
+      // ── Copy (Ctrl/⌘ + C) ──────────────────────────────────────────
+      if (mod && e.key === "c" && !isInput) {
+        const active = fabricRef.current?.getActiveObject();
+        // Don't intercept while Fabric IText is in edit mode
+        const isEditingText = (active as FabricObject & { isEditing?: boolean })?.isEditing;
+        if (active && !isEditingText) {
+          active.clone().then((cloned: FabricObject) => {
+            clipboardRef.current = cloned;
+          });
+          e.preventDefault();
+        }
         return;
+      }
+
+      // ── Paste (Ctrl/⌘ + V) ─────────────────────────────────────────
+      if (mod && e.key === "v" && !isInput) {
+        const cb = clipboardRef.current;
+        if (cb && fabricRef.current) {
+          // Clone from clipboard each time so repeated pastes cascade
+          cb.clone().then((c: FabricObject) => {
+            c.set({
+              left: (cb.left ?? 0) + 16,
+              top:  (cb.top  ?? 0) + 16,
+            });
+            fabricRef.current!.add(c);
+            fabricRef.current!.setActiveObject(c);
+            fabricRef.current!.requestRenderAll();
+            // Shift the stored clipboard so the next paste is further offset
+            clipboardRef.current = c;
+          });
+          e.preventDefault();
+        }
+        return;
+      }
+
+      // ── Delete / Backspace ──────────────────────────────────────────
+      if (e.key !== "Delete" && e.key !== "Backspace") return;
+      if (isInput) return;
       if (!fabricRef.current) return;
       fabricRef.current
         .getActiveObjects()
