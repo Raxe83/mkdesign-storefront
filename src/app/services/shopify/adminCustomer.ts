@@ -110,6 +110,38 @@ export async function adminCreateCustomer(
   return data.customerCreate.customer;
 }
 
+// ─── Customer Password (for code-login) ─────────────────────────────────────
+
+export async function adminSetCustomerPassword(
+  customerId: string,
+  password: string,
+): Promise<void> {
+  const numericId = customerId.replace(/\D/g, "");
+  const domain = process.env.SHOPIFY_ADMIN_DOMAIN;
+  const token = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
+  if (!domain || !token) throw new Error("Admin API nicht konfiguriert.");
+
+  const res = await fetch(
+    `https://${domain}/admin/api/2024-10/customers/${numericId}.json`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", "X-Shopify-Access-Token": token },
+      body: JSON.stringify({ customer: { id: Number(numericId), password, password_confirmation: password } }),
+    },
+  );
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Passwort setzen fehlgeschlagen (${res.status}): ${body}`);
+  }
+
+  const data = await res.json();
+  if (data.errors) {
+    const msgs = Object.values(data.errors).flat().join(", ");
+    throw new Error(msgs);
+  }
+}
+
 // ─── Customer Lookup ─────────────────────────────────────────────────────────
 
 const CUSTOMER_BY_EMAIL = `

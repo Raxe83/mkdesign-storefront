@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { Mail, User, LogOut } from "lucide-react";
+import { Mail, User, LogOut, MapPin } from "lucide-react";
 import type { Metadata } from "next";
 
 import { getSession } from "../../lib/session";
@@ -105,11 +105,36 @@ export default async function AccountPage() {
 
       {/* ── Adressverwaltung ── */}
       {isEmailSession ? (
-        <div className="rounded-sm border border-dashed border-zinc-300 dark:border-zinc-700 p-5 text-center">
-          <p className="text-xs text-muted">
-            Die Adressverwaltung ist nur mit Passwort-Login verfügbar.
-          </p>
-        </div>
+        addresses.length > 0 ? (
+          <div>
+            <h2 className="font-display text-lg font-semibold text-charcoal dark:text-primary tracking-tight mb-5">
+              Meine Adressen
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {addresses.map((addr) => (
+                <div
+                  key={addr.id}
+                  className="flex items-start gap-3 p-5 rounded-sm border border-zinc-200/60 dark:border-zinc-800 bg-white dark:bg-zinc-900"
+                >
+                  <div className="w-9 h-9 rounded-sm bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0">
+                    <MapPin size={16} className="text-rust" />
+                  </div>
+                  <address className="not-italic text-sm text-muted leading-relaxed min-w-0">
+                    <p className="text-primary font-medium">{[addr.firstName, addr.lastName].filter(Boolean).join(" ")}</p>
+                    {addr.address1 && <p>{addr.address1}</p>}
+                    {addr.address2 && <p>{addr.address2}</p>}
+                    <p>{[addr.zip, addr.city].filter(Boolean).join(" ")}</p>
+                    {addr.country && <p>{addr.country}</p>}
+                    {addr.phone && <p className="mt-1">{addr.phone}</p>}
+                  </address>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-muted mt-3">
+              Zum Bearbeiten von Adressen bitte mit Passwort anmelden.
+            </p>
+          </div>
+        ) : null
       ) : (
         <AddressManager addresses={addresses} />
       )}

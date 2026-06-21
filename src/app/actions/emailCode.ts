@@ -4,12 +4,19 @@ import crypto from "crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Resend } from "resend";
-import { encryptToken, decryptToken, setEmailSessionCookie } from "../lib/session";
-import { adminLookupCustomerByEmail, adminCreateCustomer } from "../services/shopify/adminCustomer";
+import { encryptToken, decryptToken, setSessionCookie, setEmailSessionCookie } from "../lib/session";
+import { adminLookupCustomerByEmail, adminCreateCustomer, adminSetCustomerPassword } from "../services/shopify/adminCustomer";
+import { loginCustomer } from "../services/shopifyCustomer";
 
 const CODE_COOKIE = "mk_email_code";
 const REG_CODE_COOKIE = "mk_register_code";
 const CODE_TTL_MS = 10 * 60 * 1000;
+
+function deriveCodeLoginPassword(email: string): string {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) throw new Error("SESSION_SECRET fehlt.");
+  return crypto.createHmac("sha256", secret).update(`code-login:${email}`).digest("base64url").slice(0, 32);
+}
 
 export interface EmailCodeState {
   step: "email" | "code";
@@ -117,6 +124,18 @@ export async function verifyEmailCode(
 
   if (!customer) {
     return { step: "email", error: "Kein Kundenkonto mit dieser E-Mail gefunden." };
+  }
+
+  const derivedPassword = deriveCodeLoginPassword(email);
+  try {
+    await adminSetCustomerPassword(customer.id, derivedPassword);
+    const loginResult = await loginCustomer(email, derivedPassword);
+    if (loginResult.accessToken) {
+      await setSessionCookie(loginResult.accessToken.accessToken, loginResult.accessToken.expiresAt);
+      redirect("/pages/account");
+    }
+  } catch {
+    // Fallback: email session with read-only access
   }
 
   await setEmailSessionCookie(email, customer.id);
@@ -241,6 +260,18 @@ export async function verifyRegisterCode(
       return { step: "info", error: "Ein Konto mit dieser E-Mail existiert bereits. Bitte melde dich an." };
     }
     return { step: "info", error: msg || "Registrierung fehlgeschlagen." };
+  }
+
+  const derivedPassword = deriveCodeLoginPassword(email);
+  try {
+    await adminSetCustomerPassword(customer.id, derivedPassword);
+    const loginResult = await loginCustomer(email, derivedPassword);
+    if (loginResult.accessToken) {
+      await setSessionCookie(loginResult.accessToken.accessToken, loginResult.accessToken.expiresAt);
+      redirect("/pages/account");
+    }
+  } catch {
+    // Fallback: email session with read-only access
   }
 
   await setEmailSessionCookie(email, customer.id);
