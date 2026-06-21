@@ -10,12 +10,19 @@ const CLIENT_SECRET = process.env.SHOPIFY_APP_CLIENT_SECRET;
 const SHOP          = process.env.SHOPIFY_ADMIN_DOMAIN;
 const REDIRECT_URI  = "http://localhost:3000/api/shopify-connect";
 const SCOPES = [
+  "read_customers",
+  "write_customers",
   "read_products",
   "write_products",
+  "read_orders",
   "read_shipping",
+  "read_fulfillments",
+  "read_inventory",
+  "read_content",
   "read_metaobjects",
   "write_metaobjects",
   "write_metaobject_definitions",
+  "read_metaobject_definitions",
 ].join(",");
 
 export async function GET(req: NextRequest) {
