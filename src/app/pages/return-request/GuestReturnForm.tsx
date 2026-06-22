@@ -53,12 +53,13 @@ export function GuestReturnForm() {
       {/* Name */}
       <div>
         <label htmlFor="customerName" className="block text-xs font-medium text-primary dark:text-neutral-200 mb-1.5">
-          Name
+          Name *
         </label>
         <input
           id="customerName"
           name="customerName"
           type="text"
+          required
           placeholder="Vor- und Nachname"
           className="w-full rounded border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2.5 text-sm text-primary dark:text-neutral-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-accent"
         />

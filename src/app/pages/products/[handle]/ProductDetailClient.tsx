@@ -360,9 +360,9 @@ export default function ProductDetailClient({
       {faqSlot}
 
       {/* ── Hero-Karten ── */}
-      {/* <div className="mt-16">
+      <div className="mt-16">
         <ProductHeroCards product={product} cards={heroCards} />
-      </div> */}
+      </div>
 
       {/* ── Design Editor CTA ── */}
       <div className="mt-16 -mx-6 md:-mx-10 lg:-mx-16">

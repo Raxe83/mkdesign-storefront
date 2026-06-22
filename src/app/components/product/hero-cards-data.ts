@@ -79,10 +79,10 @@ export const HERO_CARDS: Record<ProductCategory, HeroCard[]> = {
   ],
 
   "3d-druck": [
-    { imageIndex: 0, accentBg: "bg-teal-700",  title: "0,1 mm Präzision",         body: "Schichtdicke von 0,1–0,2 mm für gestochen scharfe Details. Jedes Teil wird nach dem Druck einzeln geprüft." },
-    { imageIndex: 1, accentBg: "bg-zinc-700",  title: "PLA – nachhaltig",          body: "Biologisch abbaubares PLA-Filament, formstabil und geruchsneutral. Gutes Gewissen beim Bestellen inklusive." },
-    { imageIndex: 0, accentBg: "bg-rust",      title: "Individuell anpassbar",     body: "Farbe, Größe oder Motiv nach Wunsch ändern. Custom-Aufträge nehmen wir gerne entgegen – einfach schreiben." },
-    { imageIndex: 1, accentBg: "bg-stone-600", title: "Versandfertig in 24–48h",   body: "Druck, Prüfung, bruchsichere Verpackung – und dann auf dem Weg zu dir. Expressversand auf Wunsch." },
+    { imageIndex: 0, accentBg: "bg-teal-700",  title: "0,1 mm Präzision",            body: "Schichtdicke von 0,1–0,2 mm für gestochen scharfe Details. Jedes Teil wird nach dem Druck einzeln geprüft." },
+    { imageIndex: 1, accentBg: "bg-zinc-700",  title: "Aus einem Stück gedruckt",     body: "Alle Artikel werden in einem Durchgang gedruckt – nichts wird geklebt, geschraubt oder zusammengesteckt. Ein Teil, fertig." },
+    { imageIndex: 0, accentBg: "bg-rust",      title: "Individuell anpassbar",        body: "Farbe, Größe oder Motiv nach Wunsch ändern. Custom-Aufträge nehmen wir gerne entgegen – einfach schreiben." },
+    { imageIndex: 1, accentBg: "bg-amber-800", title: "⚠ Nicht für Kleinkinder",      body: "Trotz einteiligem Druck können kleine Teile abbrechen. Bitte von Kindern unter 3 Jahren fernhalten – Verschluckungsgefahr. Dekoartikel, kein Spielzeug." },
   ],
 
   laser: [

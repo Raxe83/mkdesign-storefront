@@ -26,17 +26,25 @@ export default function ProductsGrid({
   const initialTypes = initialType ? new Set([initialType]) : undefined;
   const filter = useProductFilter(allProducts, initialTypes, collectionIdSet);
 
+  const displayName = collectionHandle
+    ? collectionHandle.replace(/-/g, " ").replace(/\b\w\S*/g, (word, i) =>
+        i === 0 || !["und", "oder", "für", "mit", "auf", "in", "am", "im", "an", "zu"].includes(word)
+          ? word.charAt(0).toUpperCase() + word.slice(1)
+          : word,
+      )
+    : initialType ?? null;
+
   return (
     <div className="pb-12">
       <PageHeader
-        title={collectionHandle ?? initialType ?? "Alle Produkte"}
+        title={displayName ?? "Alle Produkte"}
         eyebrow={collectionHandle ? "Kollektion" : initialType ? "Kategorie" : "Sortiment"}
         breadcrumbs={
-          collectionHandle
+          displayName && collectionHandle
             ? [
                 { label: "Start", href: "/" },
                 { label: "Produkte", href: "/pages/products" },
-                { label: collectionHandle.toUpperCase() },
+                { label: displayName },
               ]
             : initialType
             ? [
