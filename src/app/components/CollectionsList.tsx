@@ -263,7 +263,7 @@ export function CategoryGrid({
       {maxItems && (
         <div className="mt-8 flex justify-center">
           <Link
-            href="/pages/categories"
+            href="/pages/kollektionen"
             className={cn(
               "inline-flex items-center gap-2",
               "text-sm font-medium text-charcoal dark:text-primary",

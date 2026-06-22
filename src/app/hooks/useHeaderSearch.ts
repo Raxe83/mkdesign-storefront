@@ -71,7 +71,7 @@ const STATIC_ENTRIES: SearchResult[] = [
     type: "page",
     title: "Kategorien",
     subtitle: "Produkte nach Kategorie durchsuchen",
-    href: "/pages/categories",
+    href: "/pages/kollektionen",
   },
   {
     type: "page",

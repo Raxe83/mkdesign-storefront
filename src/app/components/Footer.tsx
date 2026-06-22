@@ -48,7 +48,7 @@ const Footer = async () => {
               </li>
               <li>
                 <Link
-                  href="/pages/categories"
+                  href="/pages/kollektionen"
                   className="text-sm hover:text-white transition-colors duration-150"
                 >
                   Kollektionen

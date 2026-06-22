@@ -111,6 +111,7 @@ export const TAG_TO_META_TYPE: Readonly<Record<string, ProductCategory>> = {
   "wanduhr-schiefer":     "schieferuhr",
   // 3D-Druck
   "3d-druck":         "3d-druck",
+  "3d druck":         "3d-druck",
   "3d-print":         "3d-druck",
   fdm:                "3d-druck",
   // Laser

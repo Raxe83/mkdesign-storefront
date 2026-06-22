@@ -64,7 +64,7 @@ export default async function HomePage() {
           },
           {
             label: heroCms?.ctaSecondaryLabel ?? "Alle Kollektionen",
-            href: heroCms?.ctaSecondaryHref ?? "/pages/categories",
+            href: heroCms?.ctaSecondaryHref ?? "/pages/kollektionen",
             variant: "outline",
           },
         ]}

@@ -26,17 +26,6 @@ const COLOR_MAP: Record<string, string> = {
   gelb:        "#F1C40F",
   orange:      "#E67E22",
   pink:        "#E91E8F",
-  lila:        "#8E44AD",
-  violett:     "#9B59B6",
-  türkis:      "#1ABC9C",
-  hellblau:    "#5DADE2",
-  dunkelblau:  "#1A3C6E",
-  hellgrün:    "#58D68D",
-  dunkelgrün:  "#1E6F3C",
-  beige:       "#E8D5B7",
-  transparent: "linear-gradient(135deg, #ffffff 40%, #d0d0d0 60%)",
-  holz:        "#B5834A",
-  marmor:      "linear-gradient(135deg, #e8e8e8 30%, #a0a0a0 70%)",
 };
 
 function colorSwatch(name: string): string | null {
