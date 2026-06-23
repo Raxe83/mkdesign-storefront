@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { parseProductDescription } from "@/app/utils/parseProductDescription";
 import { sanitizeRichHtml } from "@/app/utils/sanitizeHtml";
@@ -32,6 +32,7 @@ import ImageGallery from "./ImageGallery";
 import Button from "@/app/components/ui/Button";
 import { ShareButtons } from "@/app/components/product/ShareButtons";
 import { WishlistButton } from "@/app/components/ui/WishlistButton";
+import { trackProductView, trackAddToCart } from "@/app/utils/shopifyAnalytics";
 
 /** Maps product tags + title to the matching barrel illustration variant. */
 function variantFromProduct(tags: string[], title: string): BarrelVariant {
@@ -117,6 +118,15 @@ export default function ProductDetailClient({
       router.push("/pages/products");
     }
   }, [router]);
+
+  useEffect(() => {
+    trackProductView(product);
+
+    const onConsentGranted = () => trackProductView(product);
+    window.addEventListener("cookie-consent-updated", onConsentGranted);
+    return () =>
+      window.removeEventListener("cookie-consent-updated", onConsentGranted);
+  }, [product]);
 
   const [quantity, setQuantity] = useState(1);
   const [extrasValues, setExtrasValues] = useState<ProductExtrasValues>({
@@ -274,6 +284,19 @@ export default function ProductDetailClient({
               quantity={quantity}
               formValid={extrasValid}
               metaZusatzprodukte={extrasValues.zusatzprodukte}
+              onSuccess={() =>
+                trackAddToCart({
+                  variantId: firstVariant.id,
+                  productId: product.id,
+                  productTitle: product.title,
+                  productHandle: product.handle,
+                  variantTitle: firstVariant.title,
+                  price: price,
+                  currencyCode,
+                  quantity,
+                  imageUrl: product.featuredImage?.url,
+                })
+              }
               customAttributes={[
                 ...(product.zusatzoptionen?.textfelder ?? [])
                   .map((label, i) => ({

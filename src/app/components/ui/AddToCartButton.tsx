@@ -20,6 +20,8 @@ interface AddToCartButtonProps {
   metaZusatzprodukte?: ZusatzproduktOption[];
   /** false → Button disabled + Hinweis, dass Pflichtfelder fehlen */
   formValid?: boolean;
+  /** Wird nach erfolgreichem Hinzufügen aufgerufen */
+  onSuccess?: () => void;
 }
 
 const AddToCartButton: React.FC<AddToCartButtonProps> = ({
@@ -32,6 +34,7 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
   customAttributes,
   metaZusatzprodukte,
   formValid = true,
+  onSuccess,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { addItem } = useCart();
@@ -57,6 +60,7 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
         attributes.length > 0 ? attributes : undefined,
         additionalLines?.length ? additionalLines : undefined,
       );
+      onSuccess?.();
     } catch (err) {
       addToast("Fehler beim Hinzufügen zum Warenkorb", "error");
     } finally {

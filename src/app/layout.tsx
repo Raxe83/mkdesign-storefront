@@ -20,7 +20,9 @@ const dmSans = DM_Sans({
 import { CartProvider } from "./context/CartContext";
 import { ToastProvider } from "./context/ToastContext";
 import { WishlistProvider } from "./context/WishlistContext";
+import { Suspense } from "react";
 import ScrollToTop from "./utils/ScrollToTop";
+import PageViewTracker from "./components/PageViewTracker";
 import ImportantMessage from "./components/ImportantMessages";
 import CookieConsent from "./components/cookie-consent";
 import Header from "./components/Header";
@@ -87,6 +89,9 @@ export default async function RootLayout({
         <CartProvider>
           <ToastProvider>
             {/* <AgeVerification /> */}
+            <Suspense fallback={null}>
+              <PageViewTracker />
+            </Suspense>
             <ScrollToTop />
             <ImportantMessage announcements={announcements} />
             <a
