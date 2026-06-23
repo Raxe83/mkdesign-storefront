@@ -11,26 +11,18 @@ interface Props {
   images: ShopifyImage[];
   productTitle: string;
   initialImage: string;
-  /** External control of image index (optional) */
-  externalIndex?: number;
-  /** Callback when index changes via user interaction */
-  onIndexChange?: (index: number) => void;
 }
 
 export default function ImageGallery({
   images,
   productTitle,
   initialImage,
-  externalIndex,
-  onIndexChange,
 }: Props) {
-  const [internalIndex, setInternalIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [imgLoaded, setImgLoaded]         = useState(false);
   const [lightboxOpen, setLightboxOpen]   = useState(false);
   const touchStartX = useRef<number | null>(null);
 
-  // Use external index if provided, otherwise use internal state
-  const currentIndex = externalIndex ?? internalIndex;
   const selectedImage = images[currentIndex]?.url ?? initialImage;
 
   const imageUrls = images.map((img) => img.url);
@@ -38,8 +30,7 @@ export default function ImageGallery({
   const goTo = (index: number) => {
     const next = (index + images.length) % images.length;
     setImgLoaded(false);
-    setInternalIndex(next);
-    onIndexChange?.(next);
+    setCurrentIndex(next);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
