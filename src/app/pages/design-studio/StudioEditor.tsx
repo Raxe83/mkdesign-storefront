@@ -17,7 +17,6 @@ import { EditorStatusBar } from "./components/EditorStatusBar";
 import { SaveStatusOverlay } from "./components/SaveStatusOverlay";
 
 export type ActiveTool = "select" | "move" | "text" | "shapes" | "images" | "assets";
-export type RightTab = "design" | "styles" | "assets";
 export { type BarrelColor };
 export type { FitState };
 
@@ -39,7 +38,6 @@ export default function StudioEditor({ product }: Props) {
   const [activeTool, setActiveTool]       = useState<ActiveTool>("select");
   const [selectedColor, setSelectedColor] = useState<BarrelColor>("grau");
   const [leftPanelOpen, setLeftPanelOpen] = useState(true);
-  const [rightTab, setRightTab]           = useState<RightTab>("design");
 
   const canvasPreset = useMemo(() => getPresetForTitle(product.label), [product.label]);
   const { Component: BarrelIllustration, fit: defaultFit } = useMemo(
@@ -138,8 +136,6 @@ export default function StudioEditor({ product }: Props) {
         />
 
         <EditorRightPanel
-          tab={rightTab}
-          onTabChange={setRightTab}
           selectedColor={selectedColor}
           onColorChange={setSelectedColor}
           onSave={saveAndAddToCart}
