@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Search, Undo2, Redo2, Minus, Plus, Share2, Save } from "lucide-react";
+import { Search, Undo2, Redo2, Minus, Plus, Share2, Save, Loader2 } from "lucide-react";
 
 interface Props {
   productName: string;
@@ -11,11 +11,13 @@ interface Props {
   onRedo: () => void;
   canUndo: boolean;
   canRedo: boolean;
+  onSave: () => void;
+  saving: boolean;
 }
 
 const BTN = "p-1.5 rounded hover:bg-white/[0.07] text-white/40 hover:text-white/80 transition-colors cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-white/40";
 
-export function EditorTopBar({ productName, zoom, onZoomIn, onZoomOut, onZoomReset, onUndo, onRedo, canUndo, canRedo }: Props) {
+export function EditorTopBar({ productName, zoom, onZoomIn, onZoomOut, onZoomReset, onUndo, onRedo, canUndo, canRedo, onSave, saving }: Props) {
   return (
     <header
       className="flex items-center h-11 px-3 gap-2 shrink-0"
@@ -75,12 +77,16 @@ export function EditorTopBar({ productName, zoom, onZoomIn, onZoomOut, onZoomRes
         </button>
 
         <button
-          className="flex items-center gap-1.5 px-3 h-7 rounded text-[11px] font-semibold ml-1.5 cursor-pointer transition-colors"
+          onClick={onSave}
+          disabled={saving}
+          title="Design speichern & in den Warenkorb"
+          className="flex items-center gap-1.5 px-3 h-7 rounded text-[11px] font-semibold ml-1.5 cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-70"
           style={{ background: "var(--color-gold)", color: "#0f1117" }}
-          onMouseEnter={e => (e.currentTarget.style.background = "#d4a840")}
+          onMouseEnter={e => { if (!saving) e.currentTarget.style.background = "#d4a840"; }}
           onMouseLeave={e => (e.currentTarget.style.background = "var(--color-gold)")}
         >
-          <Save size={12} /> Save
+          {saving ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
+          {saving ? "Speichert…" : "Speichern"}
         </button>
       </div>
     </header>

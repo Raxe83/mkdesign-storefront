@@ -1,5 +1,5 @@
 import { MousePointer2, Hand, Type, Square, Image, Layers, Settings } from "lucide-react";
-import type { ActiveTool } from "../page";
+import type { ActiveTool } from "../StudioEditor";
 
 interface Props {
   activeTool: ActiveTool;

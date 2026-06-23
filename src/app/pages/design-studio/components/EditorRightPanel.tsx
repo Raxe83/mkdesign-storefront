@@ -1,8 +1,8 @@
-import { Download, CheckCircle2 } from "lucide-react";
+import { ShoppingCart, CheckCircle2, Loader2 } from "lucide-react";
 import type { BarrelColor } from "@/app/components/design/barrel";
 import { DevPanel } from "@/app/components/design/panels/DevPanel";
 import type { FitState } from "@/app/components/design/panels/DevPanel";
-import type { RightTab } from "../page";
+import type { RightTab } from "../StudioEditor";
 
 interface DevProps {
   canvasWidth: number;
@@ -16,6 +16,8 @@ interface Props {
   onTabChange: (t: RightTab) => void;
   selectedColor: BarrelColor;
   onColorChange: (c: BarrelColor) => void;
+  onSave: () => void;
+  saving: boolean;
   devProps?: DevProps;
 }
 
@@ -32,7 +34,7 @@ const COLORS: { id: BarrelColor; label: string; swatch: string }[] = [
   { id: "gold",    label: "Gold",       swatch: "#c8a020" },
 ];
 
-export function EditorRightPanel({ tab, onTabChange, selectedColor, onColorChange, devProps }: Props) {
+export function EditorRightPanel({ tab, onTabChange, selectedColor, onColorChange, onSave, saving, devProps }: Props) {
   return (
     <aside
       className="flex flex-col w-[240px] xl:w-[260px] shrink-0"
@@ -61,7 +63,7 @@ export function EditorRightPanel({ tab, onTabChange, selectedColor, onColorChang
       {/* Panel body */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-5">
         {tab === "design" && (
-          <DesignTab selectedColor={selectedColor} onColorChange={onColorChange} />
+          <DesignTab selectedColor={selectedColor} onColorChange={onColorChange} onSave={onSave} saving={saving} />
         )}
         {tab === "styles" && <PlaceholderTab label="Stile" />}
         {tab === "assets" && <PlaceholderTab label="Assets" />}
@@ -85,7 +87,7 @@ export function EditorRightPanel({ tab, onTabChange, selectedColor, onColorChang
   );
 }
 
-function DesignTab({ selectedColor, onColorChange }: Pick<Props, "selectedColor" | "onColorChange">) {
+function DesignTab({ selectedColor, onColorChange, onSave, saving }: Pick<Props, "selectedColor" | "onColorChange" | "onSave" | "saving">) {
   return (
     <>
       {/* Configuration */}
@@ -146,15 +148,17 @@ function DesignTab({ selectedColor, onColorChange }: Pick<Props, "selectedColor"
         </div>
       </section>
 
-      {/* Export CTA */}
+      {/* Save → Warenkorb CTA */}
       <button
-        className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-[12px] font-semibold cursor-pointer transition-all"
+        onClick={onSave}
+        disabled={saving}
+        className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-[12px] font-semibold cursor-pointer transition-all disabled:cursor-not-allowed disabled:opacity-70"
         style={{ background: "var(--color-rust)", color: "white" }}
-        onMouseEnter={e => (e.currentTarget.style.background = "var(--color-rust-mid)")}
+        onMouseEnter={e => { if (!saving) e.currentTarget.style.background = "var(--color-rust-mid)"; }}
         onMouseLeave={e => (e.currentTarget.style.background = "var(--color-rust)")}
       >
-        <Download size={14} />
-        Export Package
+        {saving ? <Loader2 size={14} className="animate-spin" /> : <ShoppingCart size={14} />}
+        {saving ? "Speichert…" : "Speichern & in den Warenkorb"}
       </button>
 
       {/* Properties */}

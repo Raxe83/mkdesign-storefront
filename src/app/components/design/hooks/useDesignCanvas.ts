@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { uploadDualDesign, uploadCanvasImage, type UploadState } from "@/app/lib/designApi";
+import { uploadDualDesign, uploadCanvasImage, type UploadState, type DualDesignUploadResult } from "@/app/lib/designApi";
 import { FONT_OPTIONS, type CanvasPreset } from "../constants";
 import type { FabricConf, ProductOption } from "../types";
 import type { FabricObject } from "fabric";
@@ -259,8 +259,8 @@ export function useDesignCanvas(
 
   // ─── Save & upload ──────────────────────────────────────────────────────────
 
-  const saveDesign = useCallback(async (otherSideJson?: object | null) => {
-    if (!fabricRef.current || !selectedProduct) return;
+  const saveDesign = useCallback(async (otherSideJson?: object | null): Promise<DualDesignUploadResult | null> => {
+    if (!fabricRef.current || !selectedProduct) return null;
     setUploadState({ status: "uploading", step: "preview-a" });
     try {
       const canvasJson     = fabricRef.current.toJSON();
@@ -280,11 +280,13 @@ export function useDesignCanvas(
         (step) => setUploadState({ status: "uploading", step }),
       );
       setUploadState({ status: "success", result });
+      return result;
     } catch (err) {
       setUploadState({
         status: "error",
         message: err instanceof Error ? err.message : "Unbekannter Fehler",
       });
+      return null;
     }
   }, [selectedProduct]); // eslint-disable-line react-hooks/exhaustive-deps
 

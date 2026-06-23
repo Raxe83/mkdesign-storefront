@@ -6,7 +6,7 @@ import {
   Spline, Layers, Box, AlignJustify,
 } from "lucide-react";
 import type { FabricObject } from "fabric";
-import type { ActiveTool } from "../page";
+import type { ActiveTool } from "../StudioEditor";
 import type { useDesignCanvas } from "@/app/components/design/hooks/useDesignCanvas";
 import { ShapesPanel } from "@/app/components/design/panels/ShapesPanel";
 import { TextPanel } from "@/app/components/design/panels/TextPanel";
