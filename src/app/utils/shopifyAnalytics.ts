@@ -53,9 +53,7 @@ type AnalyticsEvent =
 
 // ─── Shopify Monorail (Live View) ───────────────────────────────────────────
 
-const SHOP_DOMAIN =
-  process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN ?? "";
-const MONORAIL_URL = `https://${SHOP_DOMAIN}/.well-known/shopify/monorail/unstable/produce_batch`;
+const ANALYTICS_PROXY = "/api/analytics";
 const SHOP_ID = 77104939357;
 const STOREFRONT_TOKEN =
   process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN ?? "";
@@ -97,16 +95,12 @@ function sendToMonorail(
     ],
   });
 
-  if (typeof navigator !== "undefined" && navigator.sendBeacon) {
-    navigator.sendBeacon(MONORAIL_URL, body);
-  } else {
-    fetch(MONORAIL_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain" },
-      body,
-      keepalive: true,
-    }).catch(() => {});
-  }
+  fetch(ANALYTICS_PROXY, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body,
+    keepalive: true,
+  }).catch(() => {});
 }
 
 function sendPageViewToShopify(url: string, title: string): void {
