@@ -102,15 +102,16 @@ const CartPageItem = ({ node, linkedItems, index }: CartPageItemProps) => {
           <p className="mt-0.5 text-xs text-muted">{node.merchandise.title}</p>
         )}
 
-        {isCustomDesign ? (
+        {isCustomDesign && (
           <p className="mt-1 text-xs text-rust font-medium">Individuelles Design</p>
-        ) : visibleAttrs.length > 0 ? (
-          <div className="mt-1 space-y-0.5">
+        )}
+        {visibleAttrs.length > 0 && (
+          <div className={isCustomDesign ? "mt-1.5 space-y-0.5" : "mt-1 space-y-0.5"}>
             {visibleAttrs.map((attr) => (
               <p key={attr.key} className="text-xs text-muted">{attr.key}: {attr.value}</p>
             ))}
           </div>
-        ) : null}
+        )}
 
         {/* Linked sub-items */}
         {linkedItems.length > 0 && (

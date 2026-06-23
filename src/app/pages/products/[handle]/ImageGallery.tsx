@@ -11,22 +11,35 @@ interface Props {
   images: ShopifyImage[];
   productTitle: string;
   initialImage: string;
+  /** External control of image index (optional) */
+  externalIndex?: number;
+  /** Callback when index changes via user interaction */
+  onIndexChange?: (index: number) => void;
 }
 
-export default function ImageGallery({ images, productTitle, initialImage }: Props) {
-  const [selectedImage, setSelectedImage] = useState(initialImage);
-  const [currentIndex, setCurrentIndex]   = useState(0);
+export default function ImageGallery({
+  images,
+  productTitle,
+  initialImage,
+  externalIndex,
+  onIndexChange,
+}: Props) {
+  const [internalIndex, setInternalIndex] = useState(0);
   const [imgLoaded, setImgLoaded]         = useState(false);
   const [lightboxOpen, setLightboxOpen]   = useState(false);
   const touchStartX = useRef<number | null>(null);
+
+  // Use external index if provided, otherwise use internal state
+  const currentIndex = externalIndex ?? internalIndex;
+  const selectedImage = images[currentIndex]?.url ?? initialImage;
 
   const imageUrls = images.map((img) => img.url);
 
   const goTo = (index: number) => {
     const next = (index + images.length) % images.length;
     setImgLoaded(false);
-    setCurrentIndex(next);
-    setSelectedImage(images[next].url);
+    setInternalIndex(next);
+    onIndexChange?.(next);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -55,7 +68,7 @@ export default function ImageGallery({ images, productTitle, initialImage }: Pro
       />
     )}
     <div
-      className="flex flex-col gap-3 md:sticky md:top-20 md:h-[calc(100vh-6rem)]"
+      className="flex flex-col gap-3 md:sticky md:top-0 md:h-screen"
       tabIndex={0}
       onKeyDown={handleKeyDown}
       aria-label="Bilder-Galerie"

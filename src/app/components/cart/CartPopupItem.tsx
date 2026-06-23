@@ -82,15 +82,16 @@ const CartPopupItem = ({ node, linkedItems }: CartPopupItemProps) => {
           {node.merchandise.product.title}
         </p>
 
-        {isCustomDesign ? (
+        {isCustomDesign && (
           <p className="text-xs text-rust font-medium mt-0.5">Individuelles Design</p>
-        ) : visibleAttrs.length > 0 ? (
+        )}
+        {visibleAttrs.length > 0 && (
           <div className="text-xs text-stone dark:text-muted mt-0.5 space-y-0.5">
             {visibleAttrs.map((attr, i) => (
               <div key={i}>{attr.key}: {attr.value}</div>
             ))}
           </div>
-        ) : null}
+        )}
 
         {/* Linked sub-items */}
         {linkedItems.length > 0 && (

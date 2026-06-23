@@ -54,15 +54,28 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
                 {item.merchandise.title}
               </p>
             )}
-            {item.attributes.length > 0 && (
-              <div className="flex flex-wrap gap-x-2 mt-0.5">
-                {item.attributes.map((attr) => (
-                  <span key={attr.key} className="text-xs text-muted">
-                    {attr.key}: {attr.value}
-                  </span>
-                ))}
-              </div>
-            )}
+            {item.attributes.length > 0 && (() => {
+              const visible = item.attributes.filter(
+                (a) => !a.key.startsWith("_") && a.key !== "Design-Vorschau" && a.key !== "Design-Vorschau-B",
+              );
+              const isDesign = item.attributes.some((a) => a.key === "_design_json");
+              return (
+                <>
+                  {isDesign && (
+                    <p className="text-xs text-rust font-medium mt-0.5">Individuelles Design</p>
+                  )}
+                  {visible.length > 0 && (
+                    <div className="flex flex-col gap-0.5 mt-0.5">
+                      {visible.map((attr) => (
+                        <span key={attr.key} className="text-xs text-muted">
+                          {attr.key}: {attr.value}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
           <Price
             amount={item.merchandise.price.amount}

@@ -55,8 +55,7 @@ type AnalyticsEvent =
 
 const ANALYTICS_PROXY = "/api/analytics";
 const SHOP_ID = 77104939357;
-const STOREFRONT_TOKEN =
-  process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN ?? "";
+const HEADLESS_APP_ID = "12875497473";
 
 function getOrCreateToken(name: string): string {
   if (typeof document === "undefined") return "";
@@ -78,21 +77,15 @@ function getVisitToken(): string {
 let microSessionCount = 0;
 
 function sendToMonorail(
-  schemaId: string,
-  payload: Record<string, unknown>,
+  events: Array<{
+    schema_id: string;
+    payload: Record<string, unknown>;
+    metadata: { event_created_at_ms: number; event_sent_at_ms: number };
+  }>,
 ): void {
-  const now = Date.now();
   const body = JSON.stringify({
-    events: [
-      {
-        schema_id: schemaId,
-        payload,
-        metadata: {
-          event_created_at_ms: now,
-          event_sent_at_ms: now,
-        },
-      },
-    ],
+    events,
+    metadata: { event_sent_at_ms: Date.now() },
   });
 
   fetch(ANALYTICS_PROXY, {
@@ -103,12 +96,24 @@ function sendToMonorail(
   }).catch(() => {});
 }
 
+function buildEvent(
+  schemaId: string,
+  payload: Record<string, unknown>,
+) {
+  const now = Date.now();
+  return {
+    schema_id: schemaId,
+    payload,
+    metadata: { event_created_at_ms: now, event_sent_at_ms: now },
+  };
+}
+
 function sendPageViewToShopify(url: string, title: string): void {
   microSessionCount++;
   const parsed = new URL(url, window.location.origin);
 
-  sendToMonorail("trekkie_storefront_page_view/1.3", {
-    appClientId: STOREFRONT_TOKEN,
+  const base = {
+    appClientId: HEADLESS_APP_ID,
     shopId: SHOP_ID,
     hydrogenSubchannelId: "0",
     isPersistentCookie: true,
@@ -124,7 +129,17 @@ function sendPageViewToShopify(url: string, title: string): void {
     currency: "EUR",
     contentLanguage: "de",
     isMerchantRequest: false,
-  });
+  };
+
+  sendToMonorail([
+    buildEvent("trekkie_storefront_page_view/1.4", base),
+    buildEvent("custom_storefront_customer_tracking/1.2", {
+      ...base,
+      event_name: "page_rendered",
+      canonical_url: parsed.href,
+      customer_id: 0,
+    }),
+  ]);
 
   if (isDev) {
     console.log("[ShopifyAnalytics] Monorail page_view sent →", url);

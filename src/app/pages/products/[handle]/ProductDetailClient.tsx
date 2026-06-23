@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useScrollSyncImageGallery } from "@/app/hooks/useScrollSyncImageGallery";
 import { parseProductDescription } from "@/app/utils/parseProductDescription";
 import { sanitizeRichHtml } from "@/app/utils/sanitizeHtml";
 import { TechnicalSpecsModal } from "@/app/components/product/TechnicalSpecsModal";
@@ -129,6 +130,8 @@ export default function ProductDetailClient({
   }, [product]);
 
   const [quantity, setQuantity] = useState(1);
+  const [imageIndex, setImageIndex] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [extrasValues, setExtrasValues] = useState<ProductExtrasValues>({
     textfelder: [],
     zusatzprodukte: [],
@@ -136,6 +139,9 @@ export default function ProductDetailClient({
     entscheid: "",
     farbe: "",
   });
+
+  // Sync image gallery with scroll position
+  useScrollSyncImageGallery(containerRef, images.length, setImageIndex);
 
   const displayPrice = useMemo(
     () =>
@@ -176,16 +182,18 @@ export default function ProductDetailClient({
         Zurück zu den Produkten
       </button>
 
-      {/* ── Two-column layout ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-20 items-start">
+      {/* ── Two-column layout with sticky image gallery ── */}
+      <div ref={containerRef} className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-20">
         <ImageGallery
           images={images}
           productTitle={product.title}
           initialImage={initialImage}
+          externalIndex={imageIndex}
+          onIndexChange={setImageIndex}
         />
 
         {/* Product info */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6" data-product-info>
           <div className="flex items-start gap-3">
             <h1 className="font-display text-3xl lg:text-4xl font-medium text-primary dark:text-neutral-100 leading-tight flex-1">
               {product.title}
