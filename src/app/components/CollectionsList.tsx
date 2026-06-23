@@ -17,6 +17,7 @@ export interface ShopifyCollection {
   handle: string;
   title: string;
   description: string;
+  descriptionHtml?: string;
   image: ShopifyCollectionImage | null;
   productsCount?: number;
 }
@@ -149,10 +150,15 @@ function CategoryCard({ collection, config, index }: CategoryCardProps) {
           {label}
         </h3>
 
-        {collection.description && (
-          <p className="text-white/70 text-xs sm:text-sm line-clamp-2 mb-2 font-light max-w-md">
-            {collection.description}
-          </p>
+        {(collection.descriptionHtml || collection.description) && (
+          <p
+            className="text-white/70 text-xs sm:text-sm line-clamp-2 mb-2 font-light max-w-md"
+            dangerouslySetInnerHTML={{
+              __html: sanitizeInlineHtml(
+                collection.descriptionHtml || collection.description,
+              ),
+            }}
+          />
         )}
 
         {collection.productsCount !== undefined && (

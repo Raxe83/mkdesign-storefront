@@ -188,12 +188,13 @@ interface GiftCardItemProps {
 
 function GiftCardItem({ card, index }: GiftCardItemProps) {
   return (
-    <div
+    <Link
+      href={card.cta.href}
       className={cn(
         "group relative",
         "bg-cream dark:bg-zinc-900",
         "border border-sand/60 dark:border-zinc-800 rounded",
-        "p-6 flex flex-col gap-4",
+        "p-6 flex flex-col gap-4 overflow-hidden",
         "transition-all duration-300 ease-out",
         "hover:border-rust dark:hover:border-rust hover:-translate-y-0.5 hover:shadow-sm",
         "animate-gift-in",
@@ -202,13 +203,13 @@ function GiftCardItem({ card, index }: GiftCardItemProps) {
         animationDelay: `${index * 80}ms`,
       }}
     >
-      {/* Icon */}
-      <div className="w-10 h-10 rounded bg-rust-light dark:bg-rust/15 text-rust flex items-center justify-center flex-shrink-0 transition-colors duration-200 group-hover:bg-rust group-hover:text-white">
+      {/* Background Icon */}
+      <div className="absolute -right-3 -bottom-3 w-20 h-20 text-rust opacity-20 pointer-events-none [&_svg]:w-full [&_svg]:h-full transition-transform duration-300 ease-out group-hover:scale-125">
         {card.icon}
       </div>
 
       {/* Text */}
-      <div className="flex-1">
+      <div className="relative z-10 flex-1">
         <h3 className="font-display font-medium text-charcoal dark:text-primary text-base leading-snug mb-1.5">
           {card.title}
         </h3>
@@ -218,14 +219,13 @@ function GiftCardItem({ card, index }: GiftCardItemProps) {
       </div>
 
       {/* CTA */}
-      <Link
-        href={card.cta.href}
-        className="inline-flex items-center gap-1.5 self-start text-rust text-xs font-medium tracking-wide uppercase hover:gap-3 transition-all duration-200"
-      >
-        {card.cta.label}
-        <span aria-hidden>→</span>
-      </Link>
-    </div>
+      <div className="relative z-10 border-t border-sand/60 dark:border-zinc-700 pt-4 mt-auto">
+        <span className="inline-flex items-center gap-1.5 self-start text-rust text-xs font-medium tracking-wide uppercase group-hover:gap-3 transition-all duration-200">
+          {card.cta.label}
+          <span aria-hidden>→</span>
+        </span>
+      </div>
+    </Link>
   );
 }
 

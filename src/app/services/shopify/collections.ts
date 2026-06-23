@@ -16,6 +16,7 @@ export async function getCollections(
             title
             handle
             description
+            descriptionHtml
             image {
               url
               altText

@@ -47,8 +47,7 @@ export default async function NotFoundPage() {
           sectionLabel="Unsere Kategorien"
           title="Vielleicht findest du hier, was du suchst"
           description="Entdecke alle Produktkategorien von M.K. Design."
-          columns={2}
-          forceCardSize="tall"
+          maxItems={6}
         />
       )}
     </div>

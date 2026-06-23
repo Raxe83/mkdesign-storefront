@@ -29,8 +29,6 @@ export default async function CollectionsPage() {
       <CategoryGrid
         collections={collections}
         showHeader={false}
-        columns={3}
-        forceCardSize="normal"
       />
     </div>
   );

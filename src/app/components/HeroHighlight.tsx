@@ -60,10 +60,8 @@ function cardShell(children: React.ReactNode) {
 function HighlightCard({ item }: { item: StaticItem }) {
   return cardShell(
     <>
-      <div className="relative w-12 h-12 mx-auto rounded-sm bg-orange-700/10 flex items-center justify-center shrink-0 border border-orange-700/20 shadow-sm">
-        <item.icon className="text-orange-600 w-6 h-6" />
-      </div>
-      <div className="relative z-10 text-center">
+      <item.icon className="absolute -right-3 -bottom-3 w-20 h-20 text-orange-600 opacity-20" />
+      <div className="relative z-10">
         <h3 className="text-base font-medium text-neutral-100 mb-2 tracking-tight">{item.title}</h3>
         <p className="text-[13px] text-neutral-400 leading-relaxed">{item.description}</p>
       </div>
@@ -74,10 +72,8 @@ function HighlightCard({ item }: { item: StaticItem }) {
 function ReviewStatsCard({ reviewStats }: { reviewStats: { total: number; average: number } | null }) {
   return cardShell(
     <>
-      <div className="relative w-12 h-12 mx-auto rounded-sm bg-orange-700/10 flex items-center justify-center shrink-0 border border-orange-700/20 shadow-sm">
-        <Star className="text-orange-600 w-6 h-6" />
-      </div>
-      <div className="relative z-10 text-center">
+      <Star className="absolute -right-3 -bottom-3 w-20 h-20 text-orange-600 opacity-20" />
+      <div className="relative z-10">
         {reviewStats == null ? (
           <>
             <div className="h-4 w-32 mx-auto rounded bg-white/10 animate-pulse mb-3" />

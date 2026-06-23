@@ -1,5 +1,5 @@
 import type { Product } from "../types/shopify";
-import { getCookie } from "../lib/cookies";
+import { getCookie, setCookie } from "../lib/cookies";
 
 // ─── Event Payloads ──────────────────────────────────────────────────────────
 
@@ -50,6 +50,92 @@ type AnalyticsEvent =
   | { name: "page_viewed"; payload: PageViewEvent }
   | { name: "product_viewed"; payload: ProductViewEvent }
   | { name: "product_added_to_cart"; payload: AddToCartEvent };
+
+// ─── Shopify Monorail (Live View) ───────────────────────────────────────────
+
+const SHOP_DOMAIN =
+  process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN ?? "";
+const MONORAIL_URL = `https://${SHOP_DOMAIN}/.well-known/shopify/monorail/unstable/produce_batch`;
+const SHOP_ID = 77104939357;
+const STOREFRONT_TOKEN =
+  process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN ?? "";
+
+function getOrCreateToken(name: string): string {
+  if (typeof document === "undefined") return "";
+  const existing = getCookie(name);
+  if (existing) return existing;
+  const token = crypto.randomUUID();
+  setCookie(name, token, 365);
+  return token;
+}
+
+function getUniqToken(): string {
+  return getOrCreateToken("_shopify_y");
+}
+
+function getVisitToken(): string {
+  return getOrCreateToken("_shopify_s");
+}
+
+let microSessionCount = 0;
+
+function sendToMonorail(
+  schemaId: string,
+  payload: Record<string, unknown>,
+): void {
+  const now = Date.now();
+  const body = JSON.stringify({
+    events: [
+      {
+        schema_id: schemaId,
+        payload,
+        metadata: {
+          event_created_at_ms: now,
+          event_sent_at_ms: now,
+        },
+      },
+    ],
+  });
+
+  if (typeof navigator !== "undefined" && navigator.sendBeacon) {
+    navigator.sendBeacon(MONORAIL_URL, body);
+  } else {
+    fetch(MONORAIL_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body,
+      keepalive: true,
+    }).catch(() => {});
+  }
+}
+
+function sendPageViewToShopify(url: string, title: string): void {
+  microSessionCount++;
+  const parsed = new URL(url, window.location.origin);
+
+  sendToMonorail("trekkie_storefront_page_view/1.3", {
+    appClientId: STOREFRONT_TOKEN,
+    shopId: SHOP_ID,
+    hydrogenSubchannelId: "0",
+    isPersistentCookie: true,
+    uniqToken: getUniqToken(),
+    visitToken: getVisitToken(),
+    microSessionId: crypto.randomUUID(),
+    microSessionCount,
+    url: parsed.href,
+    path: parsed.pathname,
+    search: parsed.search,
+    referrer: document.referrer,
+    title,
+    currency: "EUR",
+    contentLanguage: "de",
+    isMerchantRequest: false,
+  });
+
+  if (isDev) {
+    console.log("[ShopifyAnalytics] Monorail page_view sent →", url);
+  }
+}
 
 // ─── Cookie-Consent → Shopify Privacy API Bridge ────────────────────────────
 
@@ -174,6 +260,10 @@ export function trackPageView(url: string, title: string): void {
       timestamp: new Date().toISOString(),
     },
   });
+
+  if (hasAnalyticsConsent() && typeof window !== "undefined") {
+    sendPageViewToShopify(url, title);
+  }
 }
 
 export function trackProductView(product: Product): void {
