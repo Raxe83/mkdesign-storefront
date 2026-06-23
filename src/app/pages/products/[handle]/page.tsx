@@ -5,7 +5,6 @@ import type { Product } from "../../../types/shopify";
 import { getProductByHandle, getExtraInfoByType, getFaqByType, getTechnicalSpecsByType, getProducts } from "../../../services/shopify";
 import { getShippingOptions } from "../../../services/shopify/shipping";
 import { detectCategory, findMetaType, RELATED_CONFIG, type ProductCategory } from "@/app/components/product/product-category";
-import { HERO_CARDS } from "@/app/components/product/hero-cards-data";
 import { ProductExtraContent } from "@/app/components/product/ProductExtraContent";
 import { ProductFaq } from "@/app/components/product/ProductFaq";
 import { TechnicalSpecs } from "@/app/components/product/TechnicalSpecs";
@@ -143,7 +142,6 @@ export default async function ProductDetailPage({ params }: Props) {
   // ── 2. Kategorie & Metaobject-Typ ableiten ───────────────────────────────
   const category      = detectCategory(product);
   const relatedConfig = RELATED_CONFIG[category];
-  const heroCards     = HERO_CARDS[category];
   const metaType      = findMetaType(product.tags ?? []);
 
   // ── 3. Alle sichtbaren Produkte in einem einzigen API-Call laden ─────────
@@ -168,7 +166,6 @@ export default async function ProductDetailPage({ params }: Props) {
   return (
     <ProductDetailClient
       product={product}
-      heroCards={heroCards}
       relatedProducts={relatedProducts}
       randomProducts={randomProducts}
       relatedLabel={relatedConfig.label}

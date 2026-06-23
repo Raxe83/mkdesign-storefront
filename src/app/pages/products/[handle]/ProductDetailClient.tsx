@@ -25,7 +25,6 @@ import {
   type ProductExtrasValues,
 } from "@/app/components/product/ProductExtras";
 import { ProductReviews } from "@/app/components/product/product-reviews";
-import { ProductHeroCards } from "@/app/components/product/ProductHeroCards";
 import { RelatedProducts } from "@/app/components/product/RelatedProducts";
 import { Personalization } from "@/app/components/Personalization";
 import type { BarrelVariant } from "@/app/components/PersonalizationVisual";
@@ -76,7 +75,6 @@ const FALLBACK_STANDARD: CmsShippingOption = {
 
 interface Props {
   product: Product;
-  heroCards: HeroCard[];
   relatedProducts: Product[];
   randomProducts?: Product[];
   relatedLabel: string;
@@ -88,7 +86,6 @@ interface Props {
 
 export default function ProductDetailClient({
   product,
-  heroCards,
   relatedProducts,
   randomProducts,
   relatedLabel,
@@ -389,11 +386,6 @@ export default function ProductDetailClient({
 
       {/* ── FAQ (RSC-Slot mit Suspense-Skeleton aus page.tsx) ── */}
       {faqSlot}
-
-      {/* ── Hero-Karten ── */}
-      <div className="mt-16">
-        <ProductHeroCards product={product} cards={heroCards} />
-      </div>
 
       {/* ── Design Editor CTA ── */}
       <div className="mt-16 -mx-6 md:-mx-10 lg:-mx-16">
