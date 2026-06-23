@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Search, Undo2, Redo2, Minus, Plus, Share2, Save, Loader2 } from "lucide-react";
+import { ChevronLeft, Undo2, Redo2, Minus, Plus, Share2, Save, Loader2 } from "lucide-react";
 
 interface Props {
   productName: string;
@@ -13,18 +13,27 @@ interface Props {
   canRedo: boolean;
   onSave: () => void;
   saving: boolean;
+  onBack: () => void;
 }
 
 const BTN = "p-1.5 rounded hover:bg-white/[0.07] text-white/40 hover:text-white/80 transition-colors cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-white/40";
 
-export function EditorTopBar({ productName, zoom, onZoomIn, onZoomOut, onZoomReset, onUndo, onRedo, canUndo, canRedo, onSave, saving }: Props) {
+export function EditorTopBar({ productName, zoom, onZoomIn, onZoomOut, onZoomReset, onUndo, onRedo, canUndo, canRedo, onSave, saving, onBack }: Props) {
   return (
     <header
       className="flex items-center h-11 px-3 gap-2 shrink-0"
       style={{ background: "#0f1117", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
     >
-      {/* Logo + breadcrumb */}
-      <div className="flex items-center gap-3 shrink-0">
+      {/* Back + Logo + breadcrumb */}
+      <div className="flex items-center gap-2 shrink-0">
+        <button
+          onClick={onBack}
+          title="Produkt wechseln"
+          className="flex items-center gap-1 pl-1 pr-2 h-7 rounded text-white/45 hover:text-white/85 hover:bg-white/[0.07] transition-colors cursor-pointer"
+        >
+          <ChevronLeft size={16} />
+          <span className="text-[11px] font-medium hidden sm:block">Produkt</span>
+        </button>
         <Image
           src="/mkdesign-font-white.png"
           alt="MK Design"
@@ -37,16 +46,8 @@ export function EditorTopBar({ productName, zoom, onZoomIn, onZoomOut, onZoomRes
         <span className="text-[13px] font-medium text-white/65 hidden sm:block">{productName}</span>
       </div>
 
-      {/* Search */}
-      <div className="flex-1 flex justify-center">
-        <div
-          className="flex items-center gap-2 px-3 h-7 rounded-full w-52 xl:w-64"
-          style={{ background: "#1c2128", border: "1px solid rgba(255,255,255,0.07)" }}
-        >
-          <Search size={12} className="text-white/25 shrink-0" />
-          <span className="text-[11px] text-white/25">Search components...</span>
-        </div>
-      </div>
+      {/* Spacer */}
+      <div className="flex-1" />
 
       {/* Controls */}
       <div className="flex items-center gap-0.5 shrink-0">

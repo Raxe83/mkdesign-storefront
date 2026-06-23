@@ -32,9 +32,10 @@ const FINISH_LABELS: Record<BarrelColor, string> = {
 
 interface Props {
   product: ProductOption;
+  onBack: () => void;
 }
 
-export default function StudioEditor({ product }: Props) {
+export default function StudioEditor({ product, onBack }: Props) {
   const [activeTool, setActiveTool]       = useState<ActiveTool>("select");
   const [selectedColor, setSelectedColor] = useState<BarrelColor>("grau");
   const [leftPanelOpen, setLeftPanelOpen] = useState(true);
@@ -99,6 +100,7 @@ export default function StudioEditor({ product }: Props) {
         canRedo={canvas.canRedo}
         onSave={saveAndAddToCart}
         saving={saving}
+        onBack={onBack}
       />
 
       <div className="flex flex-1 min-h-0">
