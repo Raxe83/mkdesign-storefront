@@ -4,7 +4,12 @@
 export interface CmsShippingOption {
   zone: string;
   method: string;
+  /** Reine Versand-/Transportdauer (Versanddienstleister), z.B. "2–4 Werktage". */
   days: string;
+  /** Anfertigungszeit vor Versandbeginn, z.B. "3–5 Werktage". null = sofort versandfertig (Lagerware). */
+  productionDays: string | null;
+  /** Anfertigung + Versand kombiniert, z.B. "5–9 Werktage". Identisch zu `days` wenn keine Anfertigung nötig. */
+  totalDays: string;
   price: string;
   /** Ab diesem Bestellwert ist der Versand kostenlos, z.B. "250,00 €". null = keine Bedingung. */
   freeFrom: string | null;

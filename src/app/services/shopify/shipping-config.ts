@@ -28,6 +28,12 @@ export interface StaticShippingProfile {
   matchProductTypes: string[];
   /** Shopify-Produkt-Tags (lowercase) — Fallback wenn productType nicht matcht */
   matchTags: string[];
+  /**
+   * Anfertigungszeit vor Versandbeginn (handgefertigte/personalisierte Produkte),
+   * z.B. "5–8 Werktage". null = sofort versandfertig (Lagerware).
+   * Läuft VOR der Versandzeit (`rates[].days`) — wird zur Gesamt-Lieferzeit addiert.
+   */
+  productionDays: string | null;
   rates: StaticShippingRate[];
 }
 
@@ -38,6 +44,7 @@ export const SHIPPING_PROFILES: StaticShippingProfile[] = [
     productCount: 175,
     matchProductTypes: ["feuertonne", "feuerschale", "fire barrel", "fire bowl"],
     matchTags: ["feuertonne", "feuerschale", "feuer-tonne", "feuer-schale"],
+    productionDays: "5–8 Werktage",
     rates: [
       {
         method: "Standard",
@@ -55,6 +62,7 @@ export const SHIPPING_PROFILES: StaticShippingProfile[] = [
     productCount: 28,
     matchProductTypes: ["nachtlicht", "nachtlichter"],
     matchTags: ["nachtlicht", "nightlight", "night-light"],
+    productionDays: "3–5 Werktage",
     rates: [
       {
         method: "Standard",
@@ -72,6 +80,7 @@ export const SHIPPING_PROFILES: StaticShippingProfile[] = [
     productCount: 12,
     matchProductTypes: ["holzschild", "holzschilder"],
     matchTags: ["holzschild", "holz-schild"],
+    productionDays: "3–5 Werktage",
     rates: [
       {
         method: "Standard",
@@ -89,6 +98,7 @@ export const SHIPPING_PROFILES: StaticShippingProfile[] = [
     productCount: 14,
     matchProductTypes: ["schiefer uhr", "schieferuhr", "schiefer-uhr"],
     matchTags: ["schiefer-uhr", "schiefer uhr", "schieferuhr"],
+    productionDays: "4–6 Werktage",
     rates: [
       {
         method: "Standard",
@@ -106,6 +116,7 @@ export const SHIPPING_PROFILES: StaticShippingProfile[] = [
     productCount: 62,
     matchProductTypes: ["weinverpackung", "weinkiste"],
     matchTags: ["weinverpackung", "weinkiste", "wein-verpackung"],
+    productionDays: "2–3 Werktage",
     rates: [
       {
         method: "Standard",
@@ -123,6 +134,7 @@ export const SHIPPING_PROFILES: StaticShippingProfile[] = [
     productCount: 158,
     matchProductTypes: ["stehtisch", "stehtisch beheizt", "heizstehtisch"],
     matchTags: ["stehtisch", "beheizt", "stehtisch-beheizt"],
+    productionDays: "7–10 Werktage",
     rates: [
       {
         method: "Cargo International · 80–100 kg",
@@ -167,6 +179,7 @@ export const SHIPPING_PROFILES: StaticShippingProfile[] = [
     productCount: 78,
     matchProductTypes: ["schiefer-untersetzer", "schieferuntersetzer", "untersetzer"],
     matchTags: ["schiefer-untersetzer", "schieferuntersetzer", "untersetzer"],
+    productionDays: "3–5 Werktage",
     rates: [
       {
         method: "Standard",
@@ -184,6 +197,7 @@ export const SHIPPING_PROFILES: StaticShippingProfile[] = [
     productCount: 22,
     matchProductTypes: ["grillplatte", "schlummerlicht", "schlummerlichter"],
     matchTags: ["grillplatte", "schlummerlicht", "schlummerlichter"],
+    productionDays: "3–5 Werktage",
     rates: [
       {
         method: "Standard",
@@ -201,6 +215,7 @@ export const SHIPPING_PROFILES: StaticShippingProfile[] = [
     productCount: 3,
     matchProductTypes: ["holz uhr", "holzuhr", "holz-uhr"],
     matchTags: ["holz-uhr", "holzuhr", "holz uhr"],
+    productionDays: "4–6 Werktage",
     rates: [
       {
         method: "Standard",
@@ -218,6 +233,7 @@ export const SHIPPING_PROFILES: StaticShippingProfile[] = [
     productCount: 6,
     matchProductTypes: ["tischplatte 120er", "tischplatte", "tischplatte-120"],
     matchTags: ["tischplatte-120", "tischplatte", "120er"],
+    productionDays: "5–7 Werktage",
     rates: [
       {
         method: "Standard",
@@ -235,6 +251,7 @@ export const SHIPPING_PROFILES: StaticShippingProfile[] = [
     productCount: 1,
     matchProductTypes: ["klein material", "kleinmaterial"],
     matchTags: ["klein-material", "kleinmaterial"],
+    productionDays: null,
     rates: [
       {
         method: "Standard",
