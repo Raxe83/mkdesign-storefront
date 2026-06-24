@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import type { Product } from "../../../types/shopify";
 import { getProductByHandle, getExtraInfoByType, getFaqByType, getTechnicalSpecsByType, getProducts } from "../../../services/shopify";
 import { getShippingOptions } from "../../../services/shopify/shipping";
-import { detectCategory, findMetaType, RELATED_CONFIG, type ProductCategory } from "@/app/components/product/product-category";
+import { detectCategory, findMetaType, findTechnicalSpecType, RELATED_CONFIG, type ProductCategory } from "@/app/components/product/product-category";
 import { HERO_CARDS } from "@/app/components/product/hero-cards-data";
 import { ProductExtraContent } from "@/app/components/product/ProductExtraContent";
 import { ProductFaq } from "@/app/components/product/ProductFaq";
@@ -52,8 +52,8 @@ function ExtraContentSkeleton() {
 
 // ─── Streaming-Sektion für Technische Details ────────────────────────────────
 
-async function TechnicalSpecsSection({ metaType }: { metaType: ProductCategory | null }) {
-  const specs = metaType ? await getTechnicalSpecsByType(metaType) : [];
+async function TechnicalSpecsSection({ specType }: { specType: string | null }) {
+  const specs = specType ? await getTechnicalSpecsByType(specType) : [];
   if (specs.length === 0) return null;
   return <TechnicalSpecs specs={specs} />;
 }
@@ -145,6 +145,7 @@ export default async function ProductDetailPage({ params }: Props) {
   const relatedConfig = RELATED_CONFIG[category];
   const heroCards     = HERO_CARDS[category];
   const metaType      = findMetaType(product.tags ?? []);
+  const techSpecType  = findTechnicalSpecType(product.tags ?? []);
 
   // ── 3. Alle sichtbaren Produkte in einem einzigen API-Call laden ─────────
   const allProducts = await getProducts(30);
@@ -175,7 +176,7 @@ export default async function ProductDetailPage({ params }: Props) {
       shippingOptions={shippingOptions}
       technicalSpecsSlot={
         <Suspense fallback={<TechnicalSpecsSkeleton />}>
-          <TechnicalSpecsSection metaType={metaType} />
+          <TechnicalSpecsSection specType={techSpecType} />
         </Suspense>
       }
       extraContentSlot={

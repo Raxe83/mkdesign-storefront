@@ -136,6 +136,29 @@ export function findMetaType(tags: readonly string[]): ProductCategory | null {
   return null;
 }
 
+// ─── Technische Details: feinere Auflösung als die Basis-Kategorie ────────────
+//
+// Größenvarianten (z. B. Feuerschale XL) sollen EIGENE technische Daten zeigen,
+// aber Extra-Info & FAQ weiterhin mit der Basis-Kategorie (`feuerschale`) teilen.
+// Diese Funktion liefert daher nur für die Technical-Specs-Sektion einen
+// spezifischeren Typ; alle anderen Sektionen nutzen weiter `findMetaType`.
+//
+// Rückgabe ist ein Metaobjekt-Kategorie-String (kann spezifischer sein als
+// ProductCategory), den getTechnicalSpecsByType zu `{typ}_technical_specs` macht.
+
+/** Tags, die eine eigene Technical-Specs-Kategorie erzwingen (spezifischer zuerst). */
+const TECH_SPEC_OVERRIDES: ReadonlyArray<{ tag: string; type: string }> = [
+  { tag: "feuerschale-xl", type: "feuerschale-xl" },
+];
+
+export function findTechnicalSpecType(tags: readonly string[]): string | null {
+  const lower = tags.map((t) => t.toLowerCase());
+  for (const { tag, type } of TECH_SPEC_OVERRIDES) {
+    if (lower.includes(tag)) return type;
+  }
+  return findMetaType(tags);
+}
+
 // ─── Verwandte-Produkte-Konfiguration ─────────────────────────────────────────
 
 export const RELATED_CONFIG: Record<ProductCategory, { tag?: string; label: string }> = {
