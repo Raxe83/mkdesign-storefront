@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback } from "react";
 import { useCart } from "@/app/context/CartContext";
+import { useSessionCustomer } from "@/app/hooks/useSessionCustomer";
 import { useDesignCanvas } from "@/app/components/design/hooks/useDesignCanvas";
 import { useDesignSaveToCart } from "@/app/components/design/hooks/useDesignSaveToCart";
 import { useEditorZoomPan } from "@/app/components/design/hooks/useEditorZoomPan";
@@ -53,6 +54,7 @@ export default function StudioEditor({ product, onBack }: Props) {
   const [leftPanelOpen, setLeftPanelOpen] = useState(true);
   const [selectedAddons, setSelectedAddons] = useState<ZusatzproduktOption[]>([]);
   const { itemCount: cartItemCount } = useCart();
+  const customer = useSessionCustomer();
 
   const canvasPreset = useMemo(() => getPresetForTitle(product.label), [product.label]);
   const { Component: BarrelIllustration, fit: defaultFit } = useMemo(
@@ -135,6 +137,7 @@ export default function StudioEditor({ product, onBack }: Props) {
         saving={saving}
         onBack={onBack}
         cartItemCount={cartItemCount}
+        customer={customer}
       />
 
       <div className="flex flex-1 min-h-0">

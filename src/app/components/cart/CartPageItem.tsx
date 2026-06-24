@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { ShoppingBag, Trash2 } from "lucide-react";
+import { ShoppingBag, Trash2, ZoomIn } from "lucide-react";
 import Link from "next/link";
 import { useCart } from "@/app/context/CartContext";
 import { formatPrice } from "@/app/utils/formatPrice";
+import { ReviewLightbox } from "@/app/components/ui/ReviewLightbox";
 import type { CartItem } from "@/app/types/shopify";
 
 interface CartPageItemProps {
@@ -17,6 +18,7 @@ interface CartPageItemProps {
 const CartPageItem = ({ node, linkedItems, index }: CartPageItemProps) => {
   const { updateItemQuantityFunction, removeItem } = useCart();
   const [localQty, setLocalQty] = useState(node.quantity);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   // Sync from API response — no-op if local state already matches
   useEffect(() => {
@@ -52,22 +54,47 @@ const CartPageItem = ({ node, linkedItems, index }: CartPageItemProps) => {
   const previewUrl  = node.attributes?.find((a) => a.key === "Design-Vorschau")?.value;
   const previewUrlB = node.attributes?.find((a) => a.key === "Design-Vorschau-B")?.value;
   const visibleAttrs = node.attributes?.filter((a) => !a.key.startsWith("_") && a.key !== "Design-Vorschau" && a.key !== "Design-Vorschau-B") ?? [];
+  const designImages = [previewUrl, previewUrlB].filter((u): u is string => Boolean(u));
 
   return (
     <div
       className="p-5 sm:p-6 flex items-start gap-4 opacity-0 animate-gift-in"
       style={{ animationDelay: `${index * 60}ms`, animationFillMode: "forwards" }}
     >
+      {lightboxIndex !== null && (
+        <ReviewLightbox
+          images={designImages}
+          startIndex={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+        />
+      )}
+
       {/* Thumbnail */}
       {isCustomDesign && previewUrl ? (
         <div className="flex gap-1.5 shrink-0">
-          <div className="relative h-20 w-20 rounded-sm border border-rust/30 overflow-hidden bg-charcoal">
+          <button
+            type="button"
+            onClick={() => setLightboxIndex(0)}
+            aria-label="Design ansehen"
+            className="group relative h-20 w-20 rounded-sm border border-rust/30 overflow-hidden bg-charcoal cursor-zoom-in"
+          >
             <Image src={previewUrl} alt="Seite A" fill className="object-contain p-1" />
-          </div>
+            <span className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-colors duration-150">
+              <ZoomIn size={16} className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
+            </span>
+          </button>
           {previewUrlB && (
-            <div className="relative h-20 w-20 rounded-sm border border-rust/30 overflow-hidden bg-charcoal">
+            <button
+              type="button"
+              onClick={() => setLightboxIndex(1)}
+              aria-label="Design Seite B ansehen"
+              className="group relative h-20 w-20 rounded-sm border border-rust/30 overflow-hidden bg-charcoal cursor-zoom-in"
+            >
               <Image src={previewUrlB} alt="Seite B" fill className="object-contain p-1" />
-            </div>
+              <span className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-colors duration-150">
+                <ZoomIn size={16} className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
+              </span>
+            </button>
           )}
         </div>
       ) : (

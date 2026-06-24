@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, Undo2, Redo2, Minus, Plus, Share2, Save, Loader2, ShoppingCart } from "lucide-react";
+import { ChevronLeft, Undo2, Redo2, Minus, Plus, Share2, Save, Loader2, ShoppingCart, User } from "lucide-react";
+import type { SessionCustomer } from "@/app/hooks/useSessionCustomer";
 
 interface Props {
   productName: string;
@@ -16,13 +17,26 @@ interface Props {
   saving: boolean;
   onBack: () => void;
   cartItemCount: number;
+  customer: SessionCustomer | null;
+}
+
+function AccountAvatar({ firstName, lastName }: SessionCustomer) {
+  const initials = [firstName?.[0], lastName?.[0]].filter(Boolean).join("").toUpperCase() || "?";
+  return (
+    <div
+      className="w-6 h-6 rounded-full text-white text-[10px] font-semibold flex items-center justify-center leading-none shrink-0"
+      style={{ background: "var(--color-rust)" }}
+    >
+      {initials}
+    </div>
+  );
 }
 
 const BTN = "p-2 rounded hover:bg-white/[0.07] text-white/40 hover:text-white/80 transition-colors cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-white/40";
 
 export function EditorTopBar({
   productName, zoom, onZoomIn, onZoomOut, onZoomReset, onUndo, onRedo, canUndo, canRedo,
-  onSave, saving, onBack, cartItemCount,
+  onSave, saving, onBack, cartItemCount, customer,
 }: Props) {
   return (
     <header
@@ -106,6 +120,14 @@ export function EditorTopBar({
               {cartItemCount}
             </span>
           )}
+        </Link>
+
+        <Link
+          href={customer ? "/pages/account" : "/pages/login"}
+          title={customer ? "Mein Konto" : "Anmelden"}
+          className="flex items-center justify-center w-9 h-9 ml-0.5 rounded text-white/55 hover:text-white/90 hover:bg-white/[0.07] transition-colors cursor-pointer"
+        >
+          {customer ? <AccountAvatar firstName={customer.firstName} lastName={customer.lastName} /> : <User size={17} />}
         </Link>
 
         <button
