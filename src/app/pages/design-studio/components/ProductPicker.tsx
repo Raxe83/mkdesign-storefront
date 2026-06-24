@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import { Palette } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft, Palette } from "lucide-react";
 import { getBarrelEntry } from "@/app/components/design/barrel";
 import type { ProductOption } from "@/app/components/design/types";
 
@@ -20,6 +21,14 @@ export function ProductPicker({ products, onSelect }: Props) {
       className="dark fixed inset-0 z-[9999] flex flex-col overflow-hidden font-body"
       style={{ background: "#0f1117" }}
     >
+      <Link
+        href="/"
+        title="Zurück zum Shop"
+        className="absolute top-5 left-5 z-10 flex items-center gap-1.5 text-[12px] font-medium text-white/45 hover:text-white/85 transition-colors"
+      >
+        <ArrowLeft size={15} /> Zurück zum Shop
+      </Link>
+
       {/* Header */}
       <header className="shrink-0 flex flex-col items-center text-center gap-2 px-6 pt-12 pb-8">
         <span

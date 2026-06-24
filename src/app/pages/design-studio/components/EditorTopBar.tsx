@@ -29,8 +29,19 @@ export function EditorTopBar({
       className="flex items-center h-16 px-4 gap-3 shrink-0"
       style={{ background: "#0f1117", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
     >
-      {/* Zurück zum Shop + Produktwechsel + Logo + Produktname */}
+      {/* Produktwechsel + Logo + Produktname */}
       <div className="flex items-center gap-3 shrink-0">
+        <button
+          onClick={onBack}
+          title="Produkt wechseln"
+          className="flex items-center gap-1.5 pl-1.5 pr-3 h-9 rounded text-white/45 hover:text-white/85 hover:bg-white/[0.07] transition-colors cursor-pointer"
+        >
+          <ChevronLeft size={18} />
+          <span className="text-[12px] font-medium hidden sm:block">Produkt</span>
+        </button>
+
+        <div className="w-px h-6 shrink-0" style={{ background: "rgba(255,255,255,0.1)" }} />
+
         <Link
           href="/"
           title="Zurück zum Shop"
@@ -45,17 +56,6 @@ export function EditorTopBar({
             priority
           />
         </Link>
-
-        <div className="w-px h-6 shrink-0" style={{ background: "rgba(255,255,255,0.1)" }} />
-
-        <button
-          onClick={onBack}
-          title="Produkt wechseln"
-          className="flex items-center gap-1.5 pl-1.5 pr-3 h-9 rounded text-white/45 hover:text-white/85 hover:bg-white/[0.07] transition-colors cursor-pointer"
-        >
-          <ChevronLeft size={18} />
-          <span className="text-[12px] font-medium hidden sm:block">Produkt</span>
-        </button>
 
         <span className="text-white/15 hidden md:block text-lg leading-none">|</span>
         <span className="text-[14px] font-medium text-white/65 hidden md:block">{productName}</span>
