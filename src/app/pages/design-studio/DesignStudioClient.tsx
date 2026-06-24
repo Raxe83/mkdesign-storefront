@@ -31,6 +31,15 @@ export default function DesignStudioClient() {
     if (match) setChosen(match);
   }, [productsLoading, chosen, paramId, products]);
 
+  // Das Studio ist ein Vollbild-Overlay (fixed inset-0) — die normale Seite
+  // (Header/Footer) bleibt im Dokumentfluss und erzeugt sonst eine sinnlose,
+  // rein optische äußere Scrollbar. Body-Scroll für die Dauer sperren.
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
   if (productsLoading) {
     return (
       <div

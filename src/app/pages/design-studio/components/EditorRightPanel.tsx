@@ -32,86 +32,41 @@ const COLORS: { id: BarrelColor; label: string; swatch: string }[] = [
   { id: "gold",    label: "Gold",       swatch: "#c8a020" },
 ];
 
-export function EditorRightPanel({ selectedColor, onColorChange, onSave, saving, displayPrice, zusatzprodukte, selectedAddons, onToggleAddon, devProps }: Props) {
+/**
+ * Rechts-Panel des Studios: Preis (oben, fixiert) und Save-CTA (unten, fixiert)
+ * bleiben immer sichtbar. Dazwischen genau EIN scrollender Bereich (Finish,
+ * Zusatzprodukte, Design Review) — bewusst kein verschachteltes Scrollen.
+ */
+export function EditorRightPanel({
+  selectedColor, onColorChange, onSave, saving, displayPrice,
+  zusatzprodukte, selectedAddons, onToggleAddon, devProps,
+}: Props) {
   return (
     <aside
       className="flex flex-col w-[240px] xl:w-[260px] shrink-0"
       style={{ background: "#111318", borderLeft: "1px solid rgba(255,255,255,0.05)" }}
     >
-      {/* Header */}
+      {/* Fixierter Preis-Header */}
       <div
-        className="shrink-0 px-4 py-3"
+        className="shrink-0 px-4 py-3.5 flex flex-col gap-0.5"
         style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
       >
-        <span className="text-[11px] font-medium tracking-[0.05em] uppercase" style={{ color: "var(--color-cream)" }}>
-          Design
-        </span>
-      </div>
-
-      {/* Panel body */}
-      <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-5">
-        <DesignTab
-          selectedColor={selectedColor}
-          onColorChange={onColorChange}
-          onSave={onSave}
-          saving={saving}
-          displayPrice={displayPrice}
-          zusatzprodukte={zusatzprodukte}
-          selectedAddons={selectedAddons}
-          onToggleAddon={onToggleAddon}
-        />
-      </div>
-
-      {/* Dev panel — only rendered when devProps is passed (IS_DEV) */}
-      {devProps && (
-        <div
-          className="shrink-0 p-3"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
-        >
-          <DevPanel
-            canvasWidth={devProps.canvasWidth}
-            fit={devProps.fit}
-            onCanvasWidthChange={devProps.onCanvasWidthChange}
-            onFitChange={devProps.onFitChange}
-          />
-        </div>
-      )}
-    </aside>
-  );
-}
-
-type DesignTabProps = Pick<
-  Props,
-  "selectedColor" | "onColorChange" | "onSave" | "saving" | "displayPrice" | "zusatzprodukte" | "selectedAddons" | "onToggleAddon"
->;
-
-function DesignTab({
-  selectedColor, onColorChange, onSave, saving,
-  displayPrice, zusatzprodukte, selectedAddons, onToggleAddon,
-}: DesignTabProps) {
-  return (
-    <>
-      {/* Preis */}
-      <section className="flex flex-col gap-0.5">
-        <span className="text-[9px] font-semibold tracking-[0.14em] uppercase"
-          style={{ color: "rgba(255,255,255,0.3)" }}>
+        <span className="text-[9px] font-semibold tracking-[0.14em] uppercase" style={{ color: "rgba(255,255,255,0.3)" }}>
           Preis
         </span>
-        <span className="text-[22px] font-semibold leading-tight" style={{ color: "var(--color-cream)" }}>
+        <span className="text-[24px] font-semibold leading-tight" style={{ color: "var(--color-cream)" }}>
           {formatPrice(displayPrice.amount, displayPrice.currencyCode)}
         </span>
-      </section>
+      </div>
 
-      {/* Configuration */}
-      <section>
-        <h3 className="text-[13px] font-semibold text-white/80 mb-3">Configuration</h3>
-
-        <div className="flex flex-col gap-2">
+      {/* Einziger scrollender Bereich */}
+      <div className="flex-1 min-h-0 overflow-y-auto p-4 flex flex-col gap-5">
+        {/* Finish / Lackierung */}
+        <section className="flex flex-col gap-2">
           <span className="text-[9px] font-semibold tracking-[0.14em] uppercase"
             style={{ color: "rgba(255,255,255,0.3)" }}>
             Finish / Lackierung
           </span>
-
           <div className="grid grid-cols-2 gap-1.5">
             {COLORS.map((c) => {
               const active = selectedColor === c.id;
@@ -138,17 +93,15 @@ function DesignTab({
               );
             })}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Zusatzprodukte */}
-      {zusatzprodukte.length > 0 && (
-        <section className="flex flex-col gap-2">
-          <span className="text-[9px] font-semibold tracking-[0.14em] uppercase"
-            style={{ color: "rgba(255,255,255,0.3)" }}>
-            Zusatzprodukte
-          </span>
-          <div className="flex flex-col gap-1.5 max-h-52 overflow-y-auto pr-0.5">
+        {/* Zusatzprodukte */}
+        {zusatzprodukte.length > 0 && (
+          <section className="flex flex-col gap-1.5">
+            <span className="text-[9px] font-semibold tracking-[0.14em] uppercase"
+              style={{ color: "rgba(255,255,255,0.3)" }}>
+              Zusatzprodukte
+            </span>
             {zusatzprodukte.map((opt) => {
               const active = selectedAddons.some((a) => a.id === opt.id);
               return (
@@ -182,58 +135,55 @@ function DesignTab({
                 </button>
               );
             })}
+          </section>
+        )}
+
+        {/* Design Review */}
+        <section
+          className="rounded-lg p-3 flex flex-col gap-2"
+          style={{ background: "rgba(200,154,60,0.1)", border: "1px solid rgba(200,154,60,0.25)" }}
+        >
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: "var(--color-gold)" }} />
+            <span className="text-[9px] font-bold tracking-[0.14em] uppercase" style={{ color: "var(--color-gold)" }}>
+              Design Review
+            </span>
+          </div>
+          <div className="flex items-start gap-2">
+            <CheckCircle2 size={14} className="shrink-0 mt-0.5" style={{ color: "var(--color-gold)" }} />
+            <p className="text-[12px] leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>
+              Ready for production export. All assets are linked.
+            </p>
           </div>
         </section>
+      </div>
+
+      {/* Fixierter Save-Footer */}
+      <div className="shrink-0 p-4" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+        <button
+          onClick={onSave}
+          disabled={saving}
+          className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-[12px] font-semibold cursor-pointer transition-all disabled:cursor-not-allowed disabled:opacity-70"
+          style={{ background: "var(--color-rust)", color: "white" }}
+          onMouseEnter={e => { if (!saving) e.currentTarget.style.background = "var(--color-rust-mid)"; }}
+          onMouseLeave={e => (e.currentTarget.style.background = "var(--color-rust)")}
+        >
+          {saving ? <Loader2 size={14} className="animate-spin" /> : <ShoppingCart size={14} />}
+          {saving ? "Speichert…" : "Speichern & in den Warenkorb"}
+        </button>
+      </div>
+
+      {/* Dev panel — only rendered when devProps is passed (IS_DEV) */}
+      {devProps && (
+        <div className="shrink-0 p-3" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+          <DevPanel
+            canvasWidth={devProps.canvasWidth}
+            fit={devProps.fit}
+            onCanvasWidthChange={devProps.onCanvasWidthChange}
+            onFitChange={devProps.onFitChange}
+          />
+        </div>
       )}
-
-      {/* Design Review */}
-      <section
-        className="rounded-lg p-3 flex flex-col gap-2"
-        style={{ background: "rgba(200,154,60,0.1)", border: "1px solid rgba(200,154,60,0.25)" }}
-      >
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full shrink-0" style={{ background: "var(--color-gold)" }} />
-          <span className="text-[9px] font-bold tracking-[0.14em] uppercase" style={{ color: "var(--color-gold)" }}>
-            Design Review
-          </span>
-        </div>
-        <div className="flex items-start gap-2">
-          <CheckCircle2 size={14} className="shrink-0 mt-0.5" style={{ color: "var(--color-gold)" }} />
-          <p className="text-[12px] leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>
-            Ready for production export. All assets are linked.
-          </p>
-        </div>
-      </section>
-
-      {/* Save → Warenkorb CTA */}
-      <button
-        onClick={onSave}
-        disabled={saving}
-        className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-[12px] font-semibold cursor-pointer transition-all disabled:cursor-not-allowed disabled:opacity-70"
-        style={{ background: "var(--color-rust)", color: "white" }}
-        onMouseEnter={e => { if (!saving) e.currentTarget.style.background = "var(--color-rust-mid)"; }}
-        onMouseLeave={e => (e.currentTarget.style.background = "var(--color-rust)")}
-      >
-        {saving ? <Loader2 size={14} className="animate-spin" /> : <ShoppingCart size={14} />}
-        {saving ? "Speichert…" : "Speichern & in den Warenkorb"}
-      </button>
-
-      {/* Properties */}
-      <section className="flex flex-col gap-2">
-        <span className="text-[9px] font-semibold tracking-[0.14em] uppercase"
-          style={{ color: "rgba(255,255,255,0.3)" }}>
-          Eigenschaften
-        </span>
-        <div className="grid grid-cols-2 gap-2">
-          {[["Breite", "60 cm"], ["Höhe", "60 cm"], ["Format", "SVG"], ["DPI", "300"]].map(([l, v]) => (
-            <div key={l} className="flex flex-col gap-0.5 p-2 rounded cursor-default select-none"
-              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
-              <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>{l}</span>
-              <span className="text-[12px] font-medium" style={{ color: "rgba(255,255,255,0.7)" }}>{v}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-    </>
+    </aside>
   );
 }

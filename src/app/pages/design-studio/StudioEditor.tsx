@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
+import { useCart } from "@/app/context/CartContext";
 import { useDesignCanvas } from "@/app/components/design/hooks/useDesignCanvas";
 import { useDesignSaveToCart } from "@/app/components/design/hooks/useDesignSaveToCart";
 import { useEditorZoomPan } from "@/app/components/design/hooks/useEditorZoomPan";
@@ -51,6 +52,7 @@ export default function StudioEditor({ product, onBack }: Props) {
   const [selectedColor, setSelectedColor] = useState<BarrelColor>("grau");
   const [leftPanelOpen, setLeftPanelOpen] = useState(true);
   const [selectedAddons, setSelectedAddons] = useState<ZusatzproduktOption[]>([]);
+  const { itemCount: cartItemCount } = useCart();
 
   const canvasPreset = useMemo(() => getPresetForTitle(product.label), [product.label]);
   const { Component: BarrelIllustration, fit: defaultFit } = useMemo(
@@ -132,6 +134,7 @@ export default function StudioEditor({ product, onBack }: Props) {
         onSave={saveAndAddToCart}
         saving={saving}
         onBack={onBack}
+        cartItemCount={cartItemCount}
       />
 
       <div className="flex flex-1 min-h-0">

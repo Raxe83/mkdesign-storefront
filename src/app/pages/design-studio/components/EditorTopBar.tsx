@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { ChevronLeft, Undo2, Redo2, Minus, Plus, Share2, Save, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { ChevronLeft, Undo2, Redo2, Minus, Plus, Share2, Save, Loader2, ShoppingCart } from "lucide-react";
 
 interface Props {
   productName: string;
@@ -14,36 +15,50 @@ interface Props {
   onSave: () => void;
   saving: boolean;
   onBack: () => void;
+  cartItemCount: number;
 }
 
-const BTN = "p-1.5 rounded hover:bg-white/[0.07] text-white/40 hover:text-white/80 transition-colors cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-white/40";
+const BTN = "p-2 rounded hover:bg-white/[0.07] text-white/40 hover:text-white/80 transition-colors cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-white/40";
 
-export function EditorTopBar({ productName, zoom, onZoomIn, onZoomOut, onZoomReset, onUndo, onRedo, canUndo, canRedo, onSave, saving, onBack }: Props) {
+export function EditorTopBar({
+  productName, zoom, onZoomIn, onZoomOut, onZoomReset, onUndo, onRedo, canUndo, canRedo,
+  onSave, saving, onBack, cartItemCount,
+}: Props) {
   return (
     <header
-      className="flex items-center h-11 px-3 gap-2 shrink-0"
+      className="flex items-center h-16 px-4 gap-3 shrink-0"
       style={{ background: "#0f1117", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
     >
-      {/* Back + Logo + breadcrumb */}
-      <div className="flex items-center gap-2 shrink-0">
+      {/* Zurück zum Shop + Produktwechsel + Logo + Produktname */}
+      <div className="flex items-center gap-3 shrink-0">
+        <Link
+          href="/"
+          title="Zurück zum Shop"
+          className="flex items-center shrink-0 opacity-90 hover:opacity-100 transition-opacity"
+        >
+          <Image
+            src="/mkdesign-font-white.png"
+            alt="MK Design — zurück zum Shop"
+            width={200}
+            height={55}
+            className="object-contain"
+            priority
+          />
+        </Link>
+
+        <div className="w-px h-6 shrink-0" style={{ background: "rgba(255,255,255,0.1)" }} />
+
         <button
           onClick={onBack}
           title="Produkt wechseln"
-          className="flex items-center gap-1 pl-1 pr-2 h-7 rounded text-white/45 hover:text-white/85 hover:bg-white/[0.07] transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 pl-1.5 pr-3 h-9 rounded text-white/45 hover:text-white/85 hover:bg-white/[0.07] transition-colors cursor-pointer"
         >
-          <ChevronLeft size={16} />
-          <span className="text-[11px] font-medium hidden sm:block">Produkt</span>
+          <ChevronLeft size={18} />
+          <span className="text-[12px] font-medium hidden sm:block">Produkt</span>
         </button>
-        <Image
-          src="/mkdesign-font-white.png"
-          alt="MK Design"
-          width={160}
-          height={44}
-          className="object-contain"
-          priority
-        />
-        <span className="text-white/15 hidden sm:block text-lg leading-none">|</span>
-        <span className="text-[13px] font-medium text-white/65 hidden sm:block">{productName}</span>
+
+        <span className="text-white/15 hidden md:block text-lg leading-none">|</span>
+        <span className="text-[14px] font-medium text-white/65 hidden md:block">{productName}</span>
       </div>
 
       {/* Spacer */}
@@ -51,42 +66,58 @@ export function EditorTopBar({ productName, zoom, onZoomIn, onZoomOut, onZoomRes
 
       {/* Controls */}
       <div className="flex items-center gap-0.5 shrink-0">
-        <button className={BTN} onClick={onUndo} disabled={!canUndo} title="Rückgängig (Strg+Z)"><Undo2 size={14} /></button>
-        <button className={BTN} onClick={onRedo} disabled={!canRedo} title="Wiederholen (Strg+Y)"><Redo2 size={14} /></button>
+        <button className={BTN} onClick={onUndo} disabled={!canUndo} title="Rückgängig (Strg+Z)"><Undo2 size={16} /></button>
+        <button className={BTN} onClick={onRedo} disabled={!canRedo} title="Wiederholen (Strg+Y)"><Redo2 size={16} /></button>
 
-        <div className="w-px h-4 mx-2" style={{ background: "rgba(255,255,255,0.08)" }} />
+        <div className="w-px h-6 mx-2.5" style={{ background: "rgba(255,255,255,0.08)" }} />
 
-        <button className={BTN} onClick={onZoomOut} title="Zoom Out"><Minus size={14} /></button>
+        <button className={BTN} onClick={onZoomOut} title="Zoom Out"><Minus size={16} /></button>
         <button
           onClick={onZoomReset}
-          className="text-[11px] text-white/50 hover:text-white/80 w-9 text-center tabular-nums select-none cursor-pointer transition-colors"
+          className="text-[12px] text-white/50 hover:text-white/80 w-10 text-center tabular-nums select-none cursor-pointer transition-colors"
           title="Zoom zurücksetzen"
         >
           {zoom}%
         </button>
-        <button className={BTN} onClick={onZoomIn} title="Zoom In"><Plus size={14} /></button>
+        <button className={BTN} onClick={onZoomIn} title="Zoom In"><Plus size={16} /></button>
 
-        <div className="w-px h-4 mx-2" style={{ background: "rgba(255,255,255,0.08)" }} />
+        <div className="w-px h-6 mx-2.5" style={{ background: "rgba(255,255,255,0.08)" }} />
 
         <button
-          className="flex items-center gap-1.5 px-2.5 h-7 rounded text-[11px] font-medium text-white/55 hover:text-white/90 transition-all cursor-pointer"
+          className="flex items-center gap-1.5 px-3.5 h-9 rounded text-[12px] font-medium text-white/55 hover:text-white/90 transition-all cursor-pointer"
           style={{ border: "1px solid rgba(255,255,255,0.1)" }}
           onMouseEnter={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)")}
           onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
         >
-          <Share2 size={12} /> Share
+          <Share2 size={14} /> Share
         </button>
+
+        <Link
+          href="/pages/cart"
+          title="Zum Warenkorb"
+          className="relative flex items-center justify-center w-9 h-9 ml-1 rounded text-white/55 hover:text-white/90 hover:bg-white/[0.07] transition-colors cursor-pointer"
+        >
+          <ShoppingCart size={17} />
+          {cartItemCount > 0 && (
+            <span
+              className="absolute -top-1 -right-1 flex items-center justify-center h-4 w-4 rounded-full text-[9px] font-semibold leading-none"
+              style={{ background: "var(--color-rust)", color: "white" }}
+            >
+              {cartItemCount}
+            </span>
+          )}
+        </Link>
 
         <button
           onClick={onSave}
           disabled={saving}
           title="Design speichern & in den Warenkorb"
-          className="flex items-center gap-1.5 px-3 h-7 rounded text-[11px] font-semibold ml-1.5 cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-70"
+          className="flex items-center gap-1.5 px-4 h-9 rounded text-[12px] font-semibold ml-1.5 cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-70"
           style={{ background: "var(--color-gold)", color: "#0f1117" }}
           onMouseEnter={e => { if (!saving) e.currentTarget.style.background = "#d4a840"; }}
           onMouseLeave={e => (e.currentTarget.style.background = "var(--color-gold)")}
         >
-          {saving ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
+          {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
           {saving ? "Speichert…" : "Speichern"}
         </button>
       </div>
