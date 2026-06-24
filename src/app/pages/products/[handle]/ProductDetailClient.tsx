@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import type { Product, CmsShippingOption } from "../../../types/shopify";
-import type { HeroCard } from "@/app/components/product/product-category";
 import { formatPrice } from "../../../utils/formatPrice";
 import { calculateDisplayPrice } from "../../../utils/calculateDisplayPrice";
 import AddToCartButton from "../../../components/ui/AddToCartButton";
@@ -65,6 +64,8 @@ const FALLBACK_STANDARD: CmsShippingOption = {
   zone: "Deutschland",
   method: "Standard",
   days: "2–4 Werktage",
+  productionDays: null,
+  totalDays: "2–4 Werktage",
   price: "5,90 €",
   freeFrom: "250,00 €",
   isStandard: true,
@@ -347,17 +348,24 @@ export default function ProductDetailClient({
                 <span>Versand wird im Checkout berechnet</span>
               </div>
             ) : (
-              <div className="flex items-center gap-2.5 text-sm text-muted dark:text-neutral-400">
-                <Truck size={15} className="shrink-0" />
-                <span>
-                  {standardShipping.method}: {standardShipping.days} —{" "}
-                  {standardShipping.price}
-                  {standardShipping.freeFrom && (
-                    <span className="ml-1 text-xs opacity-70">
-                      (ab {standardShipping.freeFrom} kostenlos)
-                    </span>
-                  )}
-                </span>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2.5 text-sm text-muted dark:text-neutral-400">
+                  <Truck size={15} className="shrink-0" />
+                  <span>
+                    {standardShipping.method}: {standardShipping.totalDays} —{" "}
+                    {standardShipping.price}
+                    {standardShipping.freeFrom && (
+                      <span className="ml-1 text-xs opacity-70">
+                        (ab {standardShipping.freeFrom} kostenlos)
+                      </span>
+                    )}
+                  </span>
+                </div>
+                {standardShipping.productionDays && (
+                  <p className="pl-[23px] text-xs text-muted/70 dark:text-neutral-500">
+                    zusätzliche Anfertigungsdauer
+                  </p>
+                )}
               </div>
             )}
           </div>

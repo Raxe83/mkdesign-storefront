@@ -1,11 +1,12 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { uploadDualDesign, uploadCanvasImage, type UploadState } from "@/app/lib/designApi";
+import { uploadDualDesign, uploadCanvasImage, type UploadState, type DualDesignUploadResult } from "@/app/lib/designApi";
 import { FONT_OPTIONS, type CanvasPreset } from "../constants";
 import type { FabricConf, ProductOption } from "../types";
 import type { FabricObject } from "fabric";
 import { useCanvasInit } from "./useCanvasInit";
+import { useCanvasHistory } from "./useCanvasHistory";
 
 /** Rendert ein Fabric-JSON-Objekt auf einem Offscreen-Canvas und gibt ein PNG-DataURL zurück. */
 async function renderJsonToDataUrl(json: object, preset: CanvasPreset): Promise<string> {
@@ -28,6 +29,7 @@ export function useDesignCanvas(
 ) {
   const init = useCanvasInit(canvasPreset);
   const { fabricRef, canvasPresetRef } = init;
+  const history = useCanvasHistory(fabricRef, init.canvasReady);
 
   const [imageUploading, setImageUploading] = useState(false);
   const [uploadState,    setUploadState]    = useState<UploadState>({ status: "idle" });
@@ -257,8 +259,8 @@ export function useDesignCanvas(
 
   // ─── Save & upload ──────────────────────────────────────────────────────────
 
-  const saveDesign = useCallback(async (otherSideJson?: object | null) => {
-    if (!fabricRef.current || !selectedProduct) return;
+  const saveDesign = useCallback(async (otherSideJson?: object | null): Promise<DualDesignUploadResult | null> => {
+    if (!fabricRef.current || !selectedProduct) return null;
     setUploadState({ status: "uploading", step: "preview-a" });
     try {
       const canvasJson     = fabricRef.current.toJSON();
@@ -278,11 +280,13 @@ export function useDesignCanvas(
         (step) => setUploadState({ status: "uploading", step }),
       );
       setUploadState({ status: "success", result });
+      return result;
     } catch (err) {
       setUploadState({
         status: "error",
         message: err instanceof Error ? err.message : "Unbekannter Fehler",
       });
+      return null;
     }
   }, [selectedProduct]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -312,6 +316,7 @@ export function useDesignCanvas(
     canvasElRef:   init.canvasElRef,
     fileInputRef:  init.fileInputRef,
     wrapperRef:    init.wrapperRef,
+    fabricRef:     init.fabricRef,
     canvasReady:   init.canvasReady,
     objectCount:   init.objectCount,
     lastModified:  init.lastModified,
@@ -344,5 +349,10 @@ export function useDesignCanvas(
     saveDesign, resetUploadState,
     // side switching
     getCanvasJSON, loadCanvasJSON,
+    // history
+    undo: history.undo,
+    redo: history.redo,
+    canUndo: history.canUndo,
+    canRedo: history.canRedo,
   };
 }

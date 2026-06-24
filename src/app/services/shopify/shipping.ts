@@ -86,6 +86,33 @@ function isExpress(name: string): boolean {
   return /express|eilig|over.?night/i.test(name);
 }
 
+/** Parst "2–4 Werktage" / "1 Werktag" / "5 Werktage" zu {min, max}. */
+function parseDayRange(label: string): { min: number; max: number } | null {
+  const match = label.match(/(\d+)(?:\s*[–-]\s*(\d+))?/);
+  if (!match) return null;
+  const min = parseInt(match[1], 10);
+  const max = match[2] ? parseInt(match[2], 10) : min;
+  return { min, max };
+}
+
+function formatDayRange(min: number, max: number): string {
+  if (min === max) return `${min} Werktag${min === 1 ? "" : "e"}`;
+  return `${min}–${max} Werktage`;
+}
+
+/**
+ * Kombiniert Anfertigungszeit (vor Versandbeginn) mit der reinen Versanddauer
+ * zur Gesamt-Lieferzeit, z.B. "5–8 Werktage" + "2–4 Werktage" → "7–12 Werktage".
+ * Ohne Anfertigungszeit (Lagerware) entspricht das Ergebnis der Versanddauer.
+ */
+function combineProductionAndShipping(productionDays: string | null, shippingDaysLabel: string): string {
+  if (!productionDays) return shippingDaysLabel;
+  const production = parseDayRange(productionDays);
+  const shipping = parseDayRange(shippingDaysLabel);
+  if (!production || !shipping) return shippingDaysLabel;
+  return formatDayRange(production.min + shipping.min, production.max + shipping.max);
+}
+
 function isStandard(name: string, methods: ApiMethodDef[]): boolean {
   // Mark first active method as standard if none explicitly named "Standard"
   const active = methods.filter((m) => m.active);
@@ -100,10 +127,13 @@ function profileToOption(method: ApiMethodDef, zoneName: string, sortOrder: numb
   const price = method.rateProvider?.price;
   if (!price) return null;
 
+  const days = "2–4 Werktage"; // Admin API liefert keine Tage — statisch befüllt
   return {
     zone:       zoneName,
     method:     method.name,
-    days:       "2–4 Werktage",   // Admin API liefert keine Tage — statisch befüllt
+    days,                          // wird ggf. durch Matching mit static config ergänzt
+    productionDays: null,          // wird ggf. durch Matching mit static config ergänzt
+    totalDays:  days,
     price:      formatEur(price.amount),
     freeFrom:   null,              // wird ggf. durch Matching mit static config ergänzt
     isStandard: isStandard(method.name, [method]),
@@ -114,11 +144,17 @@ function profileToOption(method: ApiMethodDef, zoneName: string, sortOrder: numb
 
 // ─── Statischer Fallback ──────────────────────────────────────────────────────
 
-function staticToOption(rate: (typeof SHIPPING_PROFILES)[number]["rates"][number], sortOrder: number): CmsShippingOption {
+function staticToOption(
+  rate: (typeof SHIPPING_PROFILES)[number]["rates"][number],
+  sortOrder: number,
+  productionDays: string | null,
+): CmsShippingOption {
   return {
     zone:      "Deutschland",
     method:    rate.method,
     days:      rate.days,
+    productionDays,
+    totalDays: combineProductionAndShipping(productionDays, rate.days),
     price:     rate.price,
     freeFrom:  rate.freeFrom ?? null,
     isStandard: rate.isStandard,
@@ -133,7 +169,7 @@ function buildStaticProfiles(): CmsShippingProfile[] {
     name:         p.name,
     isDefault:    false,
     productCount: p.productCount,
-    options:      p.rates.map(staticToOption),
+    options:      p.rates.map((r, i) => staticToOption(r, i, p.productionDays)),
   }));
 }
 
@@ -175,6 +211,8 @@ export async function getShippingProfiles(): Promise<CmsShippingProfile[]> {
             if (staticRate) {
               opt.freeFrom = staticRate.freeFrom ?? null;
               opt.days     = staticRate.days;
+              opt.productionDays = staticMatch.productionDays;
+              opt.totalDays = combineProductionAndShipping(staticMatch.productionDays, staticRate.days);
             }
           });
         }
@@ -211,14 +249,14 @@ export function getShippingOptions(
         (mt) => typeLower === mt || typeLower.includes(mt) || mt.includes(typeLower),
       ),
     );
-    if (byType) return byType.rates.map((r, i) => staticToOption(r, i));
+    if (byType) return byType.rates.map((r, i) => staticToOption(r, i, byType.productionDays));
   }
 
   if (tagsLower.length > 0) {
     const byTag = SHIPPING_PROFILES.find((p) =>
       p.matchTags.some((mt) => tagsLower.some((t) => t.includes(mt) || mt.includes(t))),
     );
-    if (byTag) return byTag.rates.map((r, i) => staticToOption(r, i));
+    if (byTag) return byTag.rates.map((r, i) => staticToOption(r, i, byTag.productionDays));
   }
 
   return null;

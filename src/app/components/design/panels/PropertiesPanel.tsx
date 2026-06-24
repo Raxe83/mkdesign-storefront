@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import {
   AlignLeft, AlignCenter, AlignRight,
   Bold, Italic, Underline,
@@ -9,6 +10,52 @@ import {
 } from "lucide-react";
 import { cn } from "@/app/utils/utils";
 import { FONT_OPTIONS } from "../constants";
+
+/** Button that fires once on click and accelerates while held down. */
+function HoldBtn({
+  onClick, title, className, children,
+}: {
+  onClick: () => void;
+  title?: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  // Always store the latest callback so timers never use a stale closure
+  const latestCb  = useRef(onClick);
+  latestCb.current = onClick;
+
+  const timerRef  = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const repeatRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const speedRef  = useRef(130);
+
+  function stop() {
+    clearTimeout(timerRef.current);
+    clearTimeout(repeatRef.current);
+    speedRef.current = 130;
+  }
+
+  function start(e: React.MouseEvent) {
+    e.preventDefault();
+    latestCb.current();
+    timerRef.current = setTimeout(function repeat() {
+      latestCb.current();
+      speedRef.current = Math.max(28, speedRef.current * 0.8);
+      repeatRef.current = setTimeout(repeat, speedRef.current);
+    }, 380);
+  }
+
+  return (
+    <button
+      onMouseDown={start}
+      onMouseUp={stop}
+      onMouseLeave={stop}
+      title={title}
+      className={className}
+    >
+      {children}
+    </button>
+  );
+}
 
 type Props = {
   hasActiveObject:  boolean;
@@ -89,19 +136,19 @@ export function PropertiesPanel({
             </select>
 
             <div className="flex items-center gap-0.5">
-              <button
+              <HoldBtn
                 onClick={() => applyFontSize(Math.max(10, fontSize - 2))}
-                title="Kleiner"
+                title="Kleiner (gedrückt halten)"
                 className={cn(btn, off, "text-base font-bold")}
-              >−</button>
+              >−</HoldBtn>
               <span className="w-9 text-center text-[12px] font-medium text-primary dark:text-cream tabular-nums select-none">
                 {fontSize}
               </span>
-              <button
+              <HoldBtn
                 onClick={() => applyFontSize(Math.min(120, fontSize + 2))}
-                title="Größer"
+                title="Größer (gedrückt halten)"
                 className={cn(btn, off, "text-base font-bold")}
-              >+</button>
+              >+</HoldBtn>
             </div>
 
             {SEP}
@@ -127,29 +174,33 @@ export function PropertiesPanel({
         {/* ── Objekt-Eigenschaften (bei jeder Auswahl) ───────────── */}
         {hasActiveObject && (
           <>
-            <button
-              onClick={() => applyFillColor(noFill ? "#ffffff" : "transparent")}
-              title={noFill ? "Füllung aktivieren" : "Keine Füllung"}
-              className={cn(btn, noFill ? on : off)}
-            >
-              <Minus size={13} />
-            </button>
+            {!isTextSelected && (
+              <>
+                <button
+                  onClick={() => applyFillColor(noFill ? "#ffffff" : "transparent")}
+                  title={noFill ? "Füllung aktivieren" : "Keine Füllung"}
+                  className={cn(btn, noFill ? on : off)}
+                >
+                  <Minus size={13} />
+                </button>
 
-            {SEP}
+                {SEP}
 
-            <div className="flex items-center gap-1.5 shrink-0 px-1">
-              <span className="text-[10px] text-muted whitespace-nowrap hidden sm:inline">
-                Kontur <span className="text-primary dark:text-cream font-medium">{strokeWidth}px</span>
-              </span>
-              <input
-                type="range" min={0} max={20} step={1}
-                value={strokeWidth}
-                onChange={(e) => applyStrokeWidth(Number(e.target.value))}
-                className="w-16 accent-rust cursor-pointer"
-              />
-            </div>
+                <div className="flex items-center gap-1.5 shrink-0 px-1">
+                  <span className="text-[10px] text-muted whitespace-nowrap hidden sm:inline">
+                    Kontur <span className="text-primary dark:text-cream font-medium">{strokeWidth}px</span>
+                  </span>
+                  <input
+                    type="range" min={0} max={20} step={1}
+                    value={strokeWidth}
+                    onChange={(e) => applyStrokeWidth(Number(e.target.value))}
+                    className="w-16 accent-rust cursor-pointer"
+                  />
+                </div>
 
-            {SEP}
+                {SEP}
+              </>
+            )}
 
             <div className="flex items-center gap-0.5">
               <button onClick={bringForward}  title="Nach vorne"  className={cn(btn, off)}><ChevronUp   size={14} /></button>

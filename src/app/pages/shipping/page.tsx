@@ -44,7 +44,7 @@ export default async function ShippingPage() {
       <div className="flex flex-col gap-10 max-w-3xl">
         {profiles.map((profile) => (
           <div key={profile.id}>
-            <div className="flex items-baseline gap-3 mb-3">
+            <div className="flex items-baseline gap-3 mb-1.5">
               <h2 className="text-xs font-medium uppercase tracking-widest text-muted">
                 {profile.name}
               </h2>
@@ -53,9 +53,15 @@ export default async function ShippingPage() {
               </span>
             </div>
 
+            {profile.options[0]?.productionDays && (
+              <p className="text-xs text-muted mb-3">
+                Handgefertigt — Anfertigungszeit {profile.options[0].productionDays} vor Versandbeginn
+              </p>
+            )}
+
             <div className="rounded border border-zinc-200 dark:border-zinc-800 overflow-hidden">
               <div className="grid grid-cols-3 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
-                {["Versandart", "Lieferzeit", "Kosten"].map((h) => (
+                {["Versandart", "Lieferzeit gesamt", "Kosten"].map((h) => (
                   <div
                     key={h}
                     className="px-4 py-3 text-[11px] font-medium text-muted uppercase tracking-widest"
@@ -74,7 +80,12 @@ export default async function ShippingPage() {
                     {opt.method}
                   </div>
                   <div className="px-4 py-3.5 text-sm text-muted">
-                    {opt.days}
+                    {opt.totalDays}
+                    {opt.productionDays && (
+                      <p className="text-xs font-normal text-muted/60 mt-0.5">
+                        {opt.productionDays} Anfertigung + {opt.days} Versand
+                      </p>
+                    )}
                   </div>
                   <div className="px-4 py-3.5 text-sm font-medium text-primary">
                     {opt.price}

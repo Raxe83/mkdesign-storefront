@@ -1,5 +1,3 @@
-"use client";
-
 import { Clock, AlertCircle, CheckCircle2 } from "lucide-react";
 import PageHeader from "../../components/PageHeader";
 
@@ -7,7 +5,7 @@ const entries = [
   {
     label: "Standardversand",
     time: "1–3 Werktage",
-    note: "Nach Zahlungseingang",
+    note: "Nach Versandbeginn (Transportdauer)",
   },
   {
     label: "Expressversand",
@@ -39,10 +37,12 @@ export default function DeliveryTimePage() {
       />
 
       <p className="text-sm text-muted mb-8 max-w-xl">
-        Alle Angaben in Werktagen (Mo–Fr, ohne Feiertage) — gültig ab Versanddatum.
+        Alle Angaben in Werktagen (Mo–Fr, ohne Feiertage). Die Zeiten unten beziehen sich auf die
+        reine Transportdauer ab Versandbeginn — bei handgefertigten und personalisierten Produkten
+        kommt vorher eine Anfertigungszeit hinzu.
       </p>
 
-      <div className="space-y-3 max-w-2xl mb-8">
+      <div className="space-y-3 max-w-2xl mb-12">
         {entries.map((e) => (
           <div
             key={e.label}
@@ -64,6 +64,12 @@ export default function DeliveryTimePage() {
           </div>
         ))}
       </div>
+
+      {/* Anfertigungszeit je Produktkategorie */}
+      <p className="text-sm text-muted mb-5 max-w-xl">
+        Handgefertigte und personalisierte Produkte werden erst nach Bestelleingang gefertigt.
+        Die Gesamt-Lieferzeit setzt sich aus Anfertigungszeit und Versanddauer zusammen.
+      </p>
 
       {/* Notice */}
       <div className="flex items-start gap-3 p-4 rounded border border-amber-200 dark:border-amber-900/40 bg-amber-50 dark:bg-amber-950/20 max-w-2xl">
