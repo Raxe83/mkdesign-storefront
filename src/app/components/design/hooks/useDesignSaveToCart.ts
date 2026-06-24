@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { useCart } from "@/app/context/CartContext";
 import type { useDesignCanvas } from "./useDesignCanvas";
 import type { ProductOption } from "../types";
+import type { ZusatzproduktOption } from "@/app/types/shopify";
 
 type Canvas = ReturnType<typeof useDesignCanvas>;
 
@@ -16,6 +17,8 @@ export type SaveToCartStatus =
 interface Options {
   /** Lesbares Lackierungs-/Finish-Label, z. B. "Gold" — landet als Detail im Warenkorb. */
   finishLabel?: string;
+  /** Ausgewählte Zusatzprodukte — werden als eigene, verlinkte Cart-Lines hinzugefügt. */
+  selectedAddons?: ZusatzproduktOption[];
 }
 
 /**
@@ -31,7 +34,7 @@ interface Options {
 export function useDesignSaveToCart(
   canvas: Canvas,
   product: ProductOption | null,
-  { finishLabel }: Options = {},
+  { finishLabel, selectedAddons = [] }: Options = {},
 ) {
   const { addItem } = useCart();
   const [state, setState] = useState<SaveToCartStatus>({ status: "idle" });
@@ -62,16 +65,29 @@ export function useDesignSaveToCart(
       { key: "_design_id", value: result.designId },
       { key: "_design_json", value: result.sideA.jsonUrl },
       ...(finishLabel ? [{ key: "Lackierung", value: finishLabel }] : []),
+      ...(selectedAddons.length > 0
+        ? [{ key: "_zusatzprodukte", value: selectedAddons.map((a) => a.title).join(", ") }]
+        : []),
     ];
+
+    // Zusatzprodukte als eigene, mit dem Hauptprodukt verlinkte Cart-Lines
+    // (gleiches Muster wie AddToCartButton — _linkedTo gruppiert sie im Warenkorb)
+    const additionalLines = selectedAddons.length > 0
+      ? selectedAddons.map((a) => ({
+          variantId: a.defaultVariantId,
+          quantity: 1,
+          customAttributes: [{ key: "_linkedTo", value: product.variantId! }],
+        }))
+      : undefined;
 
     // 3. In den Warenkorb (löst automatisch das Cart-Popup aus)
     try {
-      await addItem(product.variantId, 1, attrs);
+      await addItem(product.variantId, 1, attrs, additionalLines);
       setState({ status: "success", previewUrl: result.sideA.previewUrl });
     } catch {
       setState({ status: "error", message: "Konnte nicht zum Warenkorb hinzugefügt werden." });
     }
-  }, [addItem, canvas, product, finishLabel]);
+  }, [addItem, canvas, product, finishLabel, selectedAddons]);
 
   return { state, saveAndAddToCart, reset };
 }

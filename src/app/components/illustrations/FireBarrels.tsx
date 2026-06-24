@@ -170,14 +170,28 @@ function BottomCap({ color = "grau" }: { color?: BarrelColor }) {
   return <ellipse cx="150" cy="335" rx="82" ry="6" fill={cap} stroke="#3c3836" strokeWidth="1.5" />;
 }
 
-function Legs({ color = "grau" }: { color?: BarrelColor }) {
+/** Eine einzelne, am Boden flach auslaufende Tonnen-/Schalen-Stütze, zentriert auf `cx`. */
+function legPath(cx: number): string {
+  return `M ${cx - 2.5},335 L ${cx - 6.5},362 Q ${cx - 7.5},366 ${cx - 2.5},366 L ${cx + 3.5},366 Q ${cx + 8.5},365 ${cx + 7.5},361 L ${cx + 2.5},335 Z`;
+}
+
+/**
+ * Rendert `count` Beine gleichmäßig verteilt unter dem Rumpf.
+ * Die beiden äußeren Beine stehen vorne (helle Farbe), alle übrigen
+ * gelten als weiter hinten liegend (dunklere Farbe) — wie schon beim
+ * ursprünglichen 3-Bein-Layout (2 vorne hell, 1 Mitte dunkel).
+ */
+function Legs({ color = "grau", count = 3 }: { color?: BarrelColor; count?: number }) {
   const legs = COLOR_PALETTE[color].legs;
   const legsDark = color === "schwarz" ? "#302d2a" : legs;
+  const half = 42;
+  const step = count > 1 ? (half * 2) / (count - 1) : 0;
+  const positions = Array.from({ length: count }, (_, i) => 150 - half + step * i);
   return (
     <>
-      <path d="M 108,335 L 104,362 Q 103,366 108,366 L 114,366 Q 119,365 118,361 L 113,335 Z" fill={legs} />
-      <path d="M 192,335 L 188,361 Q 187,365 193,366 L 199,366 Q 204,365 203,361 L 200,335 Z" fill={legs} />
-      <path d="M 147,335 L 145,361 Q 144,365 149,366 L 155,366 Q 160,365 158,361 L 156,335 Z" fill={legsDark} />
+      {positions.map((cx, i) => (
+        <path key={i} d={legPath(cx)} fill={i === 0 || i === count - 1 ? legs : legsDark} />
+      ))}
     </>
   );
 }
@@ -326,7 +340,7 @@ export function BarrelSchaleXL({ showBackground = true, showFloorShadow = true, 
       </defs>
       {showBackground   && <rect x="0" y="138" width="300" height="262" fill={`url(#${id}Bg)`} />}
       {showFloorShadow  && <FloorShadow cy={372} />}
-      <Legs color={color} />
+      <Legs color={color} count={4} />
       <BottomCap color={color} />
       <BarrelBody id={id} clipId={`${id}Clip`} />
       <Ring2 id={id} />
@@ -348,7 +362,7 @@ export function BarrelSchale({ showBackground = true, showFloorShadow = true, co
       </defs>
       {showBackground   && <rect x="0" y="230" width="300" height="170" fill={`url(#${id}Bg)`} />}
       {showFloorShadow  && <FloorShadow cy={372} />}
-      <Legs color={color} />
+      <Legs color={color} count={4} />
       <BottomCap color={color} />
       <BarrelBody id={id} clipId={`${id}Clip`} />
       <SideHandles rimCy={247} />
@@ -364,7 +378,7 @@ export function BarrelStehtisch({ showBackground = true, showFloorShadow = true,
       <Defs id={id} color={color} />
       {showBackground   && <rect x="0" y="-10" width="300" height="410" fill={`url(#${id}Bg)`} />}
       {showFloorShadow  && <FloorShadow />}
-      <Legs color={color} />
+      <Legs color={color} count={5} />
       <BottomCap color={color} />
       <BarrelBody id={id} />
       <Ring1 id={id} />

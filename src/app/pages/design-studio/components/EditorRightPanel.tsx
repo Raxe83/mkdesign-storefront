@@ -1,5 +1,8 @@
-import { ShoppingCart, CheckCircle2, Loader2 } from "lucide-react";
+import { ShoppingCart, CheckCircle2, Loader2, Check } from "lucide-react";
 import type { BarrelColor } from "@/app/components/design/barrel";
+import type { ZusatzproduktOption } from "@/app/types/shopify";
+import type { PriceAmount } from "@/app/utils/calculateDisplayPrice";
+import { formatPrice } from "@/app/utils/formatPrice";
 import { DevPanel } from "@/app/components/design/panels/DevPanel";
 import type { FitState } from "@/app/components/design/panels/DevPanel";
 
@@ -15,6 +18,10 @@ interface Props {
   onColorChange: (c: BarrelColor) => void;
   onSave: () => void;
   saving: boolean;
+  displayPrice: PriceAmount;
+  zusatzprodukte: ZusatzproduktOption[];
+  selectedAddons: ZusatzproduktOption[];
+  onToggleAddon: (opt: ZusatzproduktOption) => void;
   devProps?: DevProps;
 }
 
@@ -25,7 +32,7 @@ const COLORS: { id: BarrelColor; label: string; swatch: string }[] = [
   { id: "gold",    label: "Gold",       swatch: "#c8a020" },
 ];
 
-export function EditorRightPanel({ selectedColor, onColorChange, onSave, saving, devProps }: Props) {
+export function EditorRightPanel({ selectedColor, onColorChange, onSave, saving, displayPrice, zusatzprodukte, selectedAddons, onToggleAddon, devProps }: Props) {
   return (
     <aside
       className="flex flex-col w-[240px] xl:w-[260px] shrink-0"
@@ -43,7 +50,16 @@ export function EditorRightPanel({ selectedColor, onColorChange, onSave, saving,
 
       {/* Panel body */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-5">
-        <DesignTab selectedColor={selectedColor} onColorChange={onColorChange} onSave={onSave} saving={saving} />
+        <DesignTab
+          selectedColor={selectedColor}
+          onColorChange={onColorChange}
+          onSave={onSave}
+          saving={saving}
+          displayPrice={displayPrice}
+          zusatzprodukte={zusatzprodukte}
+          selectedAddons={selectedAddons}
+          onToggleAddon={onToggleAddon}
+        />
       </div>
 
       {/* Dev panel — only rendered when devProps is passed (IS_DEV) */}
@@ -64,9 +80,28 @@ export function EditorRightPanel({ selectedColor, onColorChange, onSave, saving,
   );
 }
 
-function DesignTab({ selectedColor, onColorChange, onSave, saving }: Pick<Props, "selectedColor" | "onColorChange" | "onSave" | "saving">) {
+type DesignTabProps = Pick<
+  Props,
+  "selectedColor" | "onColorChange" | "onSave" | "saving" | "displayPrice" | "zusatzprodukte" | "selectedAddons" | "onToggleAddon"
+>;
+
+function DesignTab({
+  selectedColor, onColorChange, onSave, saving,
+  displayPrice, zusatzprodukte, selectedAddons, onToggleAddon,
+}: DesignTabProps) {
   return (
     <>
+      {/* Preis */}
+      <section className="flex flex-col gap-0.5">
+        <span className="text-[9px] font-semibold tracking-[0.14em] uppercase"
+          style={{ color: "rgba(255,255,255,0.3)" }}>
+          Preis
+        </span>
+        <span className="text-[22px] font-semibold leading-tight" style={{ color: "var(--color-cream)" }}>
+          {formatPrice(displayPrice.amount, displayPrice.currencyCode)}
+        </span>
+      </section>
+
       {/* Configuration */}
       <section>
         <h3 className="text-[13px] font-semibold text-white/80 mb-3">Configuration</h3>
@@ -105,6 +140,51 @@ function DesignTab({ selectedColor, onColorChange, onSave, saving }: Pick<Props,
           </div>
         </div>
       </section>
+
+      {/* Zusatzprodukte */}
+      {zusatzprodukte.length > 0 && (
+        <section className="flex flex-col gap-2">
+          <span className="text-[9px] font-semibold tracking-[0.14em] uppercase"
+            style={{ color: "rgba(255,255,255,0.3)" }}>
+            Zusatzprodukte
+          </span>
+          <div className="flex flex-col gap-1.5 max-h-52 overflow-y-auto pr-0.5">
+            {zusatzprodukte.map((opt) => {
+              const active = selectedAddons.some((a) => a.id === opt.id);
+              return (
+                <button
+                  key={opt.id}
+                  onClick={() => onToggleAddon(opt)}
+                  className="flex items-center gap-2 px-2.5 py-2 rounded text-left cursor-pointer transition-all shrink-0"
+                  style={{
+                    background: active ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.03)",
+                    border: active ? "1px solid var(--color-rust)" : "1px solid rgba(255,255,255,0.08)",
+                  }}
+                >
+                  <span
+                    className="shrink-0 w-4 h-4 rounded-sm border flex items-center justify-center"
+                    style={{
+                      background: active ? "var(--color-rust)" : "transparent",
+                      borderColor: active ? "var(--color-rust)" : "rgba(255,255,255,0.25)",
+                    }}
+                  >
+                    {active && <Check size={11} color="white" />}
+                  </span>
+                  <span
+                    className="flex-1 min-w-0 text-[12px] font-medium truncate"
+                    style={{ color: active ? "var(--color-cream)" : "rgba(255,255,255,0.65)" }}
+                  >
+                    {opt.title}
+                  </span>
+                  <span className="shrink-0 text-[11px] tabular-nums" style={{ color: "rgba(255,255,255,0.45)" }}>
+                    +{formatPrice(opt.price.amount, opt.price.currencyCode)}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* Design Review */}
       <section

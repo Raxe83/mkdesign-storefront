@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useDesignCanvas } from "@/app/components/design/hooks/useDesignCanvas";
 import { useDesignSaveToCart } from "@/app/components/design/hooks/useDesignSaveToCart";
 import { useEditorZoomPan } from "@/app/components/design/hooks/useEditorZoomPan";
@@ -8,6 +8,8 @@ import { getBarrelEntry, type BarrelColor } from "@/app/components/design/barrel
 import { getPresetForTitle } from "@/app/components/design/constants";
 import type { ProductOption } from "@/app/components/design/types";
 import type { FitState } from "@/app/components/design/panels/DevPanel";
+import type { ZusatzproduktOption } from "@/app/types/shopify";
+import { calculateDisplayPrice } from "@/app/utils/calculateDisplayPrice";
 import { EditorTopBar } from "./components/EditorTopBar";
 import { EditorIconRail } from "./components/EditorIconRail";
 import { EditorLeftPanel } from "./components/EditorLeftPanel";
@@ -30,6 +32,15 @@ const FINISH_LABELS: Record<BarrelColor, string> = {
   gold:    "Gold",
 };
 
+/** Zusatzprodukte mit diesen Schlagworten gehören zur "Seite B"-Logik des alten
+ *  Editors (zweite Design-Seite) — das Studio unterstützt aktuell nur eine Seite,
+ *  daher werden sie aus der normalen Zusatzprodukte-Auswahl ausgeblendet. */
+const SEITE_B_KEYWORDS = ["zweite seite", "seite b", "seite-b", "2. seite", "rückseite", "rueckseite", "beidseitig"];
+function isSeiteBProduct(title: string): boolean {
+  const lower = title.toLowerCase();
+  return SEITE_B_KEYWORDS.some((kw) => lower.includes(kw));
+}
+
 interface Props {
   product: ProductOption;
   onBack: () => void;
@@ -39,6 +50,7 @@ export default function StudioEditor({ product, onBack }: Props) {
   const [activeTool, setActiveTool]       = useState<ActiveTool>("select");
   const [selectedColor, setSelectedColor] = useState<BarrelColor>("grau");
   const [leftPanelOpen, setLeftPanelOpen] = useState(true);
+  const [selectedAddons, setSelectedAddons] = useState<ZusatzproduktOption[]>([]);
 
   const canvasPreset = useMemo(() => getPresetForTitle(product.label), [product.label]);
   const { Component: BarrelIllustration, fit: defaultFit } = useMemo(
@@ -58,11 +70,30 @@ export default function StudioEditor({ product, onBack }: Props) {
 
   const canvas = useDesignCanvas(product, overridePreset);
 
+  // Zusatzprodukte des Produkts — "Seite B"-Produkte ausgeblendet (Studio ist einseitig)
+  const zusatzprodukte = useMemo(
+    () => (product.zusatzoptionen?.zusatzprodukte ?? []).filter((p) => !isSeiteBProduct(p.title)),
+    [product.zusatzoptionen],
+  );
+
+  const toggleAddon = useCallback((opt: ZusatzproduktOption) => {
+    setSelectedAddons((prev) =>
+      prev.some((a) => a.id === opt.id) ? prev.filter((a) => a.id !== opt.id) : [...prev, opt],
+    );
+  }, []);
+
+  // Preis: Grundpreis + Summe der ausgewählten Zusatzprodukte
+  const [baseAmount, baseCurrency] = product.price.split(" ");
+  const displayPrice = useMemo(
+    () => calculateDisplayPrice(baseAmount || "0", baseCurrency || "EUR", selectedAddons),
+    [baseAmount, baseCurrency, selectedAddons],
+  );
+
   // Save → Warenkorb (Ein-Klick)
   const { state: saveState, saveAndAddToCart, reset: resetSave } = useDesignSaveToCart(
     canvas,
     product,
-    { finishLabel: FINISH_LABELS[selectedColor] },
+    { finishLabel: FINISH_LABELS[selectedColor], selectedAddons },
   );
   const saving = saveState.status === "saving";
 
@@ -142,6 +173,10 @@ export default function StudioEditor({ product, onBack }: Props) {
           onColorChange={setSelectedColor}
           onSave={saveAndAddToCart}
           saving={saving}
+          displayPrice={displayPrice}
+          zusatzprodukte={zusatzprodukte}
+          selectedAddons={selectedAddons}
+          onToggleAddon={toggleAddon}
           devProps={IS_DEV ? {
             canvasWidth: customWidth,
             fit: fitOverride,
