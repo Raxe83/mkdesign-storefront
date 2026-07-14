@@ -71,14 +71,16 @@ const Footer = async () => {
               Service
             </p>
             <ul className="space-y-2.5">
-              <li>
+              {/* TODO: Versandkosten Page muss überabeitet werden */}
+              {/* Page ist zu unübersichtlich und es ist nicht sichergestellt ob richtige Daten geladen wurden */}
+              {/* <li>
                 <Link
                   href="/pages/shipping"
                   className="text-sm hover:text-white transition-colors duration-150"
                 >
                   Versandkosten
                 </Link>
-              </li>
+              </li> */}
               <li>
                 <Link
                   href="/pages/delivery-time"
@@ -166,7 +168,7 @@ const Footer = async () => {
               Datenschutz
             </Link>
             <Link
-              href="/pages/tos"
+              href="/pages/terms-of-service"
               className="hover:text-zinc-400 transition-colors duration-150"
             >
               Nutzungsbedingungen

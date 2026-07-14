@@ -136,7 +136,7 @@ export function RegisterForm() {
 
       <p className="text-center text-[10px] text-muted leading-relaxed">
         Mit der Registrierung stimmst du unseren{" "}
-        <Link href="/pages/tos" className="underline hover:text-rust">AGB</Link>{" "}
+        <Link href="/pages/terms-of-service" className="underline hover:text-rust">AGB</Link>{" "}
         und der{" "}
         <Link href="/pages/privacy" className="underline hover:text-rust">Datenschutzerklärung</Link>{" "}
         zu.

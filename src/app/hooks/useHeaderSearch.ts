@@ -95,7 +95,7 @@ const STATIC_ENTRIES: SearchResult[] = [
     type: "page",
     title: "AGB",
     subtitle: "Allgemeine Geschäftsbedingungen",
-    href: "/pages/tos",
+    href: "/pages/terms-of-service",
   },
 ];
 

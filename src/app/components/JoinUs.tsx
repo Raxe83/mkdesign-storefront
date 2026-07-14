@@ -90,7 +90,7 @@ const JoinUs = () => {
 
           <p className="text-xs text-muted">
             Mit der Anmeldung stimmst du unseren{" "}
-            <Link href="/pages/tos" className="hover:text-primary underline underline-offset-2 transition-colors duration-150">Nutzungsbedingungen</Link>
+            <Link href="/pages/terms-of-service" className="hover:text-primary underline underline-offset-2 transition-colors duration-150">Nutzungsbedingungen</Link>
             {" "}und der{" "}
             <Link href="/pages/privacy" className="hover:text-primary underline underline-offset-2 transition-colors duration-150">Datenschutzerklärung</Link> zu.
           </p>

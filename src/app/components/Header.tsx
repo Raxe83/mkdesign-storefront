@@ -388,7 +388,7 @@ const Header = ({ customer = null }: { customer?: HeaderCustomer | null }) => {
                 { url: "/pages/shipping", title: "Versand & Lieferung" },
                 { url: "/pages/imprint", title: "Impressum" },
                 { url: "/pages/privacy", title: "Datenschutz" },
-                { url: "/pages/tos", title: "AGB" },
+                { url: "/pages/terms-of-service", title: "AGB" },
               ].map((item) => (
                 <li key={item.url}>
                   <Link
