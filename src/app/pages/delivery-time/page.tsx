@@ -1,26 +1,56 @@
-import { Clock, AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle, Hammer, Truck } from "lucide-react";
 import PageHeader from "../../components/PageHeader";
 
-const entries = [
+interface DeliveryEntry {
+  category: string;
+  production: string;
+  shippingTime: string;
+  carrier: string;
+}
+
+// Quelle: manuelle Angabe des Betriebs — nur bestätigte Werte, keine Schätzungen.
+const ENTRIES: DeliveryEntry[] = [
   {
-    label: "Standardversand",
-    time: "1–3 Werktage",
-    note: "Nach Versandbeginn (Transportdauer)",
+    category: "Feuertonnen mit fertigen Motiven",
+    production: "2–3 Werktage",
+    shippingTime: "2 Tage",
+    carrier: "DHL",
   },
   {
-    label: "Expressversand",
-    time: "1 Werktag",
-    note: "Bestellung bis 12:00 Uhr",
+    category: "Feuertonnen und Feuerschalen mit Wunschmotiv",
+    production: "ca. 14–20 Werktage",
+    shippingTime: "2 Tage",
+    carrier: "DHL",
   },
   {
-    label: "EU-Ausland",
-    time: "3–8 Werktage",
-    note: "Je nach Zielland",
+    category: "Feuerschalen mit fertigen Motiven",
+    production: "10 Werktage",
+    shippingTime: "2 Tage",
+    carrier: "DHL",
   },
   {
-    label: "International",
-    time: "7–14 Werktage",
-    note: "Außerhalb der EU",
+    category: "Stehtische beheizt",
+    production: "ca. 14–16 Werktage",
+    shippingTime: "3–5 Tage",
+    carrier: "Cargo International",
+  },
+  {
+    category: "Stehtische mit Wunschmotiv beheizt",
+    production: "ca. 14–20 Werktage",
+    shippingTime: "3–5 Tage",
+    carrier: "Cargo International",
+  },
+  {
+    category: "Faßmöbel",
+    production: "16–20 Werktage",
+    shippingTime: "3–5 Tage",
+    carrier: "Cargo International",
+  },
+  {
+    category: "Alle anderen Artikel",
+    production: "2–3 Werktage",
+    shippingTime: "2 Tage",
+    carrier: "DHL",
   },
 ];
 
@@ -28,7 +58,7 @@ export default function DeliveryTimePage() {
   return (
     <div className="pb-16">
       <PageHeader
-        title="Lieferzeiten"
+        title="Herstellungs- & Lieferzeiten"
         eyebrow="Service"
         breadcrumbs={[
           { label: "Start", href: "/" },
@@ -36,47 +66,55 @@ export default function DeliveryTimePage() {
         ]}
       />
 
+      <p className="text-sm text-muted mb-2 max-w-xl">
+        Alle Artikel werden auf Bestellung gefertigt. Dadurch entstehen immer Herstellungs- und
+        Lieferzeiten. Diese sind immer abhängig von der aktuellen Auftragslage.
+      </p>
       <p className="text-sm text-muted mb-8 max-w-xl">
-        Alle Angaben in Werktagen (Mo–Fr, ohne Feiertage). Die Zeiten unten beziehen sich auf die
-        reine Transportdauer ab Versandbeginn — bei handgefertigten und personalisierten Produkten
-        kommt vorher eine Anfertigungszeit hinzu.
+        Hier sind immer die aktuellen Zeiten im Überblick.
       </p>
 
-      <div className="space-y-3 max-w-2xl mb-12">
-        {entries.map((e) => (
-          <div
-            key={e.label}
-            className="flex items-center justify-between gap-4 p-5 rounded border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors duration-150"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-sm bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0">
-                <Clock size={16} className="text-muted" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-primary">{e.label}</p>
-                <p className="text-xs text-muted mt-0.5">{e.note}</p>
-              </div>
+      <div className="rounded border border-zinc-200 dark:border-zinc-800 overflow-hidden max-w-3xl mb-8">
+        <div className="grid grid-cols-[1fr_auto_auto] sm:grid-cols-[1fr_1fr_1fr] border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
+          {["Kategorie", "Herstellung", "Versand"].map((h) => (
+            <div
+              key={h}
+              className="px-4 py-3 text-[11px] font-medium text-muted uppercase tracking-widest"
+            >
+              {h}
             </div>
-            <div className="flex items-center gap-2.5 shrink-0">
-              <span className="text-sm font-medium text-primary tabular-nums">{e.time}</span>
-              <CheckCircle2 size={15} className="text-green-500" />
+          ))}
+        </div>
+
+        {ENTRIES.map((e) => (
+          <div
+            key={e.category}
+            className="grid grid-cols-[1fr_auto_auto] sm:grid-cols-[1fr_1fr_1fr] border-b border-zinc-100 dark:border-zinc-800/60 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors duration-150"
+          >
+            <div className="px-4 py-3.5 text-sm font-medium text-primary">
+              {e.category}
+            </div>
+            <div className="px-4 py-3.5 flex items-start gap-2">
+              <Hammer size={14} className="text-muted shrink-0 mt-0.5" />
+              <span className="text-sm text-primary tabular-nums">{e.production}</span>
+            </div>
+            <div className="px-4 py-3.5 flex items-start gap-2">
+              <Truck size={14} className="text-muted shrink-0 mt-0.5" />
+              <div>
+                <span className="text-sm text-primary tabular-nums">{e.shippingTime}</span>
+                <p className="text-xs text-muted mt-0.5">{e.carrier}</p>
+              </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Anfertigungszeit je Produktkategorie */}
-      <p className="text-sm text-muted mb-5 max-w-xl">
-        Handgefertigte und personalisierte Produkte werden erst nach Bestelleingang gefertigt.
-        Die Gesamt-Lieferzeit setzt sich aus Anfertigungszeit und Versanddauer zusammen.
-      </p>
-
       {/* Notice */}
       <div className="flex items-start gap-3 p-4 rounded border border-amber-200 dark:border-amber-900/40 bg-amber-50 dark:bg-amber-950/20 max-w-2xl">
         <AlertCircle size={16} className="text-amber-500 shrink-0 mt-0.5" />
         <p className="text-sm text-amber-700 dark:text-amber-400 leading-relaxed">
-          Zu Stoßzeiten (z. B. Weihnachten, Black Friday) können die Lieferzeiten abweichen.
-          Wir informieren bei Verzögerungen per E-Mail.
+          Herstellungszeit + Versandzeit ergeben zusammen die Gesamt-Lieferzeit. Beide Angaben
+          hängen von der aktuellen Auftragslage ab und können abweichen.
         </p>
       </div>
     </div>
