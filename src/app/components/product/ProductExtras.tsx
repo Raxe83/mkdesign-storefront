@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { ProductZusatzoptionen, ZusatzproduktOption } from "@/app/types/shopify";
-import { ZusatzprodukteGrid } from "./ZusatzprodukteGrid";
+import { ZusatzprodukteGrid } from "./ZusatzprodukteList";
 
 /** Mapping: Shopify-Farbname (lowercase) → CSS-Farbe.
  *  Nutzt die barrel-CSS-Variablen wo passend, sonst Standard-CSS-Farben. */

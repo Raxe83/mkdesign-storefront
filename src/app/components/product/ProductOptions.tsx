@@ -12,7 +12,7 @@
 
 import { useEffect, useState } from "react";
 import type { AdditionalOption, ZusatzproduktOption } from "@/app/types/shopify";
-import { ZusatzprodukteList } from "./ZusatzprodukteGrid";
+import { ZusatzprodukteList } from "./ZusatzprodukteList";
 
 export interface ProductOptionsState {
   /** technicalKey -> eingegebener Text bzw. gewählter Farbwert (#rrggbb) */
