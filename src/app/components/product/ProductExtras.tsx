@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { ProductZusatzoptionen, ZusatzproduktOption } from "@/app/types/shopify";
-import { ZusatzprodukteGrid } from "./ZusatzprodukteList";
+import { ZusatzprodukteList } from "./ZusatzprodukteList";
 
 /** Mapping: Shopify-Farbname (lowercase) → CSS-Farbe.
  *  Nutzt die barrel-CSS-Variablen wo passend, sonst Standard-CSS-Farben. */
@@ -122,7 +122,7 @@ export function ProductExtras({ config, onChange }: Props) {
       {config.zusatzprodukte.length > 0 && (
         <div>
           <p className={LABEL_CLS}>Zusatzprodukte</p>
-          <ZusatzprodukteGrid
+          <ZusatzprodukteList
             options={config.zusatzprodukte}
             selected={zusatzprodukte}
             onToggle={toggleZusatzprodukt}
