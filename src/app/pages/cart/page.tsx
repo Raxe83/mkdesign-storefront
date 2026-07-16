@@ -122,12 +122,15 @@ const CartPage = () => {
                     .map(({ node }) => node.id)
                 );
 
-                // Map: mainVariantId → zugehörige Zusatzprodukt-Nodes
-                const linkedByVariantId = new Map<string, typeof allEdges[number]["node"][]>();
+                // Map: lineGroup → zugehörige Zusatzprodukt-Nodes. BEWUSST
+                // kein Fallback auf die Varianten-ID mehr — das verklebte
+                // sonst neue, unverlinkte Zeilen derselben Variante mit
+                // älteren Zusatzprodukt-Zeilen.
+                const linkedByGroup = new Map<string, typeof allEdges[number]["node"][]>();
                 allEdges.forEach(({ node }) => {
                   const linkedTo = node.attributes?.find(a => a.key === "_linkedTo")?.value;
                   if (linkedTo) {
-                    linkedByVariantId.set(linkedTo, [...(linkedByVariantId.get(linkedTo) ?? []), node]);
+                    linkedByGroup.set(linkedTo, [...(linkedByGroup.get(linkedTo) ?? []), node]);
                   }
                 });
 
@@ -138,14 +141,17 @@ const CartPage = () => {
                   <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
                     {isLoading
                       ? Array.from({ length: 2 }).map((_, i) => <CartItemSkeleton key={i} />)
-                      : mainEdges.map(({ node }, index) => (
-                          <CartPageItem
-                            key={node.id}
-                            node={node}
-                            linkedItems={linkedByVariantId.get(node.merchandise.id) ?? []}
-                            index={index}
-                          />
-                        ))}
+                      : mainEdges.map(({ node }, index) => {
+                          const groupKey = node.attributes?.find(a => a.key === "_lineGroup")?.value;
+                          return (
+                            <CartPageItem
+                              key={node.id}
+                              node={node}
+                              linkedItems={groupKey ? linkedByGroup.get(groupKey) ?? [] : []}
+                              index={index}
+                            />
+                          );
+                        })}
                   </div>
                 );
               })()}

@@ -209,14 +209,23 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     const targetEdge = cart.lines.edges.find((e) => e.node.id === lineId);
     if (!targetEdge) return;
 
-    // Find linked Zusatzprodukte that point to this item's variant
-    const targetVariantId = targetEdge.node.merchandise.id;
-    const linkedLineIds = cart.lines.edges
-      .filter(({ node }) =>
-        node.id !== lineId &&
-        node.attributes?.some((a) => a.key === "_linkedTo" && a.value === targetVariantId),
-      )
-      .map(({ node }) => node.id);
+    // Find linked Zusatzprodukte that point to this item's line group.
+    // STRIKT nur über `_lineGroup` (pro Kauf eindeutig) — bewusst KEIN
+    // Fallback auf die Varianten-ID mehr: das führte dazu, dass eine neue,
+    // nicht-verlinkte Zeile derselben Variante fälschlich mit einer älteren,
+    // noch nach dem alten Muster verlinkten Zusatzprodukt-Zeile "verklebt"
+    // wurde. Ohne `_lineGroup` hat eine Zeile schlicht keine verlinkten
+    // Kinder — eindeutig, auch wenn ältere Warenkorb-Zeilen dadurch beim
+    // Entfernen manuell mit-entfernt werden müssen.
+    const targetLineGroup = targetEdge.node.attributes?.find((a) => a.key === "_lineGroup")?.value;
+    const linkedLineIds = targetLineGroup
+      ? cart.lines.edges
+          .filter(({ node }) =>
+            node.id !== lineId &&
+            node.attributes?.some((a) => a.key === "_linkedTo" && a.value === targetLineGroup),
+          )
+          .map(({ node }) => node.id)
+      : [];
 
     const allLineIds = [lineId, ...linkedLineIds];
 

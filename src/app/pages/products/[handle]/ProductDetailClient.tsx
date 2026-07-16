@@ -22,6 +22,11 @@ import {
   ProductExtras,
   type ProductExtrasValues,
 } from "@/app/components/product/ProductExtras";
+import {
+  ProductOptions,
+  EMPTY_PRODUCT_OPTIONS_STATE,
+  type ProductOptionsState,
+} from "@/app/components/product/ProductOptions";
 import { ProductReviews } from "@/app/components/product/product-reviews";
 import { RelatedProducts } from "@/app/components/product/RelatedProducts";
 import { Personalization } from "@/app/components/Personalization";
@@ -79,6 +84,9 @@ interface Props {
   randomProducts?: Product[];
   relatedLabel: string;
   shippingOptions?: CmsShippingOption[] | null;
+  /** Globale Typ-Bilder (Maßtabellen etc.) — werden IMMER hinten ans
+   *  Bilder-Grid angehängt, analog zur Reihenfolge im Admin-Tool. */
+  typBilder?: { url: string; altText: string | null }[];
   technicalSpecsSlot?: React.ReactNode;
   extraContentSlot?: React.ReactNode;
   faqSlot?: React.ReactNode;
@@ -90,6 +98,7 @@ export default function ProductDetailClient({
   randomProducts,
   relatedLabel,
   shippingOptions,
+  typBilder,
   technicalSpecsSlot,
   extraContentSlot,
   faqSlot,
@@ -97,7 +106,14 @@ export default function ProductDetailClient({
   const standardShipping =
     shippingOptions?.find((o) => o.isStandard) ?? FALLBACK_STANDARD;
   const barrelVariant = variantFromProduct(product.tags, product.title);
-  const images = (product.images?.edges ?? []).map((e) => e.node);
+  // Typ-Bilder IMMER hinten anhängen — Duplikate (falls ein Typ-Bild bereits
+  // als echtes Produktbild vorhanden ist) werden anhand der URL ausgefiltert.
+  const productImages = (product.images?.edges ?? []).map((e) => e.node);
+  const productImageUrls = new Set(productImages.map((img) => img.url));
+  const images = [
+    ...productImages,
+    ...(typBilder ?? []).filter((img) => !productImageUrls.has(img.url)),
+  ];
   const firstVariant = product.variants.edges[0]?.node;
   const price =
     firstVariant?.price.amount ?? product.priceRange.minVariantPrice.amount;
@@ -134,11 +150,23 @@ export default function ProductDetailClient({
     entscheid: "",
     farbe: "",
   });
+  // Neues Zusatzoptionen-System (custom.options) — läuft parallel zum alten
+  // ProductExtras/extrasValues oben, solange nicht alle Produkte umgestellt sind.
+  const [additionalOptionsValues, setAdditionalOptionsValues] =
+    useState<ProductOptionsState>(EMPTY_PRODUCT_OPTIONS_STATE);
 
   const displayPrice = useMemo(
     () =>
-      calculateDisplayPrice(price, currencyCode, extrasValues.zusatzprodukte),
-    [extrasValues.zusatzprodukte, price, currencyCode],
+      calculateDisplayPrice(price, currencyCode, [
+        ...extrasValues.zusatzprodukte,
+        ...additionalOptionsValues.selectedProducts,
+      ]),
+    [
+      extrasValues.zusatzprodukte,
+      additionalOptionsValues.selectedProducts,
+      price,
+      currencyCode,
+    ],
   );
 
   const { mainHtml, specs } = useMemo(
@@ -151,16 +179,24 @@ export default function ProductDetailClient({
 
   const extrasValid = useMemo(() => {
     const cfg = product.zusatzoptionen;
-    if (!cfg) return true;
-    const textsOk = cfg.textfelder.every((_, i) =>
-      extrasValues.textfelder[i]?.trim(),
-    );
-    const optionenOk =
-      cfg.optionen.length === 0 || extrasValues.optionen.length > 0;
-    const entscheidOk =
-      cfg.entscheide.length === 0 || extrasValues.entscheid.trim() !== "";
-    return textsOk && optionenOk && entscheidOk;
-  }, [product.zusatzoptionen, extrasValues]);
+    const legacyValid = (() => {
+      if (!cfg) return true;
+      const textsOk = cfg.textfelder.every((_, i) =>
+        extrasValues.textfelder[i]?.trim(),
+      );
+      const optionenOk =
+        cfg.optionen.length === 0 || extrasValues.optionen.length > 0;
+      const entscheidOk =
+        cfg.entscheide.length === 0 || extrasValues.entscheid.trim() !== "";
+      return textsOk && optionenOk && entscheidOk;
+    })();
+
+    const additionalOptionsValid = (product.additionalOptions ?? [])
+      .filter((o) => o.required && (o.type === "text" || o.type === "color"))
+      .every((o) => (additionalOptionsValues.values[o.technicalKey] ?? "").trim() !== "");
+
+    return legacyValid && additionalOptionsValid;
+  }, [product.zusatzoptionen, product.additionalOptions, extrasValues, additionalOptionsValues]);
 
   return (
     <div className="pb-8 -mt-8">
@@ -239,11 +275,19 @@ export default function ProductDetailClient({
             />
           )}
 
-          {/* ── Dynamische Zusatzoptionen (aus Shopify Metaobjekt) ── */}
+          {/* ── Zusatzoptionen: altes System (custom.layout_konfiguration) ── */}
           {product.zusatzoptionen && (
             <ProductExtras
               config={product.zusatzoptionen}
               onChange={setExtrasValues}
+            />
+          )}
+
+          {/* ── Zusatzoptionen: neues Metaobjekt-System (custom.options) ── */}
+          {product.additionalOptions && product.additionalOptions.length > 0 && (
+            <ProductOptions
+              options={product.additionalOptions}
+              onChange={setAdditionalOptionsValues}
             />
           )}
 
@@ -281,7 +325,10 @@ export default function ProductDetailClient({
               color={extrasValues.farbe}
               quantity={quantity}
               formValid={extrasValid}
-              metaZusatzprodukte={extrasValues.zusatzprodukte}
+              metaZusatzprodukte={[
+                ...extrasValues.zusatzprodukte,
+                ...additionalOptionsValues.selectedProducts,
+              ]}
               onSuccess={() =>
                 trackAddToCart({
                   variantId: firstVariant.id,
@@ -323,6 +370,16 @@ export default function ProductDetailClient({
                 ...(extrasValues.entscheid
                   ? [{ key: "Auswahl", value: extrasValues.entscheid }]
                   : []),
+                // Neues Zusatzoptionen-System (custom.options): Text-/Farbwerte
+                // als Attribute an die Hauptzeile hängen; Zusatzprodukte gehen
+                // bereits oben in metaZusatzprodukte ein.
+                ...(product.additionalOptions ?? [])
+                  .filter((o) => o.type === "text" || o.type === "color")
+                  .map((o) => ({
+                    key: o.title,
+                    value: additionalOptionsValues.values[o.technicalKey] ?? "",
+                  }))
+                  .filter((a) => a.value.trim() !== ""),
               ]}
               icon
             />
@@ -342,32 +399,10 @@ export default function ProductDetailClient({
           </Button>
 
           <div className="space-y-2.5 pt-4 border-t border-zinc-200/60 dark:border-zinc-800">
-            {shippingOptions === null ? (
-              <div className="flex items-center gap-2.5 text-sm text-muted dark:text-neutral-400">
-                <Truck size={15} className="shrink-0" />
-                <span>Versand wird im Checkout berechnet</span>
-              </div>
-            ) : (
-              <div className="space-y-1">
-                <div className="flex items-center gap-2.5 text-sm text-muted dark:text-neutral-400">
-                  <Truck size={15} className="shrink-0" />
-                  <span>
-                    {standardShipping.method}: {standardShipping.totalDays} —{" "}
-                    {standardShipping.price}
-                    {standardShipping.freeFrom && (
-                      <span className="ml-1 text-xs opacity-70">
-                        (ab {standardShipping.freeFrom} kostenlos)
-                      </span>
-                    )}
-                  </span>
-                </div>
-                {standardShipping.productionDays && (
-                  <p className="pl-[23px] text-xs text-muted/70 dark:text-neutral-500">
-                    zusätzliche Anfertigungsdauer
-                  </p>
-                )}
-              </div>
-            )}
+            <div className="flex items-center gap-2.5 text-sm text-muted dark:text-neutral-400">
+              <Truck size={15} className="shrink-0" />
+              <span>Versand wird im Checkout berechnet.</span>
+            </div>
           </div>
 
           <ShareButtons

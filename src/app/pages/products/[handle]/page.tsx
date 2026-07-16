@@ -2,9 +2,9 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import type { Product } from "../../../types/shopify";
-import { getProductByHandle, getExtraInfoByType, getFaqByType, getTechnicalSpecsByType, getProducts } from "../../../services/shopify";
+import { getProductByHandle, getExtraInfoByType, getFaqByType, getTechnicalSpecsByType, getTypBilderByType, getProducts } from "../../../services/shopify";
 import { getShippingOptions } from "../../../services/shopify/shipping";
-import { detectCategory, findMetaType, findTechnicalSpecType, RELATED_CONFIG, type ProductCategory } from "@/app/components/product/product-category";
+import { detectCategory, deriveCategoryFromProductType, findTechnicalSpecOverride, RELATED_CONFIG } from "@/app/components/product/product-category";
 import { ProductExtraContent } from "@/app/components/product/ProductExtraContent";
 import { ProductFaq } from "@/app/components/product/ProductFaq";
 import { TechnicalSpecs } from "@/app/components/product/TechnicalSpecs";
@@ -16,7 +16,7 @@ interface Props {
 
 // ─── Streaming-Sektion für Metaobject-Inhalte ─────────────────────────────────
 
-async function ExtraContentSection({ metaType }: { metaType: ProductCategory | null }) {
+async function ExtraContentSection({ metaType }: { metaType: string | null }) {
   const metaobjects = metaType ? await getExtraInfoByType(metaType) : [];
   if (metaobjects.length === 0) return null;
   return (
@@ -75,7 +75,7 @@ function TechnicalSpecsSkeleton() {
 
 // ─── Streaming-Sektion für FAQ ────────────────────────────────────────────────
 
-async function FaqSection({ metaType }: { metaType: ProductCategory | null }) {
+async function FaqSection({ metaType }: { metaType: string | null }) {
   const metaobjects = metaType ? await getFaqByType(metaType) : [];
   if (metaobjects.length === 0) return null;
   return <ProductFaq metaobjects={metaobjects} />;
@@ -140,14 +140,21 @@ export default async function ProductDetailPage({ params }: Props) {
   if (!product) notFound();
 
   // ── 2. Kategorie & Metaobject-Typ ableiten ───────────────────────────────
-  const category      = detectCategory(product);
-  const relatedConfig = RELATED_CONFIG[category];
-  const metaType      = findMetaType(product.tags ?? []);
-  const techSpecType  = findTechnicalSpecType(product.tags ?? []);
+  // `detectCategory`/`RELATED_CONFIG` bleiben tag-basiert (nur für "Verwandte
+  // Produkte"-Vorschläge). FAQ/Extra-Infos/Technische-Details/Typ-Bilder
+  // nutzen dagegen den ECHTEN Shopify-Produkttyp — der ist seit dem
+  // publish-Fix im CMS 1:1 die CMS-Kategorie, der Metaobjekt-Slug lässt sich
+  // also direkt daraus ableiten (keine feste Tag-Liste mehr nötig).
+  const category         = detectCategory(product);
+  const relatedConfig    = RELATED_CONFIG[category];
+  const dynamicCategory  = deriveCategoryFromProductType(product.productType);
+  const metaType         = dynamicCategory;
+  const techSpecType     = findTechnicalSpecOverride(product.tags ?? []) ?? dynamicCategory;
 
   // ── 3. Alle sichtbaren Produkte in einem einzigen API-Call laden ─────────
   const allProducts = await getProducts(30);
   const shippingOptions = getShippingOptions(product.tags ?? [], product.productType ?? "");
+  const typBilder = dynamicCategory ? await getTypBilderByType(dynamicCategory) : [];
 
   // Related: passende Tag-Kategorie, aktuelles Produkt ausschließen
   const relatedProducts = allProducts
@@ -171,6 +178,7 @@ export default async function ProductDetailPage({ params }: Props) {
       randomProducts={randomProducts}
       relatedLabel={relatedConfig.label}
       shippingOptions={shippingOptions}
+      typBilder={typBilder}
       technicalSpecsSlot={
         <Suspense fallback={<TechnicalSpecsSkeleton />}>
           <TechnicalSpecsSection specType={techSpecType} />

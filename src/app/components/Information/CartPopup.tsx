@@ -84,11 +84,15 @@ const CartPopup = () => {
                 .map(({ node }) => node.id)
             );
 
-            const linkedByVariantId = new Map<string, typeof allEdges[number]["node"][]>();
+            // Zusatzprodukt-Zeilen nach ihrem `_linkedTo`-Wert (= `_lineGroup`
+            // der Hauptzeile) gruppieren. BEWUSST kein Fallback auf die
+            // Varianten-ID mehr — das verklebte sonst neue, unverlinkte
+            // Zeilen derselben Variante mit älteren Zusatzprodukt-Zeilen.
+            const linkedByGroup = new Map<string, typeof allEdges[number]["node"][]>();
             allEdges.forEach(({ node }) => {
               const linkedTo = node.attributes?.find((a) => a.key === "_linkedTo")?.value;
               if (linkedTo) {
-                linkedByVariantId.set(linkedTo, [...(linkedByVariantId.get(linkedTo) ?? []), node]);
+                linkedByGroup.set(linkedTo, [...(linkedByGroup.get(linkedTo) ?? []), node]);
               }
             });
 
@@ -96,13 +100,16 @@ const CartPopup = () => {
 
             return (
               <div className="max-h-72 overflow-y-auto divide-y divide-sand/30 dark:divide-zinc-800">
-                {mainEdges.map(({ node }) => (
-                  <CartPopupItem
-                    key={node.id}
-                    node={node}
-                    linkedItems={linkedByVariantId.get(node.merchandise.id) ?? []}
-                  />
-                ))}
+                {mainEdges.map(({ node }) => {
+                  const groupKey = node.attributes?.find((a) => a.key === "_lineGroup")?.value;
+                  return (
+                    <CartPopupItem
+                      key={node.id}
+                      node={node}
+                      linkedItems={groupKey ? linkedByGroup.get(groupKey) ?? [] : []}
+                    />
+                  );
+                })}
               </div>
             );
           })()}

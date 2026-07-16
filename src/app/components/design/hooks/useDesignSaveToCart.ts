@@ -5,6 +5,7 @@ import { useCart } from "@/app/context/CartContext";
 import type { useDesignCanvas } from "./useDesignCanvas";
 import type { ProductOption } from "../types";
 import type { ZusatzproduktOption } from "@/app/types/shopify";
+import { generateLineGroupId } from "@/app/utils/utils";
 
 type Canvas = ReturnType<typeof useDesignCanvas>;
 
@@ -71,13 +72,19 @@ export function useDesignSaveToCart(
     ];
 
     // Zusatzprodukte als eigene, mit dem Hauptprodukt verlinkte Cart-Lines
-    // (gleiches Muster wie AddToCartButton — _linkedTo gruppiert sie im Warenkorb)
+    // (gleiches Muster wie AddToCartButton — _lineGroup/_linkedTo gruppiert
+    // sie im Warenkorb). Eindeutige ID pro Kauf statt Varianten-ID, damit
+    // mehrere Designs desselben Produkts nicht dieselben Zusatzprodukte teilen.
     const additionalLines = selectedAddons.length > 0
-      ? selectedAddons.map((a) => ({
-          variantId: a.defaultVariantId,
-          quantity: 1,
-          customAttributes: [{ key: "_linkedTo", value: product.variantId! }],
-        }))
+      ? (() => {
+          const lineGroup = generateLineGroupId();
+          attrs.push({ key: "_lineGroup", value: lineGroup });
+          return selectedAddons.map((a) => ({
+            variantId: a.defaultVariantId,
+            quantity: 1,
+            customAttributes: [{ key: "_linkedTo", value: lineGroup }],
+          }));
+        })()
       : undefined;
 
     // 3. In den Warenkorb (löst automatisch das Cart-Popup aus)

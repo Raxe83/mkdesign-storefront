@@ -6,6 +6,7 @@ import { ShoppingCart } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import { useToast } from "../../context/ToastContext";
 import type { ZusatzproduktOption } from "../../types/shopify";
+import { generateLineGroupId } from "../../utils/utils";
 
 interface AddToCartButtonProps {
   variantId: string;
@@ -49,11 +50,22 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
       if (customAttributes) {
         attributes.push(...customAttributes.filter((a) => a.value.trim() !== ""));
       }
-      const additionalLines = metaZusatzprodukte?.map((v) => ({
-        variantId: v.defaultVariantId,
-        quantity,
-        customAttributes: [{ key: "_linkedTo", value: variantId }],
-      }));
+
+      // Zusatzprodukte über eine pro Kauf eindeutige ID verknüpfen (nicht über
+      // die Varianten-ID) — sonst würden zwei Käufe desselben Produkts mit
+      // unterschiedlicher Personalisierung im Warenkorb dieselben
+      // Zusatzprodukte anzeigen.
+      let additionalLines: { variantId: string; quantity: number; customAttributes: { key: string; value: string }[] }[] | undefined;
+      if (metaZusatzprodukte?.length) {
+        const lineGroup = generateLineGroupId();
+        attributes.push({ key: "_lineGroup", value: lineGroup });
+        additionalLines = metaZusatzprodukte.map((v) => ({
+          variantId: v.defaultVariantId,
+          quantity,
+          customAttributes: [{ key: "_linkedTo", value: lineGroup }],
+        }));
+      }
+
       await addItem(
         variantId,
         quantity,

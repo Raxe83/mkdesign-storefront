@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/app/utils/utils";
+import { cn, shapeColorForProduct } from "@/app/utils/utils";
 import { SHAPE_CATALOG, SHAPE_CATEGORIES } from "../constants";
 import type { FabricConf } from "../types";
 import { ShapeIcon } from "./ShapeIcon";
@@ -8,18 +8,33 @@ import { ShapeIcon } from "./ShapeIcon";
 const PAGE_SIZE = 15;
 
 type Props = {
-  shapeCat:           string;
-  shapePage:          number;
-  onCategoryChange:   (cat: string) => void;
-  onPageChange:       (page: number) => void;
+  shapeCat: string;
+  shapePage: number;
+  onCategoryChange: (cat: string) => void;
+  onPageChange: (page: number) => void;
   addShapeFromCatalog: (fc: FabricConf) => void;
+  productColor: string;
 };
 
-export function ShapesPanel({ shapeCat, shapePage, onCategoryChange, onPageChange, addShapeFromCatalog }: Props) {
-  const filtered   = SHAPE_CATALOG.filter((s) => shapeCat === "Alle" || s.cat === shapeCat);
+export function ShapesPanel({
+  shapeCat,
+  shapePage,
+  onCategoryChange,
+  onPageChange,
+  addShapeFromCatalog,
+  productColor,
+}: Props) {
+  // am Anfang der Komponentenfunktion, bevor du die Shapes renderst:
+  const shapeColor = shapeColorForProduct(productColor);
+  const filtered = SHAPE_CATALOG.filter(
+    (s) => shapeCat === "Alle" || s.cat === shapeCat,
+  );
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const page       = Math.min(shapePage, totalPages - 1);
-  const visible    = filtered.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+  const page = Math.min(shapePage, totalPages - 1);
+  const visible = filtered.slice(
+    page * PAGE_SIZE,
+    page * PAGE_SIZE + PAGE_SIZE,
+  );
 
   return (
     <div className="flex flex-col gap-2">
@@ -60,7 +75,9 @@ export function ShapesPanel({ shapeCat, shapePage, onCategoryChange, onPageChang
             <span className="h-7 w-7 opacity-75">
               <ShapeIcon fc={s.fc} />
             </span>
-            <span className="leading-none truncate w-full text-center px-0.5">{s.label}</span>
+            <span className="leading-none truncate w-full text-center px-0.5">
+              {s.label}
+            </span>
           </button>
         ))}
       </div>
@@ -75,7 +92,9 @@ export function ShapesPanel({ shapeCat, shapePage, onCategoryChange, onPageChang
           >
             ← Zurück
           </button>
-          <span className="text-[10px] text-muted tabular-nums">{page + 1} / {totalPages}</span>
+          <span className="text-[10px] text-muted tabular-nums">
+            {page + 1} / {totalPages}
+          </span>
           <button
             onClick={() => onPageChange(Math.min(totalPages - 1, page + 1))}
             disabled={page === totalPages - 1}

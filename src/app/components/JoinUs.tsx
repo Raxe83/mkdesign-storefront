@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, CheckCircle } from "lucide-react";
+import { ArrowRight, Mail } from "lucide-react"; // Mail-Icon für den Hinweis
 import Link from "next/link";
 
 type Status = "idle" | "loading" | "success" | "error";
@@ -53,10 +53,14 @@ const JoinUs = () => {
           </p>
 
           {status === "success" ? (
-            <div className="flex flex-col items-center gap-3 py-4">
-              <CheckCircle size={32} className="text-emerald-500" />
-              <p className="text-sm font-medium text-primary">Anmeldung erfolgreich!</p>
-              <p className="text-xs text-muted">Du erhältst ab jetzt unsere neuesten Angebote per E-Mail.</p>
+            /* --- NEUER INDIKATOR-TEXT FÜR DOUBLE-OPT-IN --- */
+            <div className="flex flex-col items-center gap-3 py-6 bg-zinc-50 dark:bg-zinc-900/50 rounded-md border border-zinc-200/60 dark:border-zinc-800 max-w-md mx-auto mb-6 p-4">
+              <Mail size={32} className="text-rust animate-pulse" />
+              <p className="text-sm font-semibold text-primary">Fast geschafft!</p>
+              <p className="text-xs text-muted max-w-[32ch] mx-auto leading-relaxed">
+                Wir haben dir eine Bestätigungs-E-Mail an <strong className="text-primary">{email}</strong> gesendet. 
+                Bitte klicke auf den dortigen Link, um deine Anmeldung zu aktivieren.
+              </p>
             </div>
           ) : (
             <>
@@ -78,7 +82,7 @@ const JoinUs = () => {
                   disabled={status === "loading"}
                   className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-sm bg-rust text-white text-sm font-medium tracking-[0.04em] uppercase hover:bg-rust/90 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust focus-visible:ring-offset-2 shrink-0 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  {status === "loading" ? "Anmelden…" : <> Anmelden <ArrowRight size={14} /> </>}
+                  {status === "loading" ? "Sende Link…" : <> Anmelden <ArrowRight size={14} /> </>}
                 </button>
               </form>
 

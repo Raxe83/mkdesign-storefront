@@ -31,7 +31,7 @@ type ColorStops = {
   legs: string;
 };
 
-const COLOR_PALETTE: Record<BarrelColor, ColorStops> = {
+export const COLOR_PALETTE: Record<BarrelColor, ColorStops> = {
   schwarz: {
     barrel: ["#161412", "#3c3836", "#252220", "#38342f", "#161412"],
     ring:   ["#292522", "#6b6460", "#292522"],

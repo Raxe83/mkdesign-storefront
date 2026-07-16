@@ -19,10 +19,13 @@ const SCOPES = [
   "read_fulfillments",
   "read_inventory",
   "read_content",
+  "write_content",
   "read_metaobjects",
   "write_metaobjects",
   "write_metaobject_definitions",
   "read_metaobject_definitions",
+  "read_files",
+  "write_files",
 ].join(",");
 
 export async function GET(req: NextRequest) {

@@ -109,6 +109,72 @@ export async function getFaqByType(
   }
 }
 
+// ─── Typ-Bilder (globale Bilder pro Produkttyp, z.B. Maßtabellen) ─────────────
+//
+// Shopify MetaObject type:  {category}_typ_bilder  (Hyphens → Unterstriche)
+// Feld: bilder  list.file_reference  → Liste von MediaImage-Referenzen
+// Gepflegt im MK Content Studio (Admin-Tool) unter "Typ-Bilder verwalten".
+// Werden im Produkt-Bilder-Grid IMMER hinten angehängt (nach den echten
+// Produktbildern), analog zur Reihenfolge im Admin-Tool.
+
+const TYP_BILDER_QUERY = `
+  query getTypBilder($type: String!) {
+    metaobjects(type: $type, first: 1) {
+      edges {
+        node {
+          fields {
+            key
+            references(first: 20) {
+              nodes {
+                ... on MediaImage {
+                  image { url altText }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+interface TypBilderResponse {
+  metaobjects: {
+    edges: Array<{
+      node: {
+        fields: Array<{
+          key: string;
+          references: { nodes: Array<{ image: { url: string; altText: string | null } | null }> } | null;
+        }>;
+      };
+    }>;
+  };
+}
+
+/**
+ * Lädt die globalen Typ-Bilder für einen Produkttyp (z.B. Maßtabellen,
+ * technische Merkmale). Gibt [] zurück, wenn kein Metaobjekt dieses Typs
+ * existiert. ISR: 1h Cache.
+ */
+export async function getTypBilderByType(category: string): Promise<{ url: string; altText: string | null }[]> {
+  const metaobjectType = `${category.replace(/-/g, "_")}_typ_bilder`;
+  try {
+    const data = await shopifyFetch<TypBilderResponse>({
+      query: TYP_BILDER_QUERY,
+      variables: { type: metaobjectType },
+      revalidate: 3600,
+    });
+    const node = data.metaobjects.edges[0]?.node;
+    if (!node) return [];
+    const bilderField = node.fields.find((f) => f.key === "bilder");
+    return (bilderField?.references?.nodes ?? [])
+      .map((n) => n.image)
+      .filter((img): img is { url: string; altText: string | null } => Boolean(img));
+  } catch {
+    return [];
+  }
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 type RawField = {

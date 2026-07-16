@@ -178,6 +178,36 @@ export interface ProductZusatzoptionen {
   farben: string[];
 }
 
+// ─── Produkt-Zusatzoptionen (custom.options / additional_option-Metaobjekt) ───
+//
+// Neues, Shopify-natives Nachfolgesystem für Personalisierung — ersetzt
+// perspektivisch `zusatzoptionen` oben (custom.layout_konfiguration). Beide
+// Systeme laufen parallel, solange nicht alle Produkte umgestellt sind.
+
+export type AdditionalOptionType = "text" | "color" | "product";
+
+/** Roher Metaobjekt-Node aus `custom.options` (references-Liste). */
+export interface AdditionalOptionRawNode {
+  id: string;
+  title: { value: string } | null;
+  type: { value: string } | null;
+  technicalKey: { value: string } | null;
+  required: { value: string } | null;
+  linkedProduct: { reference: ZusatzoptionNode | null } | null;
+}
+
+/** Fertig normalisierte Zusatzoption für die UI. */
+export interface AdditionalOption {
+  /** Metaobjekt-GID */
+  id: string;
+  title: string;
+  type: AdditionalOptionType;
+  technicalKey: string;
+  required: boolean;
+  /** Nur bei type "product" gesetzt */
+  linkedProduct: ZusatzproduktOption | null;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface Money {
@@ -221,6 +251,8 @@ export interface Product {
   }
   /** Gesetzt wenn das Produkt ein `custom.layout_konfiguration`-Metafeld hat. */
   zusatzoptionen?: ProductZusatzoptionen | null
+  /** Gesetzt wenn das Produkt ein `custom.options`-Metafeld hat (neues System). */
+  additionalOptions?: AdditionalOption[]
 }
 
 export interface Collection {

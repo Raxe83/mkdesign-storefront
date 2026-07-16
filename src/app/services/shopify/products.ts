@@ -1,9 +1,12 @@
 import { unstable_cache } from "next/cache";
 import { shopifyFetch } from "./client";
 import type {
+  AdditionalOption,
+  AdditionalOptionRawNode,
   Product,
   ProductZusatzoptionen,
   ZusatzoptionenRaw,
+  ZusatzoptionNode,
   ZusatzproduktOption,
 } from "../../types/shopify";
 import { HIDDEN_TAGS, HIDDEN_TAGS_QUERY, VISIBILITY_TAGS_QUERY, filterHiddenProducts, filterVisibilityHidden } from "../../utils/productVisibility";
@@ -21,34 +24,39 @@ function parseList(raw: string | null): string[] {
   return [];
 }
 
+// Löst einen einzelnen Produkt-/Varianten-Referenz-Node zu einem einheitlichen
+// ZusatzproduktOption auf. Wird sowohl für Listen (alte "zusatzprodukte") als
+// auch für Einzel-Referenzen (neues "linkedProductId") verwendet.
+function resolveProductRef(n: ZusatzoptionNode): ZusatzproduktOption | null {
+  if (n.id && n.title && n.handle && n.priceRange && n.variants?.edges?.length) {
+    return {
+      id: n.id,
+      title: n.title,
+      handle: n.handle,
+      featuredImage: n.featuredImage ?? null,
+      price: n.priceRange.minVariantPrice,
+      defaultVariantId: n.variants.edges[0].node.id,
+    };
+  }
+  if (n.id && n.price && n.product?.id && n.product?.title && n.product?.handle) {
+    return {
+      id: n.product.id,
+      title: n.product.title,
+      handle: n.product.handle,
+      featuredImage: n.product.featuredImage ?? null,
+      price: n.product.priceRange?.minVariantPrice ?? n.price,
+      defaultVariantId: n.id,
+    };
+  }
+  return null;
+}
+
 function parseZusatzoptionen(raw: ZusatzoptionenRaw): ProductZusatzoptionen {
   const get = (key: string) => raw.fields.find((f) => f.key === key) ?? null;
 
   const zusatzprodukteNodes = get("zusatzprodukte")?.references?.nodes ?? [];
-  const zusatzprodukte: ZusatzproduktOption[] = zusatzprodukteNodes
-    .map((n): ZusatzproduktOption | null => {
-      if (n.id && n.title && n.handle && n.priceRange && n.variants?.edges?.length) {
-        return {
-          id: n.id,
-          title: n.title,
-          handle: n.handle,
-          featuredImage: n.featuredImage ?? null,
-          price: n.priceRange.minVariantPrice,
-          defaultVariantId: n.variants.edges[0].node.id,
-        };
-      }
-      if (n.id && n.price && n.product?.id && n.product?.title && n.product?.handle) {
-        return {
-          id: n.product.id,
-          title: n.product.title,
-          handle: n.product.handle,
-          featuredImage: n.product.featuredImage ?? null,
-          price: n.product.priceRange?.minVariantPrice ?? n.price,
-          defaultVariantId: n.id,
-        };
-      }
-      return null;
-    })
+  const zusatzprodukte = zusatzprodukteNodes
+    .map(resolveProductRef)
     .filter((n): n is ZusatzproduktOption => n !== null);
 
   return {
@@ -58,6 +66,27 @@ function parseZusatzoptionen(raw: ZusatzoptionenRaw): ProductZusatzoptionen {
     entscheide: parseList(get("entscheide")?.value ?? null),
     farben:     parseList(get("farben")?.value ?? null),
   };
+}
+
+// Neues Metaobjekt-System (custom.options -> additional_option): jede Referenz
+// ist eine eigenständige Zusatzoption vom Typ text/color/product.
+function parseAdditionalOptions(nodes: AdditionalOptionRawNode[]): AdditionalOption[] {
+  return nodes
+    .map((n): AdditionalOption | null => {
+      const type = n.type?.value;
+      if (type !== "text" && type !== "color" && type !== "product") return null;
+
+      const refNode = n.linkedProduct?.reference;
+      return {
+        id: n.id,
+        title: n.title?.value ?? "",
+        type,
+        technicalKey: n.technicalKey?.value ?? "",
+        required: n.required?.value === "true",
+        linkedProduct: refNode ? resolveProductRef(refNode) : null,
+      };
+    })
+    .filter((o): o is AdditionalOption => o !== null);
 }
 
 // ─── Queries ──────────────────────────────────────────────────────────────────
@@ -276,12 +305,52 @@ async function _getProductByHandle(
             }
           }
         }
+        additionalOptions: metafield(namespace: "custom", key: "options") {
+          references(first: 20) {
+            nodes {
+              ... on Metaobject {
+                id
+                title: field(key: "title") { value }
+                type: field(key: "type") { value }
+                technicalKey: field(key: "technicalKey") { value }
+                required: field(key: "required") { value }
+                linkedProduct: field(key: "linkedProductId") {
+                  reference {
+                    ... on Product {
+                      id
+                      title
+                      handle
+                      featuredImage {
+                        url
+                        altText
+                      }
+                      priceRange {
+                        minVariantPrice {
+                          amount
+                          currencyCode
+                        }
+                      }
+                      variants(first: 1) {
+                        edges {
+                          node {
+                            id
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   `;
 
   type ProductWithMeta = Product & {
     metafield?: { reference?: ZusatzoptionenRaw | null } | null;
+    additionalOptions?: { references: { nodes: AdditionalOptionRawNode[] } } | null;
   };
 
   const response = await shopifyFetch<{ productByHandle: ProductWithMeta | null }>({
@@ -297,8 +366,11 @@ async function _getProductByHandle(
 
   const rawRef = product.metafield?.reference ?? null;
   const zusatzoptionen = rawRef ? parseZusatzoptionen(rawRef) : null;
-  const { metafield: _drop, ...cleanProduct } = product;
-  return { ...cleanProduct, zusatzoptionen };
+  const additionalOptions = parseAdditionalOptions(
+    product.additionalOptions?.references?.nodes ?? [],
+  );
+  const { metafield: _drop, additionalOptions: _dropRaw, ...cleanProduct } = product;
+  return { ...cleanProduct, zusatzoptionen, additionalOptions };
 }
 
 // ─── Design-Editor Produkte (CustomDesign-Tag + Zusatzoptionen-Metafeld) ──────

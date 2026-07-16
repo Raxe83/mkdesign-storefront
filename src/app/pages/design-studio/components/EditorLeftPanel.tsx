@@ -67,6 +67,7 @@ export function EditorLeftPanel({ activeTool, canvas, onClose }: Props) {
               onCategoryChange={(cat) => { setShapeCat(cat); setShapePage(0); }}
               onPageChange={setShapePage}
               addShapeFromCatalog={canvas.addShapeFromCatalog}
+              productColor={canvas.fillColor}
             />
           </div>
         )}

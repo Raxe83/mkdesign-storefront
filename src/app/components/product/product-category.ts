@@ -160,6 +160,43 @@ export function findTechnicalSpecType(tags: readonly string[]): string | null {
   return findMetaType(tags);
 }
 
+/** Nur die Tag-basierten Overrides prüfen (z.B. Größenvarianten wie
+ *  "feuerschale-xl"), ohne auf `findMetaType` zurückzufallen. Wird mit dem
+ *  dynamisch aus `productType` abgeleiteten Slug kombiniert (siehe
+ *  `deriveCategoryFromProductType`), damit Größenvarianten weiterhin eigene
+ *  technische Daten bekommen können. */
+export function findTechnicalSpecOverride(tags: readonly string[]): string | null {
+  const lower = tags.map((t) => t.toLowerCase());
+  for (const { tag, type } of TECH_SPEC_OVERRIDES) {
+    if (lower.includes(tag)) return type;
+  }
+  return null;
+}
+
+// ─── Dynamische Kategorie-Ableitung (ersetzt die feste Tag-Liste oben für
+// FAQ/Extra-Infos/Technische-Details) ──────────────────────────────────────
+//
+// Das CMS erlaubt beliebig viele, auch automatisch angelegte Kategorien —
+// eine feste, hier im Code gepflegte Liste (wie `TAG_TO_META_TYPE` oben)
+// kann damit nicht mithalten. Da der echte Shopify `productType` inzwischen
+// 1:1 der CMS-Kategorie entspricht (siehe MK Content Studio publish/route.ts),
+// lässt sich der Metaobjekt-Kategorie-Slug direkt und zuverlässig daraus
+// ableiten — exakt dieselbe Slugify-Regel wie im CMS.
+export function deriveCategoryFromProductType(
+  productType: string | null | undefined,
+): string | null {
+  if (!productType) return null;
+  const slug = productType
+    .toLowerCase()
+    .replace(/ä/g, "ae")
+    .replace(/ö/g, "oe")
+    .replace(/ü/g, "ue")
+    .replace(/ß/g, "ss")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+  return slug || null;
+}
+
 // ─── Verwandte-Produkte-Konfiguration ─────────────────────────────────────────
 
 export const RELATED_CONFIG: Record<ProductCategory, { tag?: string; label: string }> = {

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDesignDraft } from "./hooks/useDesignDraft";
 import { Hand, HelpCircle, Info, Loader2, Monitor, X } from "lucide-react";
-import { cn } from "@/app/utils/utils";
+import { cn, generateLineGroupId } from "@/app/utils/utils";
 import { useCart } from "@/app/context/CartContext";
 import { getPresetForTitle } from "./constants";
 import { getBarrelEntry, type BarrelColor } from "./barrel";
@@ -276,19 +276,26 @@ export default function DesignEditor() {
       attrs.push({ key: "Design-Vorschau-B", value: result.sideB.previewUrl });
       attrs.push({ key: "_design_json_b", value: result.sideB.jsonUrl });
     }
-    // Seite B als additionalLine → beides in einer Shopify-Mutation, ein Cart-Refresh
+    // Seite B als additionalLine → beides in einer Shopify-Mutation, ein Cart-Refresh.
+    // Verknüpfung über eine pro Kauf eindeutige ID (nicht die Varianten-ID) —
+    // sonst würden zwei Designs desselben Produkts im Warenkorb dieselbe
+    // Seite-B-Zeile "teilen".
     const additionalLines =
       result.sideB && selectedProduct.sideBZusatzprodukt
-        ? [
-            {
-              variantId: selectedProduct.sideBZusatzprodukt.variantId,
-              quantity: 1,
-              customAttributes: [
-                { key: "_linkedTo", value: selectedProduct.variantId },
-                { key: "_seite_b_aufpreis", value: "true" },
-              ],
-            },
-          ]
+        ? (() => {
+            const lineGroup = generateLineGroupId();
+            attrs.push({ key: "_lineGroup", value: lineGroup });
+            return [
+              {
+                variantId: selectedProduct.sideBZusatzprodukt.variantId,
+                quantity: 1,
+                customAttributes: [
+                  { key: "_linkedTo", value: lineGroup },
+                  { key: "_seite_b_aufpreis", value: "true" },
+                ],
+              },
+            ];
+          })()
         : undefined;
 
     await addItem(selectedProduct.variantId, 1, attrs, additionalLines);
@@ -428,6 +435,7 @@ export default function DesignEditor() {
                     }}
                     onPageChange={setShapePage}
                     addShapeFromCatalog={canvas.addShapeFromCatalog}
+                    productColor={selectedColor}
                   />
                 )}
                 {activeTab === "text" && (
