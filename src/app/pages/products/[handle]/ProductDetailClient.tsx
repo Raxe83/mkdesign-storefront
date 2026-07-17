@@ -193,10 +193,18 @@ export default function ProductDetailClient({
 
     const additionalOptionsValid = (product.additionalOptions ?? [])
       .filter((o) => o.required && (o.type === "text" || o.type === "color"))
-      .every((o) => (additionalOptionsValues.values[o.technicalKey] ?? "").trim() !== "");
+      .every(
+        (o) =>
+          (additionalOptionsValues.values[o.technicalKey] ?? "").trim() !== "",
+      );
 
     return legacyValid && additionalOptionsValid;
-  }, [product.zusatzoptionen, product.additionalOptions, extrasValues, additionalOptionsValues]);
+  }, [
+    product.zusatzoptionen,
+    product.additionalOptions,
+    extrasValues,
+    additionalOptionsValues,
+  ]);
 
   return (
     <div className="pb-8 -mt-8">
@@ -210,8 +218,12 @@ export default function ProductDetailClient({
         Zurück zu den Produkten
       </button>
 
-      {/* ── Two-column layout with sticky image gallery ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-20">
+      {/* ── Two-column layout mit sticky Bilder-Galerie: die (kürzere)
+          Bilder-Spalte bleibt beim Scrollen oben stehen (position: sticky),
+          bis das Ende der (längeren) Produktinfo-Spalte erreicht ist — erst
+          dann scrollt die Seite wieder als Ganzes weiter. Dafür braucht die
+          Grid-Row `items-start` (kein overflow/height-Hack nötig). ── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-20 items-start">
         <ImageGallery
           images={images}
           productTitle={product.title}
@@ -284,12 +296,13 @@ export default function ProductDetailClient({
           )}
 
           {/* ── Zusatzoptionen: neues Metaobjekt-System (custom.options) ── */}
-          {product.additionalOptions && product.additionalOptions.length > 0 && (
-            <ProductOptions
-              options={product.additionalOptions}
-              onChange={setAdditionalOptionsValues}
-            />
-          )}
+          {product.additionalOptions &&
+            product.additionalOptions.length > 0 && (
+              <ProductOptions
+                options={product.additionalOptions}
+                onChange={setAdditionalOptionsValues}
+              />
+            )}
 
           <div>
             <p className="text-xs uppercase tracking-widest text-muted dark:text-neutral-400 mb-2">
