@@ -77,6 +77,14 @@ function parseAdditionalOptions(nodes: AdditionalOptionRawNode[]): AdditionalOpt
       if (type !== "text" && type !== "color" && type !== "product") return null;
 
       const refNode = n.linkedProduct?.reference;
+      let colors: string[] = [];
+      if (n.colors?.value) {
+        try {
+          const parsed = JSON.parse(n.colors.value);
+          if (Array.isArray(parsed)) colors = parsed.filter((c): c is string => typeof c === "string");
+        } catch { /* malformed JSON -> keine Farben */ }
+      }
+
       return {
         id: n.id,
         title: n.title?.value ?? "",
@@ -84,6 +92,7 @@ function parseAdditionalOptions(nodes: AdditionalOptionRawNode[]): AdditionalOpt
         technicalKey: n.technicalKey?.value ?? "",
         required: n.required?.value === "true",
         linkedProduct: refNode ? resolveProductRef(refNode) : null,
+        colors,
       };
     })
     .filter((o): o is AdditionalOption => o !== null);
@@ -314,6 +323,7 @@ async function _getProductByHandle(
                 type: field(key: "type") { value }
                 technicalKey: field(key: "technicalKey") { value }
                 required: field(key: "required") { value }
+                colors: field(key: "colors") { value }
                 linkedProduct: field(key: "linkedProductId") {
                   reference {
                     ... on Product {

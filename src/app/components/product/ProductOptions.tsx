@@ -93,19 +93,31 @@ export function ProductOptions({ options, onChange }: Props) {
       ))}
 
       {colorOptions.map((option) => (
-        <div key={option.id} className="flex items-center gap-3">
-          <label htmlFor={option.technicalKey} className="text-sm font-medium text-primary dark:text-neutral-100">
+        <div key={option.id}>
+          <p className="text-sm font-medium text-primary dark:text-neutral-100 mb-2">
             {option.title}
             {option.required && <span className="text-red-500 dark:text-red-400"> *</span>}
-          </label>
-          <input
-            id={option.technicalKey}
-            type="color"
-            required={option.required}
-            value={state.values[option.technicalKey] || "#000000"}
-            onChange={(e) => setValue(option.technicalKey, e.target.value)}
-            className="h-9 w-14 cursor-pointer rounded border border-zinc-200 dark:border-zinc-700 bg-transparent"
-          />
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {option.colors.map((c) => {
+              const selected = state.values[option.technicalKey] === c;
+              return (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setValue(option.technicalKey, c)}
+                  aria-label={c}
+                  aria-pressed={selected}
+                  className={`w-8 h-8 rounded-full border-2 cursor-pointer transition-colors duration-150 ${
+                    selected
+                      ? "border-accent"
+                      : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500"
+                  }`}
+                  style={{ backgroundColor: c }}
+                />
+              );
+            })}
+          </div>
         </div>
       ))}
 

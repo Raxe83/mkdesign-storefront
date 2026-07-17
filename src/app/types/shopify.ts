@@ -194,6 +194,8 @@ export interface AdditionalOptionRawNode {
   technicalKey: { value: string } | null;
   required: { value: string } | null;
   linkedProduct: { reference: ZusatzoptionNode | null } | null;
+  /** Nur bei type "color": JSON-Array von Hex-Werten, vom Admin vorgegeben */
+  colors: { value: string } | null;
 }
 
 /** Fertig normalisierte Zusatzoption für die UI. */
@@ -206,6 +208,8 @@ export interface AdditionalOption {
   required: boolean;
   /** Nur bei type "product" gesetzt */
   linkedProduct: ZusatzproduktOption | null;
+  /** Nur bei type "color" gesetzt: wählbare Hex-Farben */
+  colors: string[];
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
