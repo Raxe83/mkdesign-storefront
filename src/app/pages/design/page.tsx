@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
 import DesignEditor from "@/app/components/design/DesignEditor";
 import { getFaqByType } from "@/app/services/shopify";
 import { ProductFaq } from "@/app/components/product/ProductFaq";
@@ -25,7 +26,12 @@ function FaqSkeleton() {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function DesignPage() {
+export default async function DesignPage() {
+  // Phase 1: Design-Editor deaktivieren bis 3D-Studio ready ist
+  if (process.env.NEXT_PUBLIC_ENABLE_EDITOR === "false") {
+    redirect("/");
+  }
+
   return (
     <div>
       <Suspense>

@@ -29,23 +29,23 @@ export interface PersonalizationProps {
 const DEFAULT_STEPS: PersonalizationStep[] = [
   {
     step: 1,
-    title: "Produkt auswählen",
-    description: "Stöbert durch unsere Kategorien und findet das passende Produkt für Euren Anlass.",
+    title: "Kontaktiert uns",
+    description: "Stöbert durch unsere Kategorien und findet das passende Produkt für Euren Anlass. Kontaktieren sie uns per E-Mail, um Euer Wunschmotiv zu besprechen.",
   },
   {
     step: 2,
-    title: "Motiv oder Text angeben",
-    description: "Namen, Datum, Logo oder ein eigenes Bild – gebt es bei der Bestellung an oder schreibt uns direkt.",
+    title: "Motiv beschreiben",
+    description: "Beschreiben Sie uns Euer Wunschmotiv, z. B. Namen, Datum, Spruch oder ein eigenes Logo. Wir prüfen die Machbarkeit und erstellen einen Entwurf.",
   },
   {
     step: 3,
     title: "Handarbeit & Versand",
-    description: "Markus fertigt Euer Unikat von Hand und versendet es direkt aus Bleckede an Euch.",
+    description: "Wir fertigen Euer Unikat von Hand und versendet es direkt aus Bleckede an Euch.",
   },
 ];
 
 export function Personalization({
-  sectionLabel = "Wie es funktioniert",
+  sectionLabel = "Sonderanfertigung anfragen",
   title = "Dein Produkt,<br/><em>dein Motiv</em>",
   description = "Personalisierung ist bei uns keine Ausnahme – es ist der Standard. Fast jedes Produkt kann mit Eurem Namen, Wunschdatum oder Motiv versehen werden.",
   steps = DEFAULT_STEPS,

@@ -30,6 +30,5 @@ export function middleware(request: NextRequest): NextResponse {
 }
 
 export const config = {
-  // Nur auf Account-Routen matchen, statische Assets ausschließen
   matcher: ["/pages/account/:path*"],
 };

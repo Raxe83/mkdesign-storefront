@@ -7,7 +7,6 @@ import {
   LayoutGrid,
   Menu,
   Package,
-  Palette,
   Search,
   ShoppingCart,
   User,
@@ -63,11 +62,6 @@ const useNavItems = () => {
       url: "/pages/kollektionen",
       title: "Kollektionen",
       icon: <LayoutGrid size={20} />,
-    },
-    {
-      url: "/pages/design",
-      title: "Eigenes Design",
-      icon: <Palette size={20} />,
     },
   ];
 };
@@ -140,7 +134,6 @@ const Header = ({ customer = null }: { customer?: HeaderCustomer | null }) => {
                 <NavLink url="/" title="Startseite" />
                 <NavLink url="/pages/products" title="Produkte" />
                 <NavLink url="/pages/kollektionen" title="Kollektionen" />
-                <NavLink url="/pages/design" title="Eigenes Design" />
               </ul>
             </nav>
           </div>

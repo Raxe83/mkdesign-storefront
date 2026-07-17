@@ -128,8 +128,8 @@ export default async function HomePage() {
           alt: "",
         }}
         cta={{
-          label: "Design selbst gestalten",
-          href: "/pages/design",
+          label: "Anfragen",
+          href: "/pages/contact",
         }}
         variant={barrelVariant}
       />
