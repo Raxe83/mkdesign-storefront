@@ -99,15 +99,20 @@ export function ProductOptions({ options, onChange }: Props) {
             {option.required && <span className="text-red-500 dark:text-red-400"> *</span>}
           </p>
           <div className="flex flex-wrap gap-2">
-            {option.colors.map((c) => {
-              const selected = state.values[option.technicalKey] === c;
+            {option.colors.map((c, i) => {
+              // Gespeichert wird der Anzeigetext (z.B. "Blau"), nicht der
+              // Hex-Code — das ist der Wert, der später im Warenkorb/der
+              // Bestellung auftaucht. Hex dient nur der visuellen Vorschau.
+              const label = option.colorLabels[i] ?? c;
+              const selected = state.values[option.technicalKey] === label;
               return (
                 <button
-                  key={c}
+                  key={`${c}-${i}`}
                   type="button"
-                  onClick={() => setValue(option.technicalKey, c)}
-                  aria-label={c}
+                  onClick={() => setValue(option.technicalKey, label)}
+                  aria-label={label}
                   aria-pressed={selected}
+                  title={label}
                   className={`w-8 h-8 rounded-full border-2 cursor-pointer transition-colors duration-150 ${
                     selected
                       ? "border-accent"

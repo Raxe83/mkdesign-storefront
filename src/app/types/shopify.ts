@@ -196,6 +196,8 @@ export interface AdditionalOptionRawNode {
   linkedProduct: { reference: ZusatzoptionNode | null } | null;
   /** Nur bei type "color": JSON-Array von Hex-Werten, vom Admin vorgegeben */
   colors: { value: string } | null;
+  /** Parallel zu colors: die im Tool eingetippten Anzeigetexte (z.B. "Blau") */
+  colorLabels: { value: string } | null;
 }
 
 /** Fertig normalisierte Zusatzoption für die UI. */
@@ -210,6 +212,9 @@ export interface AdditionalOption {
   linkedProduct: ZusatzproduktOption | null;
   /** Nur bei type "color" gesetzt: wählbare Hex-Farben */
   colors: string[];
+  /** Parallel zu colors: Anzeigetext pro Farbe (z.B. "Blau") — wird im
+   *  Warenkorb/der Bestellung angezeigt, nicht der Hex-Code */
+  colorLabels: string[];
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -77,13 +77,17 @@ function parseAdditionalOptions(nodes: AdditionalOptionRawNode[]): AdditionalOpt
       if (type !== "text" && type !== "color" && type !== "product") return null;
 
       const refNode = n.linkedProduct?.reference;
-      let colors: string[] = [];
-      if (n.colors?.value) {
+      const parseJsonArray = (raw: string | undefined): string[] => {
+        if (!raw) return [];
         try {
-          const parsed = JSON.parse(n.colors.value);
-          if (Array.isArray(parsed)) colors = parsed.filter((c): c is string => typeof c === "string");
-        } catch { /* malformed JSON -> keine Farben */ }
-      }
+          const parsed = JSON.parse(raw);
+          return Array.isArray(parsed) ? parsed.filter((c): c is string => typeof c === "string") : [];
+        } catch {
+          return [];
+        }
+      };
+      const colors = parseJsonArray(n.colors?.value);
+      const colorLabels = parseJsonArray(n.colorLabels?.value);
 
       return {
         id: n.id,
@@ -93,6 +97,7 @@ function parseAdditionalOptions(nodes: AdditionalOptionRawNode[]): AdditionalOpt
         required: n.required?.value === "true",
         linkedProduct: refNode ? resolveProductRef(refNode) : null,
         colors,
+        colorLabels,
       };
     })
     .filter((o): o is AdditionalOption => o !== null);
@@ -324,6 +329,7 @@ async function _getProductByHandle(
                 technicalKey: field(key: "technicalKey") { value }
                 required: field(key: "required") { value }
                 colors: field(key: "colors") { value }
+                colorLabels: field(key: "colorLabels") { value }
                 linkedProduct: field(key: "linkedProductId") {
                   reference {
                     ... on Product {
